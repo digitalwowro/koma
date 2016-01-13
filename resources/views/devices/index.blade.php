@@ -28,7 +28,7 @@
 
                 <div class="main-box-body clearfix">
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-responsive">
                             <thead>
                             <tr>
                                 @foreach ($deviceSection->fields as $field)
@@ -88,4 +88,16 @@
             </div>
         </div>
     </div>
+    <style type="text/css">
+        @media (max-width: 760px) {
+            <?php $i = 1; ?>
+            @foreach ($deviceSection->fields as $field)
+                @if ($field->showInDeviceList())
+                    table.table-responsive > tbody > tr > td:nth-of-type({{ $i++ }}):before { content: "{{ $field->getName() }}"; }
+                @endif
+            @endforeach
+
+            table.table-responsive > tbody > tr > td:nth-of-type({{ $i++ }}):before { content: ""; }
+        }
+    </style>
 @stop

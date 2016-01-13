@@ -35,13 +35,15 @@
 
     {!! HTML::style('css/libs/datepicker.css') !!}
 
+    {!! HTML::style('css/custom.css') !!}
+
     @yield('head')
 </head>
-<body>
+<body class="theme-whbl">
 <div id="theme-wrapper">
     <header class="navbar" id="header-navbar">
         <div class="container">
-            <a href="index.html" id="logo" class="navbar-brand">
+            <a href="{{ route('home') }}" id="logo" class="navbar-brand">
                 <img src="{{ asset('img/logo.png') }}" alt="" class="normal-logo logo-white"/>
                 <img src="{{ asset('img/logo-black.png') }}" alt="" class="normal-logo logo-black"/>
                 <img src="{{ asset('img/logo-small.png') }}" alt="" class="small-logo hidden-xs hidden-sm hidden"/>
@@ -102,9 +104,7 @@
                                 <span class="hidden-xs">{{ auth()->user()->name }}</span> <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-right">
-                                <li><a href="user-profile.html"><i class="fa fa-user"></i>Profile</a></li>
-                                <li><a href="#"><i class="fa fa-cog"></i>Settings</a></li>
-                                <li><a href="#"><i class="fa fa-envelope-o"></i>Messages</a></li>
+                                <li><a href="{{ route('users.edit', auth()->id()) }}"><i class="fa fa-user"></i>Profile</a></li>
                                 <li><a href="/auth/logout"><i class="fa fa-power-off"></i>Logout</a></li>
                             </ul>
                         </li>
@@ -132,9 +132,7 @@
                                             <i class="fa fa-angle-down"></i>
                                         </a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="user-profile.html"><i class="fa fa-user"></i>Profile</a></li>
-                                            <li><a href="#"><i class="fa fa-cog"></i>Settings</a></li>
-                                            <li><a href="#"><i class="fa fa-envelope-o"></i>Messages</a></li>
+                                            <li><a href="{{ route('users.edit', auth()->id()) }}"><i class="fa fa-user"></i>Profile</a></li>
                                             <li><a href="/auth/logout"><i class="fa fa-power-off"></i>Logout</a></li>
                                         </ul>
                                     </span>
@@ -149,10 +147,9 @@
                                     Resource Management
                                 </li>
                                 <li>
-                                    <a href="index.html">
+                                    <a href="{{ route('home') }}">
                                         <i class="fa fa-dashboard"></i>
                                         <span>Dashboard</span>
-                                        <span class="label label-primary label-circle pull-right">28</span>
                                     </a>
                                 </li>
                                 <li {!! is_route('devices.*') !!}>
