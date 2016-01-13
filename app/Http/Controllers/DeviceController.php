@@ -103,7 +103,7 @@ class DeviceController extends Controller
             $deviceSection = $this->deviceSection->findOrFail($type);
             $device        = $this->model->findOrFail($id);
 
-            return view('devices.create', compact('deviceSection', 'device'));
+            return view('devices.edit', compact('deviceSection', 'device'));
         }
         catch (\Exception $e)
         {
@@ -113,7 +113,7 @@ class DeviceController extends Controller
         }
     }
 
-    public function update($type, $id, Request $request)
+    public function update($id, Request $request)
     {
         try
         {
@@ -129,7 +129,7 @@ class DeviceController extends Controller
             $device->save();
 
             return redirect()
-                ->route('devices.index', $type)
+                ->route('devices.index', $device->section_id)
                 ->withSuccess('Device has been updated');
         }
         catch (\Exception $e)
@@ -137,7 +137,7 @@ class DeviceController extends Controller
             return redirect()
                 ->back()
                 ->withInput()
-                ->withError('Error saving device');
+                ->withError('Error updating device');
         }
     }
 

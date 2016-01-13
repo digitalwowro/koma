@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Hash, Session;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Passwords\CanResetPassword;
@@ -16,6 +17,9 @@ class User extends Model implements AuthenticatableContract,
 {
     use Authenticatable, Authorizable, CanResetPassword;
 
+    const ROLE_ADMIN      = 1;
+    const ROLE_SUPERADMIN = 2;
+
     /**
      * The database table used by the model.
      *
@@ -28,12 +32,38 @@ class User extends Model implements AuthenticatableContract,
      *
      * @var array
      */
-    protected $fillable = ['name', 'email', 'password'];
+    protected $fillable = ['name', 'email', 'password', 'role'];
 
     /**
      * The attributes excluded from the model's JSON form.
      *
      * @var array
      */
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'encryption_key'];
+
+    /**
+     * Auto encode the data field
+     *
+     * @param string $value
+     */
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::make($value);
+        $this->attributes['encryption_key'] = encrypt(Session::get('encryption_key'), $value);
+    }
+
+    /**
+     * Returns whether current user is superadmin
+     *
+     * @return bool
+     */
+    public function isSuperAdmin()
+    {
+        return $this->role == $this::ROLE_SUPERADMIN;
+    }
+
+    public static function pagedForAdmin()
+    {
+        return self::orderBy('id')->paginate(30);
+    }
 }

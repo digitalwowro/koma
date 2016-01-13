@@ -23,6 +23,13 @@ class ComposerServiceProvider extends ServiceProvider
         view()->composer(
             'device-sections.index', 'App\Composers\DeviceSectionComposer@admin'
         );
+
+        /**
+         * Users
+         */
+        view()->composer(
+            'users.index', 'App\Composers\UserComposer@admin'
+        );
     }
 
     /**

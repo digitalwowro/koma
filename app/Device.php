@@ -30,7 +30,7 @@ class Device extends Model
      */
     public function setDataAttribute($value)
     {
-        $this->attributes['data'] = json_encode($value);
+        $this->attributes['data'] = encrypt(json_encode($value));
     }
 
     /**
@@ -41,11 +41,18 @@ class Device extends Model
      */
     public function getDataAttribute($value)
     {
-        $return = @json_decode($value, true);
+        try
+        {
+            $return = @json_decode(decrypt($value), true);
 
-        if ( ! is_array($return)) return [];
+            if ( ! is_array($return)) return [];
 
-        return $return;
+            return $return;
+        }
+        catch (\Exception $e)
+        {
+            return [];
+        }
     }
 
 }

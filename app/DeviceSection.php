@@ -70,7 +70,7 @@ class DeviceSection extends Model
         {
             try
             {
-                $options = isset($item['options']) ? $item['options ']: [];
+                $options = isset($item['options']) ? $item['options']: [];
 
                 $return[] = Factory::generate(
                     $item['name'],

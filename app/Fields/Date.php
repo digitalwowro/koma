@@ -4,7 +4,7 @@ namespace App\Fields;
 
 use Form;
 
-class Textarea extends AbstractField
+class Date extends AbstractField
 {
     /**
      * {@inheritDoc}
@@ -13,10 +13,9 @@ class Textarea extends AbstractField
     {
         return
             $this->prerender() .
-            Form::textarea($this->getInputName(), $contents, [
-                'class' => 'form-control',
+            Form::text($this->getInputName(), $contents, [
+                'class' => 'form-control datepicker',
             ]) .
             $this->postrender();
     }
-
 }

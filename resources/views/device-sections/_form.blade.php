@@ -31,7 +31,7 @@
     <label for="title" class="col-lg-2 control-label">Fields</label>
 
     <div class="col-lg-10">
-        <table class="table table-striped table-hover table-bordered">
+        <table class="table table-striped table-hover table-bordered table-field-options">
             <thead>
                 <tr>
                     <th>Field Name</th>
@@ -66,7 +66,7 @@
                             @endforeach
                         </select>
                     </td>
-                    <td>
+                    <td class="field-options">
                         ...
                     </td>
                 </tr>
@@ -84,6 +84,19 @@
 @section('footer')
     <script>
         $(document).ready(function() {
+            function refreshTr($tr) {
+                var params = {
+                    type: $tr.find('select.field-type').val(),
+                    index: $tr.prevAll().length + 1
+                };
+
+                $tr.find('td.field-options').html('<center><img src="{{ asset('img/loading.gif') }}"></center>');
+
+                $.post('{{ route('device-sections.get-options') }}', params, function(r) {
+                    $tr.find('td.field-options').html(r);
+                });
+            }
+
             $('#add-new-field').click(function(e) {
                 e.preventDefault();
 
@@ -98,6 +111,11 @@
 
                 $tr.find('.field-name').attr('name', 'fields[' + nth + '][name]');
                 $tr.find('.field-type').attr('name', 'fields[' + nth + '][type]');
+                refreshTr($tr);
+            });
+
+            $('table.table-field-options').on('change', 'select.field-type', function() {
+                refreshTr($(this).closest('tr'));
             });
         });
     </script>

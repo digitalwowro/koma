@@ -9,7 +9,7 @@
             @endforeach
         </select>
     </td>
-    <td>
-        {{ $field->getOptions() }}
+    <td class="field-options">
+        {!! $field->renderOptions($i) !!}
     </td>
 </tr>

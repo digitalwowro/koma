@@ -10,19 +10,19 @@
     <!-- bootstrap -->
     {!! HTML::style('css/bootstrap/bootstrap.min.css') !!}
 
-            <!-- libraries -->
+    <!-- libraries -->
     {!! HTML::style('css/libs/font-awesome.css') !!}
     {!! HTML::style('css/libs/nanoscroller.css') !!}
 
-            <!-- global styles -->
+    <!-- global styles -->
     {!! HTML::style('css/compiled/theme_styles.css') !!}
 
-            <!-- notifications -->
+    <!-- notifications -->
     {!! HTML::style('css/libs/ns-default.css') !!}
     {!! HTML::style('css/libs/ns-style-bar.css') !!}
     {!! HTML::style('css/libs/ns-style-theme.css') !!}
 
-            <!-- google font libraries -->
+    <!-- google font libraries -->
     <link href='//fonts.googleapis.com/css?family=Open+Sans:400,600,700,300|Titillium+Web:200,300,400' rel='stylesheet' type='text/css'>
 
     <!-- Favicon -->
@@ -32,6 +32,8 @@
     {!! HTML::script('js/html5shiv.js') !!}
     {!! HTML::script('js/respond.min.js') !!}
     <![endif]-->
+
+    {!! HTML::style('css/libs/datepicker.css') !!}
 
     @yield('head')
 </head>
@@ -60,174 +62,18 @@
                         </li>
                         <li class="dropdown hidden-xs">
                             <a class="btn dropdown-toggle" data-toggle="dropdown">
-                                <i class="fa fa-bell"></i>
-                                <span class="count">8</span>
-                            </a>
-                            <ul class="dropdown-menu notifications-list">
-                                <li class="pointer">
-                                    <div class="pointer-inner">
-                                        <div class="arrow"></div>
-                                    </div>
-                                </li>
-                                <li class="item-header">You have 6 new notifications</li>
-                                <li class="item">
-                                    <a href="#">
-                                        <i class="fa fa-comment"></i>
-                                        <span class="content">New comment on â€Awesome P...</span>
-                                        <span class="time"><i class="fa fa-clock-o"></i>13 min.</span>
-                                    </a>
-                                </li>
-                                <li class="item">
-                                    <a href="#">
-                                        <i class="fa fa-plus"></i>
-                                        <span class="content">New user registration</span>
-                                        <span class="time"><i class="fa fa-clock-o"></i>13 min.</span>
-                                    </a>
-                                </li>
-                                <li class="item">
-                                    <a href="#">
-                                        <i class="fa fa-envelope"></i>
-                                        <span class="content">New Message from George</span>
-                                        <span class="time"><i class="fa fa-clock-o"></i>13 min.</span>
-                                    </a>
-                                </li>
-                                <li class="item">
-                                    <a href="#">
-                                        <i class="fa fa-shopping-cart"></i>
-                                        <span class="content">New purchase</span>
-                                        <span class="time"><i class="fa fa-clock-o"></i>13 min.</span>
-                                    </a>
-                                </li>
-                                <li class="item">
-                                    <a href="#">
-                                        <i class="fa fa-eye"></i>
-                                        <span class="content">New order</span>
-                                        <span class="time"><i class="fa fa-clock-o"></i>13 min.</span>
-                                    </a>
-                                </li>
-                                <li class="item-footer">
-                                    <a href="#">
-                                        View all notifications
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="dropdown hidden-xs">
-                            <a class="btn dropdown-toggle" data-toggle="dropdown">
-                                <i class="fa fa-envelope-o"></i>
-                                <span class="count">16</span>
-                            </a>
-                            <ul class="dropdown-menu notifications-list messages-list">
-                                <li class="pointer">
-                                    <div class="pointer-inner">
-                                        <div class="arrow"></div>
-                                    </div>
-                                </li>
-                                <li class="item first-item">
-                                    <a href="#">
-                                        <img src="{{ asset('img/samples/messages-photo-1.png') }}" alt=""/>
-                                        <span class="content">
-                                            <span class="content-headline">
-                                                George Clooney
-                                            </span>
-                                            <span class="content-text">
-                                                Look, just because I don't be givin' no man a foot massage don't make it
-                                                right for Marsellus to throw...
-                                            </span>
-                                        </span>
-                                        <span class="time"><i class="fa fa-clock-o"></i>13 min.</span>
-                                    </a>
-                                </li>
-                                <li class="item">
-                                    <a href="#">
-                                        <img src="{{ asset('img/samples/messages-photo-2.png') }}" alt=""/>
-                                        <span class="content">
-                                            <span class="content-headline">
-                                                Emma Watson
-                                            </span>
-                                            <span class="content-text">
-                                                Look, just because I don't be givin' no man a foot massage don't make it
-                                                right for Marsellus to throw...
-                                            </span>
-                                        </span>
-                                        <span class="time"><i class="fa fa-clock-o"></i>13 min.</span>
-                                    </a>
-                                </li>
-                                <li class="item">
-                                    <a href="#">
-                                        <img src="{{ asset('img/samples/messages-photo-3.png') }}" alt=""/>
-                                        <span class="content">
-                                            <span class="content-headline">
-                                                Robert Downey Jr.
-                                            </span>
-                                            <span class="content-text">
-                                                Look, just because I don't be givin' no man a foot massage don't make it
-                                                right for Marsellus to throw...
-                                            </span>
-                                        </span>
-                                        <span class="time"><i class="fa fa-clock-o"></i>13 min.</span>
-                                    </a>
-                                </li>
-                                <li class="item-footer">
-                                    <a href="#">
-                                        View all messages
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="dropdown hidden-xs">
-                            <a class="btn dropdown-toggle" data-toggle="dropdown">
-                                New Item
+                                Create Item
                                 <i class="fa fa-caret-down"></i>
                             </a>
                             <ul class="dropdown-menu">
-                                <li class="item">
-                                    <a href="#">
-                                        <i class="fa fa-archive"></i>
-                                        New Product
-                                    </a>
-                                </li>
-                                <li class="item">
-                                    <a href="#">
-                                        <i class="fa fa-shopping-cart"></i>
-                                        New Order
-                                    </a>
-                                </li>
-                                <li class="item">
-                                    <a href="#">
-                                        <i class="fa fa-sitemap"></i>
-                                        New Category
-                                    </a>
-                                </li>
-                                <li class="item">
-                                    <a href="#">
-                                        <i class="fa fa-file-text"></i>
-                                        New Page
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="dropdown hidden-xs">
-                            <a class="btn dropdown-toggle" data-toggle="dropdown">
-                                English
-                                <i class="fa fa-caret-down"></i>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="item">
-                                    <a href="#">
-                                        Spanish
-                                    </a>
-                                </li>
-                                <li class="item">
-                                    <a href="#">
-                                        German
-                                    </a>
-                                </li>
-                                <li class="item">
-                                    <a href="#">
-                                        Italian
-                                    </a>
-                                </li>
+                                @foreach ($deviceSections as $deviceSection)
+                                    <li class="item">
+                                        <a href="{{ route('devices.create', $deviceSection->id) }}">
+                                            {!! $deviceSection->present()->icon !!}
+                                            Create {{ str_singular($deviceSection->title) }}
+                                        </a>
+                                    </li>
+                                @endforeach
                             </ul>
                         </li>
                     </ul>
@@ -235,7 +81,7 @@
 
                 <div class="nav-no-collapse pull-right" id="header-nav">
                     <ul class="nav navbar-nav pull-right">
-                        <li class="mobile-search">
+                        <!--<li class="mobile-search">
                             <a class="btn">
                                 <i class="fa fa-search"></i>
                             </a>
@@ -249,7 +95,7 @@
                                 </form>
                             </div>
 
-                        </li>
+                        </li>-->
                         <li class="dropdown profile-dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <img src="{{ gravatar(auth()->user()->email, 159) }}" alt=""/>
@@ -259,7 +105,7 @@
                                 <li><a href="user-profile.html"><i class="fa fa-user"></i>Profile</a></li>
                                 <li><a href="#"><i class="fa fa-cog"></i>Settings</a></li>
                                 <li><a href="#"><i class="fa fa-envelope-o"></i>Messages</a></li>
-                                <li><a href="#"><i class="fa fa-power-off"></i>Logout</a></li>
+                                <li><a href="/auth/logout"><i class="fa fa-power-off"></i>Logout</a></li>
                             </ul>
                         </li>
                         <li class="hidden-xxs">
@@ -289,7 +135,7 @@
                                             <li><a href="user-profile.html"><i class="fa fa-user"></i>Profile</a></li>
                                             <li><a href="#"><i class="fa fa-cog"></i>Settings</a></li>
                                             <li><a href="#"><i class="fa fa-envelope-o"></i>Messages</a></li>
-                                            <li><a href="#"><i class="fa fa-power-off"></i>Logout</a></li>
+                                            <li><a href="/auth/logout"><i class="fa fa-power-off"></i>Logout</a></li>
                                         </ul>
                                     </span>
                                     <span class="status">
@@ -300,7 +146,7 @@
                         <div class="collapse navbar-collapse navbar-ex1-collapse" id="sidebar-nav">
                             <ul class="nav nav-pills nav-stacked">
                                 <li class="nav-header nav-header-first hidden-sm hidden-xs">
-                                    Resources Management
+                                    Resource Management
                                 </li>
                                 <li>
                                     <a href="index.html">
@@ -350,21 +196,33 @@
                                         </li>
                                     </ul>
                                 </li>
+
                                 <li class="nav-header hidden-sm hidden-xs">
-                                    Category and Field Management
+                                    Administration
                                 </li>
+
                                 <li {!! is_route('device-sections.*') !!}>
                                     <a href="{{ route('device-sections.index') }}">
                                         <i class="fa fa-server"></i>
                                         <span>Device Sections</span>
                                     </a>
                                 </li>
+
                                 <li>
                                     <a href="{{ route('device-sections.index') }}">
                                         <i class="fa fa-ellipsis-h"></i>
                                         <span>IP Manager Sections</span>
                                     </a>
                                 </li>
+
+                                @can('superadmin')
+                                <li>
+                                    <a href="{{ route('users.index') }}">
+                                        <i class="fa fa-users"></i>
+                                        <span>User Management</span>
+                                    </a>
+                                </li>
+                                @endcan
                             </ul>
                         </div>
                     </div>
@@ -393,40 +251,47 @@
 {!! HTML::script('js/bootstrap.js') !!}
 {!! HTML::script('js/jquery.nanoscroller.min.js') !!}
 
-        <!-- notifications -->
+<!-- notifications -->
 {!! HTML::script('js/modernizr.custom.js') !!}
 {!! HTML::script('js/classie.js') !!}
 {!! HTML::script('js/notificationFx.js') !!}
 
-        <!-- theme scripts -->
+<!-- theme scripts -->
 {!! HTML::script('js/scripts.js') !!}
+{!! HTML::script('js/bootstrap-datepicker.js') !!}
 
 <script>
-        @foreach (['success', 'notice', 'warning', 'error'] as $type)
-            @if (Session::has($type) && is_string(Session::get($type)))
-            var notification = new NotificationFx({
-                message : '<span class="icon fa fa-bullhorn fa-2x"></span><p>{{ addslashes(Session::get($type)) }}</p>',
-                layout : 'bar',
-                effect : 'slidetop',
-                type : '{{ $type }}' // notice, warning or error
-            });
+    @foreach (['success', 'notice', 'warning', 'error'] as $type)
+        @if (Session::has($type) && is_string(Session::get($type)))
+        var notification = new NotificationFx({
+            message : '<span class="icon fa fa-bullhorn fa-2x"></span><p>{{ addslashes(Session::get($type)) }}</p>',
+            layout : 'bar',
+            effect : 'slidetop',
+            type : '{{ $type }}' // notice, warning or error
+        });
 
-            // show the notification
-            notification.show();
-            @endif
-         @endforeach
+        // show the notification
+        notification.show();
+        @endif
+     @endforeach
 
-         @if (count($errors) > 0)
-             var notification = new NotificationFx({
-                message : '<span class="icon fa fa-bullhorn fa-2x"></span><p>{{ addslashes($errors->first()) }}</p>',
-                layout : 'bar',
-                effect : 'slidetop',
-                type : 'error' // notice, warning or error
-            });
+     @if (count($errors) > 0)
+         var notification = new NotificationFx({
+            message : '<span class="icon fa fa-bullhorn fa-2x"></span><p>{{ addslashes($errors->first()) }}</p>',
+            layout : 'bar',
+            effect : 'slidetop',
+            type : 'error' // notice, warning or error
+        });
 
     // show the notification
     notification.show();
     @endif
+
+    $(document).ready(function() {
+        $('.datepicker').datepicker({
+            format: 'yyyy-mm-dd'
+        });
+    });
 </script>
 
 @yield('footer')

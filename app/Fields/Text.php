@@ -2,12 +2,20 @@
 
 namespace App\Fields;
 
+use Form;
+
 class Text extends AbstractField
 {
-    protected $showInDeviceList = true;
-
-    public function render()
+    /**
+     * {@inheritDoc}
+     */
+    public function render($contents = '')
     {
-        return $this->prerender() . '<input type="text" class="form-control" name="' . $this->getName() . '"></input>' . $this->postrender();
+        return
+            $this->prerender() .
+            Form::text($this->getInputName(), $contents, [
+                'class' => 'form-control',
+            ]) .
+            $this->postrender();
     }
 }

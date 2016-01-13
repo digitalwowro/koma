@@ -15,7 +15,7 @@ class DeviceSectionComposer
     protected $deviceSection;
 
     /**
-     * Create a new profile composer.
+     * Create a new composer.
      *
      * @param DeviceSection $deviceSection
      */

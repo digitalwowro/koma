@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DeviceSection;
+use App\Fields\Factory;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -103,6 +104,22 @@ class DeviceSectionController extends Controller
             return redirect()
                 ->back()
                 ->withError('Could not find device section');
+        }
+    }
+
+    public function getOptions(Request $request)
+    {
+        try
+        {
+            $type  = $request->input('type');
+            $index = $request->input('index');
+            $field = Factory::generate('tmp', $type);
+
+            return $field->renderOptions($index);
+        }
+        catch (\Exception $e)
+        {
+            //
         }
     }
 }

@@ -2,12 +2,21 @@
 
 namespace App\Fields;
 
+use Form;
+
 abstract class AbstractField
 {
     /**
      * Abstract methods
      */
-    abstract public function render();
+
+    /**
+     * Render edit HTML code
+     *
+     * @param string|null $contents
+     * @return string
+     */
+    abstract public function render($contents = null);
 
     /**
      * @var string
@@ -17,23 +26,18 @@ abstract class AbstractField
     /**
      * @var array
      */
-    protected $config;
-
-    /**
-     * @var bool
-     */
-    protected $showInDeviceList = false;
+    protected $options;
 
     /**
      * AbstractField constructor.
      *
      * @param string $name
-     * @param array $config
+     * @param array $options
      */
-    public function __construct($name, array $config = [])
+    public function __construct($name, array $options = [])
     {
-        $this->name   = $name;
-        $this->config = $config;
+        $this->name    = $name;
+        $this->options = $options;
     }
 
     /**
@@ -57,18 +61,59 @@ abstract class AbstractField
     }
 
     /**
+     * Get name for use in HTML inputs
+     *
+     * @return string
+     */
+    public function getInputName()
+    {
+        return clean_url($this->getName());
+    }
+
+    /**
      * Returns whether the current field should be shown in the devices list
      *
      * @return bool
      */
     public function showInDeviceList()
     {
-        return $this->showInDeviceList;
+        return $this->getOption('showlist') ? true : false;
     }
 
-    public function getOptions()
+    /**
+     * Return field setup options HTML code
+     *
+     * @param int $index
+     * @return string
+     */
+    public function renderOptions($index)
     {
-        return '..2.';
+        $name    = 'fields[' . $index . '][options][showlist]';
+        $rand    = $this->getTotallyRandomString();
+        $checked = $this->showInDeviceList();
+
+        return
+            '<div class="checkbox-nice">' .
+                Form::checkbox($name, 1, $checked, [
+                    'id' => $rand,
+                ]) .
+                '<label for="' . $rand . '">' .
+                    'Show this field in the device listing' .
+                '</label>' .
+            '</div>';
+
+    }
+
+    /**
+     * Get option
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getOption($key, $default = null)
+    {
+        return isset($this->options[$key]) ? $this->options[$key] : $default;
     }
 
     /**
@@ -92,5 +137,14 @@ abstract class AbstractField
             '</div>';
     }
 
+    /**
+     * Get a totally random string
+     *
+     * @return string
+     */
+    public function getTotallyRandomString()
+    {
+        return md5(time() . mt_rand(0, 999999) . rand(0, 999999));
+    }
 
 }

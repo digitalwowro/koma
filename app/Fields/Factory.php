@@ -30,6 +30,10 @@ class Factory
     public static function getFieldTypes()
     {
         return [
+            'Checkbox',
+            'Date',
+            'File',
+            'Radio',
             'Text',
             'Textarea',
         ];
