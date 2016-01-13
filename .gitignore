@@ -1,0 +1,9 @@
+/vendor
+/node_modules
+Homestead.yaml
+Homestead.json
+.env
+/public/uploads
+.idea
+_ide_helper.php
+_theme
