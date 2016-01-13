@@ -2,16 +2,26 @@
 
 namespace App;
 
+use App\Fields\Factory;
+use App\Presenters\DeviceSectionPresenter;
 use Illuminate\Database\Eloquent\Model;
+use Laracasts\Presenter\PresentableTrait;
 
 class DeviceSection extends Model
 {
+    use PresentableTrait;
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = ['title', 'icon', 'sort', 'fields'];
+
+    /**
+     * @var string
+     */
+    protected $presenter = DeviceSectionPresenter::class;
 
     /**
      * Relationship with DeviceSection
@@ -30,9 +40,11 @@ class DeviceSection extends Model
      */
     public function setFieldsAttribute($value)
     {
-        $this->attributes['fields'] = is_null($value)
-            ? null
-            : json_encode($value);
+        if ( ! is_array($value)) $value = [];
+
+        $value = array_merge($value, []); // reset array keys
+
+        $this->attributes['fields'] = json_encode($value);
     }
 
     /**
@@ -48,9 +60,26 @@ class DeviceSection extends Model
             return null;
         }
 
-        $return = @json_decode($value, true);
+        $items = @json_decode($value, true);
 
-        if ( ! is_array($return)) return [];
+        if ( ! is_array($items)) return [];
+
+        $return = [];
+
+        foreach ($items as $item)
+        {
+            try
+            {
+                $options = isset($item['options']) ? $item['options ']: [];
+
+                $return[] = Factory::generate(
+                    $item['name'],
+                    $item['type'],
+                    $options
+                );
+            }
+            catch (\Exception $e) {}
+        }
 
         return $return;
     }

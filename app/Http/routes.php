@@ -1,15 +1,6 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Application Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register all of the routes for an application.
-| It's a breeze. Simply tell Laravel the URIs it should respond to
-| and give it the controller to call when that URI is requested.
-|
-*/
+Route::pattern('type', '[0-9]+');
 
 
 Route::controller('auth', 'Auth\AuthController');
@@ -19,4 +10,11 @@ Route::group(['middleware' => 'auth'], function()
     Route::get('/', ['as' => 'home', 'uses' => 'DashboardController@index']);
 
     Route::resource('device-sections', 'DeviceSectionController');
+
+    Route::get   ('/devices/{type}',           ['as' => 'devices.index',   'uses' => 'DeviceController@index']);
+    Route::get   ('/devices/{type}/create',    ['as' => 'devices.create',  'uses' => 'DeviceController@create']);
+    Route::post  ('/devices/{type}',           ['as' => 'devices.store',   'uses' => 'DeviceController@store']);
+    Route::get   ('/devices/{type}/{id}/edit', ['as' => 'devices.edit',    'uses' => 'DeviceController@edit']);
+    Route::put   ('/devices/{type}/{id}',      ['as' => 'devices.update',  'uses' => 'DeviceController@update']);
+    Route::delete('/devices/{id}',             ['as' => 'devices.destroy', 'uses' => 'DeviceController@destroy']);
 });

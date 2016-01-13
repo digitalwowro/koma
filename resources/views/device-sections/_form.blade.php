@@ -6,6 +6,7 @@
             'class'       => 'form-control',
             'id'          => 'title',
             'placeholder' => 'Title',
+            'required'    => true,
         ]) !!}
     </div>
 </div>
@@ -40,18 +41,8 @@
             </thead>
             <tbody>
                 @if (isset($deviceSection))
-                    @foreach ($deviceSection->fields as $field)
-                        <tr>
-                            <td>
-                                {{ $field['name'] }}
-                            </td>
-                            <td>
-                                {{ $field['type'] }}
-                            </td>
-                            <td>
-                                {{ $field['options'] }}
-                            </td>
-                        </tr>
+                    @foreach ($deviceSection->fields as $i => $field)
+                        @include('_field-options', compact('field'))
                     @endforeach
                 @endif
             </tbody>
@@ -66,11 +57,13 @@
                 </tr>
                 <tr class="hidden">
                     <td>
-                        <input type="text" class="form-control">
+                        <input type="text" class="field-name form-control">
                     </td>
                     <td>
-                        <select class="form-control">
-                            <option>A</option>
+                        <select class="form-control field-type">
+                            @foreach (App\Fields\Factory::getFieldTypes() as $fieldType)
+                            <option value="{{ $fieldType }}">{{ $fieldType }}</option>
+                            @endforeach
                         </select>
                     </td>
                     <td>
@@ -99,6 +92,12 @@
                     template = $table.find('tfoot tr.hidden').html();
 
                 $table.find('tbody').append('<tr>' + template + '</tr>');
+
+                var $tr = $table.find('tbody tr:last'),
+                    nth = $tr.parent().find('tr').length;
+
+                $tr.find('.field-name').attr('name', 'fields[' + nth + '][name]');
+                $tr.find('.field-type').attr('name', 'fields[' + nth + '][type]');
             });
         });
     </script>

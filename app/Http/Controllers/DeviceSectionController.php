@@ -32,11 +32,21 @@ class DeviceSectionController extends Controller
 
     public function store(Request $request)
     {
-        $this->model->create($request->input());
+        try
+        {
+            $this->model->create($request->input());
 
-        return redirect()
-            ->route('device-sections.index')
-            ->withSuccess('Device section has been added');
+            return redirect()
+                ->route('device-sections.index')
+                ->withSuccess('Device section has been added');
+        }
+        catch (\Exception $e)
+        {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withError('Error saving device section');
+        }
     }
 
     public function edit($id)
@@ -71,6 +81,7 @@ class DeviceSectionController extends Controller
         {
             return redirect()
                 ->back()
+                ->withInput()
                 ->withError('Could not find device section');
         }
     }

@@ -253,7 +253,7 @@
                         <li class="dropdown profile-dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <img src="{{ gravatar(auth()->user()->email, 159) }}" alt=""/>
-                                <span class="hidden-xs">Scarlett Johansson</span> <b class="caret"></b>
+                                <span class="hidden-xs">{{ auth()->user()->name }}</span> <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-right">
                                 <li><a href="user-profile.html"><i class="fa fa-user"></i>Profile</a></li>
@@ -309,7 +309,7 @@
                                         <span class="label label-primary label-circle pull-right">28</span>
                                     </a>
                                 </li>
-                                <li class="active">
+                                <li {!! is_route('devices.*') !!}>
                                     <a href="#" class="dropdown-toggle">
                                         <i class="fa fa-server"></i>
                                         <span>Devices</span>
@@ -318,7 +318,8 @@
                                     <ul class="submenu">
                                         @foreach ($deviceSections as $deviceSection)
                                         <li>
-                                            <a href="#" class="active">
+                                            <a href="{{ route('devices.index', $deviceSection->id) }}" class="active">
+                                                {!! $deviceSection->present()->icon !!}
                                                 {{ $deviceSection->title }}
                                             </a>
                                         </li>
@@ -352,7 +353,7 @@
                                 <li class="nav-header hidden-sm hidden-xs">
                                     Category and Field Management
                                 </li>
-                                <li>
+                                <li {!! is_route('device-sections.*') !!}>
                                     <a href="{{ route('device-sections.index') }}">
                                         <i class="fa fa-server"></i>
                                         <span>Device Sections</span>
@@ -401,17 +402,17 @@
 {!! HTML::script('js/scripts.js') !!}
 
 <script>
-            @foreach (['success', 'notice', 'warning', 'error'] as $type)
-                @if (Session::has($type) && is_string(Session::get($type)))
-                var notification = new NotificationFx({
+        @foreach (['success', 'notice', 'warning', 'error'] as $type)
+            @if (Session::has($type) && is_string(Session::get($type)))
+            var notification = new NotificationFx({
                 message : '<span class="icon fa fa-bullhorn fa-2x"></span><p>{{ addslashes(Session::get($type)) }}</p>',
                 layout : 'bar',
                 effect : 'slidetop',
                 type : '{{ $type }}' // notice, warning or error
             });
 
-    // show the notification
-    notification.show();
+            // show the notification
+            notification.show();
             @endif
          @endforeach
 

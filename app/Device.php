@@ -23,4 +23,29 @@ class Device extends Model
         return $this->belongsTo('App\DeviceSection', 'section_id');
     }
 
+    /**
+     * Auto encode the data field
+     *
+     * @param string $value
+     */
+    public function setDataAttribute($value)
+    {
+        $this->attributes['data'] = json_encode($value);
+    }
+
+    /**
+     * Decode the data field
+     *
+     * @param string $value
+     * @return array
+     */
+    public function getDataAttribute($value)
+    {
+        $return = @json_decode($value, true);
+
+        if ( ! is_array($return)) return [];
+
+        return $return;
+    }
+
 }
