@@ -161,4 +161,21 @@ class DeviceController extends Controller
         }
     }
 
+    public function show($type, $id)
+    {
+        try
+        {
+            $deviceSection = $this->deviceSection->findOrFail($type);
+            $device = $this->model->findOrFail($id);
+
+            return view('devices.show', compact('device', 'deviceSection'));
+        }
+        catch (\Exception $e)
+        {
+            return redirect()
+                ->route('devices.index')
+                ->withError('Could not find device');
+        }
+    }
+
 }
