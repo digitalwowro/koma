@@ -28,7 +28,7 @@
 
                 <div class="main-box-body clearfix">
                     <div class="table-responsive">
-                        <table class="table table-responsive">
+                        <table class="table table-responsive table-hover table-striped">
                             <thead>
                             <tr>
                                 @foreach ($deviceSection->fields as $field)

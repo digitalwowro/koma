@@ -88,6 +88,8 @@
 <div class="form-group">
     <div class="col-lg-10 col-lg-offset-2">
         <button type="submit" class="btn btn-primary">{{ isset($deviceSection) ? 'Save' : 'Add' }}</button>
+        <button type="reset" class="btn btn-default">Reset</button>
+        <a href="{{ route('device-sections.index') }}" class="btn btn-default">Cancel</a>
     </div>
 </div>
 
