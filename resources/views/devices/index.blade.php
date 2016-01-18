@@ -111,13 +111,3 @@
         }
     </style>
 @stop
-
-@section('footer')
-    <script>
-    $(window).load(function() {
-        $('.tx-ov').each(function() {
-            $(this).css('width', $(this)[0].scrollWidth + 'px');
-        });
-    });
-    </script>
-@append

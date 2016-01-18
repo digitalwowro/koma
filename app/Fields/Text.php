@@ -28,18 +28,42 @@ class Text extends AbstractField
      */
     public function customDeviceListContent(Device $model)
     {
+        $return = '-';
+
         if (isset($model->data[$this->getInputName()]))
         {
             $content = $model->data[$this->getInputName()];
-            $old = $content;
 
-            $content = urlify($content);
-            return $old === $content && stripos($content, ' ') === false
-                ? '<input class="tx-ov" type="text" value="' . htmlentities($content) . '" readonly style="width:1px; border: none; background-color: transparent;" onclick="this.setSelectionRange(0, this.value.length)">'
-                : $content;
+            $return = urlify($content);
+
+            if (filter_var($this->getOption('copypaste', ''), FILTER_VALIDATE_BOOLEAN))
+            {
+                $return .= ' <a href="#" class="copy-this" data-clipboard-text="' . htmlentities($content) . '"><i class="fa fa-copy" title="Copy to Clipboard"></i></a>';
+            }
         }
 
-        return '-';
+        return $return;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function renderOptions($index)
+    {
+        $checked = filter_var($this->getOption('copypaste', ''), FILTER_VALIDATE_BOOLEAN);
+        $rand    = $this->getTotallyRandomString();
+        $name    = 'fields[' . $index . '][options][copypaste]';
+
+        return
+            parent::renderOptions($index) .
+            '<div class="checkbox-nice">' .
+                Form::checkbox($name, 1, $checked, [
+                    'id' => $rand,
+                ]) .
+            '<label for="' . $rand . '">' .
+            'Show copy text button for this field' .
+            '</label>' .
+            '</div>';
     }
 
 }
