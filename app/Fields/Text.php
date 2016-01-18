@@ -36,7 +36,7 @@ class Text extends AbstractField
 
             $return = urlify($content);
 
-            if (filter_var($this->getOption('copypaste', ''), FILTER_VALIDATE_BOOLEAN))
+            if ($content && filter_var($this->getOption('copypaste', ''), FILTER_VALIDATE_BOOLEAN))
             {
                 $return .= ' <a href="#" class="copy-this" data-clipboard-text="' . htmlentities($content) . '"><i class="fa fa-copy" title="Copy to Clipboard"></i></a>';
             }
