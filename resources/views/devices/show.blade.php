@@ -26,10 +26,16 @@
                         <div class="row">
                             <label for="title" class="col-lg-2 control-label">{{ $field->getName() }}</label>
                             <div class="col-lg-10">
-                                @if (is_array($device->data[$field->getInputName()]))
-                                    {!! autolink_email(autolink(implode(', ', $device->data[$field->getInputName()]))) !!}
+                                @if (method_exists($field, 'customDeviceListContent'))
+                                    {!! $field->customDeviceListContent($device) !!}
+                                @elseif (isset($device->data[$field->getInputName()]))
+                                    @if (is_array($device->data[$field->getInputName()]))
+                                        {!! urlify(implode(', ', $device->data[$field->getInputName()])) !!}
+                                    @else
+                                        {!! urlify($device->data[$field->getInputName()]) !!}
+                                    @endif
                                 @else
-                                    {!! autolink_email(autolink($device->data[$field->getInputName()])) !!}
+                                    -
                                 @endif
                             </div>
                         </div>

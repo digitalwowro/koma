@@ -120,3 +120,16 @@ function clean_url($s, $placeholder = '-')
 
     return $s;
 }
+
+/**
+ * Autolink URLs
+ *
+ * @param string $s
+ * @return string
+ */
+function urlify($s)
+{
+    $s = autolink($s, 128, ' target="_blank"');
+
+    return $s ?: '-';
+}

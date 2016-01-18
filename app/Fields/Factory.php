@@ -33,8 +33,10 @@ class Factory
             'ID',
             'Checkbox',
             'Date',
+            'Dropdown',
             'File',
             'Radio',
+            'Status',
             'Text',
             'Textarea',
         ];

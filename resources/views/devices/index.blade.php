@@ -47,13 +47,15 @@
                                         @if ($field->showInDeviceList())
                                             <td>
                                                 @if (method_exists($field, 'customDeviceListContent'))
-                                                    {{ $field->customDeviceListContent($device) }}
+                                                    {!! $field->customDeviceListContent($device) !!}
                                                 @elseif (isset($device->data[$field->getInputName()]))
                                                     @if (is_array($device->data[$field->getInputName()]))
-                                                        {!! autolink_email(autolink(implode(', ', $device->data[$field->getInputName()]))) !!}
+                                                        {!! urlify(implode(', ', $device->data[$field->getInputName()])) !!}
                                                     @else
-                                                        {!! autolink_email(autolink($device->data[$field->getInputName()])) !!}
+                                                        {!! urlify($device->data[$field->getInputName()]) !!}
                                                     @endif
+                                                @else
+                                                    -
                                                 @endif
                                             </td>
                                         @endif
