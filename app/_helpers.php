@@ -3,13 +3,27 @@
 /**
  * Check if a the current route is the one given
  *
- * @param mixed   $name
+ * @param mixed $name
  * @param boolean $wrapped
+ * @param array $extraParams
  * @return string
  */
-function is_route($name, $wrapped = true)
+function is_route($name, $wrapped = true, array $extraParams = [])
 {
     $return = $wrapped ? 'class="active"' : 'active';
+
+    if ( ! empty($extraParams))
+    {
+        foreach ($extraParams as $extraParam => $value)
+        {
+            $data = Route::getCurrentRoute()->parameter($extraParam);
+
+            if ($data != $value)
+            {
+                return '';
+            }
+        }
+    }
 
     if ( ! is_array($name)) return Route::is($name) ? $return : '';
 

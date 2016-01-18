@@ -161,8 +161,9 @@
                                     <ul class="submenu">
                                         @foreach ($deviceSections as $deviceSection)
                                         <li>
-                                            <a href="{{ route('devices.index', $deviceSection->id) }}" class="active">
+                                            <a href="{{ route('devices.index', $deviceSection->id) }}" {!! is_route('devices.index', true, ['type' => $deviceSection->id]) !!} style="padding-left:44px;">
                                                 {!! $deviceSection->present()->icon !!}
+                                                &nbsp;
                                                 {{ $deviceSection->title }}
                                             </a>
                                         </li>
@@ -279,10 +280,10 @@
             layout : 'bar',
             effect : 'slidetop',
             type : 'error' // notice, warning or error
-        });
+         });
 
-    // show the notification
-    notification.show();
+        // show the notification
+        notification.show();
     @endif
 
     $(document).ready(function() {

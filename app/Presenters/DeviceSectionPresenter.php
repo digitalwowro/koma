@@ -11,7 +11,7 @@ class DeviceSectionPresenter extends Presenter
      */
     public function icon()
     {
-        return '<i class="fa fa-server"></i>';
+        return '<i class="fa fa-' . $this->entity->icon . '"></i>';
     }
 
 }
