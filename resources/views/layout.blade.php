@@ -170,6 +170,7 @@
                                         @endforeach
                                     </ul>
                                 </li>
+                                @can('admin')
                                 <li>
                                     <a href="#" class="dropdown-toggle">
                                         <i class="fa fa-ellipsis-h"></i>
@@ -194,7 +195,9 @@
                                         </li>
                                     </ul>
                                 </li>
+                                @endcan
 
+                                @can('admin')
                                 <li class="nav-header hidden-sm hidden-xs">
                                     Administration
                                 </li>
@@ -220,6 +223,7 @@
                                         <span>User Management</span>
                                     </a>
                                 </li>
+                                @endcan
                                 @endcan
                             </ul>
                         </div>

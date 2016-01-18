@@ -37,6 +37,17 @@
             <label class="col-xs-2 control-label">Role</label>
             <div class="col-xs-10">
                 <div class="radio">
+                    {!! Form::radio('role', App\User::ROLE_SYSADMIN, null, [
+                        'id'       => 'role-sysadmin',
+                        'class'    => 'form-control',
+                        'required' => true,
+                    ]) !!}
+                    <label for="role-sysadmin">
+                        Sysadmin
+                    </label>
+                </div>
+
+                <div class="radio">
                     {!! Form::radio('role', App\User::ROLE_ADMIN, null, [
                         'id'       => 'role-admin',
                         'class'    => 'form-control',

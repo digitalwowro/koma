@@ -19,6 +19,8 @@ class DeviceSectionController extends Controller
     public function __construct(DeviceSection $model)
     {
         $this->model = $model;
+
+        $this->authorize('admin');
     }
 
     public function index()

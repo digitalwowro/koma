@@ -19,11 +19,13 @@
                 <header class="main-box-header clearfix">
                     <h2 class="pull-left">All {{ $deviceSection->title }}</h2>
 
+                    @can('admin')
                     <div class="filter-block pull-right">
                         <a href="{{ route('devices.create', $deviceSection->id) }}" class="btn btn-primary pull-right">
                             <i class="fa fa-plus-circle fa-lg"></i> Add device
                         </a>
                     </div>
+                    @endcan
                 </header>
 
                 <div class="main-box-body clearfix">
@@ -68,6 +70,8 @@
                                                 <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
                                             </span>
                                         </a>
+
+                                        @can('admin')
                                         <a href="{{ route('devices.edit', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
@@ -82,6 +86,7 @@
                                             </span>
                                         </a>
                                         {!! Form::close() !!}
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty

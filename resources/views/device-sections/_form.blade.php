@@ -99,7 +99,7 @@
             function refreshTr($tr) {
                 var params = {
                     type: $tr.find('select.field-type').val(),
-                    index: $tr.prevAll().length + 1
+                    index: $tr.prevAll().length
                 };
 
                 $tr.find('td.field-options').html('<center><img src="{{ asset('img/loading.gif') }}"></center>');
@@ -132,11 +132,9 @@
 
                 $table.find('tbody').append('<tr>' + template + '</tr>');
 
-                var $tr = $table.find('tbody tr:last'),
-                    nth = $tr.parent().find('tr').length;
+                var $tr = $table.find('tbody tr:last');
 
-                $tr.find('.field-name').attr('name', 'fields[' + nth + '][name]');
-                $tr.find('.field-type').attr('name', 'fields[' + nth + '][type]');
+                refreshAllIndexes();
                 refreshTr($tr);
             });
 
@@ -158,7 +156,7 @@
                 }
             });
 
-            $('table.table-field-options .delete-field').click(function() {
+            $('table.table-field-options').on('click', '.delete-field', function() {
                 if (confirm('Are you sure you want to delete this field?')) {
                     $(this).closest('tr').remove();
                     refreshAllIndexes();

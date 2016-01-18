@@ -19,6 +19,7 @@ class User extends Model implements AuthenticatableContract,
 
     const ROLE_ADMIN      = 1;
     const ROLE_SUPERADMIN = 2;
+    const ROLE_SYSADMIN   = 3;
 
     /**
      * The database table used by the model.
@@ -60,6 +61,16 @@ class User extends Model implements AuthenticatableContract,
     public function isSuperAdmin()
     {
         return $this->role == $this::ROLE_SUPERADMIN;
+    }
+
+    /**
+     * Returns whether current user is admin
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return in_array($this->role, [$this::ROLE_SUPERADMIN, $this::ROLE_ADMIN]);
     }
 
     public static function pagedForAdmin()

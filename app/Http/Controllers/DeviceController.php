@@ -55,6 +55,8 @@ class DeviceController extends Controller
 
     public function create($type)
     {
+        $this->authorize('admin');
+
         try
         {
             $deviceSection = $this->deviceSection->findOrFail($type);
@@ -71,6 +73,8 @@ class DeviceController extends Controller
 
     public function store($type, Request $request)
     {
+        $this->authorize('admin');
+
         try
         {
             $data = $request->input();
@@ -98,6 +102,8 @@ class DeviceController extends Controller
 
     public function edit($type, $id)
     {
+        $this->authorize('admin');
+
         try
         {
             $deviceSection = $this->deviceSection->findOrFail($type);
@@ -115,6 +121,8 @@ class DeviceController extends Controller
 
     public function update($id, Request $request)
     {
+        $this->authorize('admin');
+
         try
         {
             $data = $request->input();
@@ -143,6 +151,8 @@ class DeviceController extends Controller
 
     public function destroy($id)
     {
+        $this->authorize('admin');
+
         try
         {
             $device = $this->model->findOrFail($id);
