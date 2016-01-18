@@ -34,8 +34,8 @@ class Text extends AbstractField
             $old = $content;
 
             $content = urlify($content);
-            return $old === $content
-                ? '<input type="text" value="' . htmlentities($content) . '" readonly style="border: none; background-color: transparent;" onclick="this.setSelectionRange(0, this.value.length)">'
+            return $old === $content && stripos($content, ' ') === false
+                ? '<input class="tx-ov" type="text" value="' . htmlentities($content) . '" readonly style="border: none; background-color: transparent;" onclick="this.setSelectionRange(0, this.value.length)">'
                 : $content;
         }
 
