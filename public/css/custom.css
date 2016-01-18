@@ -43,3 +43,6 @@
         line-height: 30px;
     }
 }
+
+table.table-field-options .fa-reorder { cursor: move; }
+table.table-field-options .fa-trash-o { color: red; }

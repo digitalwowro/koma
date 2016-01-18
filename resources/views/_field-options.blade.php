@@ -1,4 +1,7 @@
 <tr>
+    <td style="width:1px; white-space:nowrap; text-align: center;">
+        <i class="fa fa-reorder"></i>
+    </td>
     <td>
         <input type="text" class="field-name form-control" name="fields[{{ $i }}][name]" value="{{ $field->getName() }}">
     </td>
@@ -11,5 +14,10 @@
     </td>
     <td class="field-options">
         {!! $field->renderOptions($i) !!}
+    </td>
+    <td style="width:1px; white-space:nowrap; text-align: center;">
+        <a href="#" title="Delete this field" class="delete-field">
+            <i class="fa fa-trash-o"></i>
+        </a>
     </td>
 </tr>

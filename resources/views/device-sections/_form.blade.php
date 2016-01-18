@@ -34,9 +34,11 @@
         <table class="table table-striped table-hover table-bordered table-field-options">
             <thead>
                 <tr>
+                    <th style="text-align: center;">#</th>
                     <th>Field Name</th>
                     <th>Field Type</th>
                     <th>Field Options</th>
+                    <th>Del</th>
                 </tr>
             </thead>
             <tbody>
@@ -48,7 +50,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="3" style="text-align: center;">
+                    <td colspan="5" style="text-align: center;">
                         <a href="#" id="add-new-field">
                             <i class="fa fa-plus"></i>
                             Add a new field
@@ -56,6 +58,9 @@
                     </td>
                 </tr>
                 <tr class="hidden">
+                    <td style="width:1px; white-space:nowrap; text-align: center;">
+                        <i class="fa fa-reorder"></i>
+                    </td>
                     <td>
                         <input type="text" class="field-name form-control">
                     </td>
@@ -68,6 +73,11 @@
                     </td>
                     <td class="field-options">
                         ...
+                    </td>
+                    <td style="width:1px; white-space:nowrap; text-align: center;">
+                        <a href="#" title="Delete this field" class="delete-field">
+                            <i class="fa fa-trash-o"></i>
+                        </a>
                     </td>
                 </tr>
             </tfoot>
@@ -97,6 +107,20 @@
                 });
             }
 
+            function refreshAllIndexes() {
+                $('table.table-field-options tbody tr').each(function(i) {
+                    var $this = $(this);
+
+                    $this.find('.field-name').attr('name', 'fields[' + i + '][name]');
+                    $this.find('.field-type').attr('name', 'fields[' + i + '][type]');
+                    $this.find('.field-options').find('[name^="fields\["]').each(function() {
+                        var name = $(this).attr('name');
+
+                        $(this).attr('name', name.substr(0,7) + i + name.substr(8));
+                    });
+                });
+            }
+
             $('#add-new-field').click(function(e) {
                 e.preventDefault();
 
@@ -117,6 +141,27 @@
             $('table.table-field-options').on('change', 'select.field-type', function() {
                 refreshTr($(this).closest('tr'));
             });
-        });
+
+            $('table.table-field-options tbody').sortable({
+                handle: '.fa-reorder',
+                distance: 15,
+                items: 'tr',
+                forcePlaceholderSize: true,
+                placeholder: 'ui-state-highlight',
+                start: function(event, ui) {
+                    ui.placeholder.html('<td style="height:30px; background-color:#d1eeff;" colspan="5">&nbsp;</td>');
+                },
+                stop: function() {
+                    refreshAllIndexes();
+                }
+            });
+
+            $('table.table-field-options .delete-field').click(function() {
+                if (confirm('Are you sure you want to delete this field?')) {
+                    $(this).closest('tr').remove();
+                    refreshAllIndexes();
+                }
+            });
+    });
     </script>
 @append

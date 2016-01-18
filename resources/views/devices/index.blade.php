@@ -46,7 +46,9 @@
                                     @foreach ($deviceSection->fields as $field)
                                         @if ($field->showInDeviceList())
                                             <td>
-                                                @if (isset($device->data[$field->getInputName()]))
+                                                @if (method_exists($field, 'customDeviceListContent'))
+                                                    {{ $field->customDeviceListContent($device) }}
+                                                @elseif (isset($device->data[$field->getInputName()]))
                                                     @if (is_array($device->data[$field->getInputName()]))
                                                         {{ implode(', ', $device->data[$field->getInputName()]) }}
                                                     @else

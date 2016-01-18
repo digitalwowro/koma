@@ -245,6 +245,7 @@
 
 <!-- global scripts -->
 {!! HTML::script('js/jquery.js') !!}
+{!! HTML::script('js/jquery-ui.custom.min.js') !!}
 {!! HTML::script('js/bootstrap.js') !!}
 {!! HTML::script('js/jquery.nanoscroller.min.js') !!}
 

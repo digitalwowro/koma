@@ -30,6 +30,7 @@ class Factory
     public static function getFieldTypes()
     {
         return [
+            'ID',
             'Checkbox',
             'Date',
             'File',

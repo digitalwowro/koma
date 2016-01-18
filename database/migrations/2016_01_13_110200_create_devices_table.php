@@ -15,7 +15,7 @@ class CreateDevicesTable extends Migration
         Schema::create('devices', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('section_id')->unsigned()->index()->nullable();
-            $table->foreign('section_id')->references('id')->on('device_sections');
+            $table->foreign('section_id')->references('id')->on('device_sections')->onDelete('cascade');
             $table->mediumText('data');
             $table->timestamps();
         });
