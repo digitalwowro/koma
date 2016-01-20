@@ -6,10 +6,11 @@
             <ol class="breadcrumb">
                 <li><a href="{{ route('home') }}">Home</a></li>
                 <li><span>IP Addresses</span></li>
-                <li class="active"><span>{{ $ipCategory->title }}</span></li>
+                <li><a href="{{ route('ip.index', $ipCategory->id) }}"><span>{{ $ipCategory->title }}</span></a></li>
+                <li class="active"><span>View subnet: {{ $subnet }}</span></li>
             </ol>
 
-            <h1>Subnets <small>{{ $ipCategory->title }}</small></h1>
+            <h1>IP Addresses <small>in subnet {{ $subnet }}</small></h1>
         </div>
     </div>
 
@@ -17,7 +18,7 @@
         <div class="col-lg-12">
             <div class="main-box clearfix">
                 <header class="main-box-header clearfix">
-                    <h2 class="pull-left">All {{ $ipCategory->title }} Subnets</h2>
+                    <h2 class="pull-left">All IP Addresses In Subnet</h2>
 
                     @can('admin')
                     <div class="filter-block pull-right">
@@ -33,46 +34,39 @@
                         <table class="table table-responsive table-hover table-striped">
                             <thead>
                             <tr>
-                                <th>Subnet</th>
-                                <th>Free IPs</th>
+                                <th>IP Address</th>
+                                <th>Device</th>
                                 <th>&nbsp;</th>
                             </tr>
                             </thead>
                             <tbody>
-                            @forelse ($subnets as $subnet)
+                            @forelse ($ips as $ip)
                                 <tr>
-                                    <td style="font-size: 1.15em; font-weight:300;">
-                                        <a href="{{ route('ip.subnet', ['subnet' => str_replace('/', '-', $subnet->subnet)]) }}">
-                                            {{ $subnet->subnet }}
-                                        </a>
+                                    <td>
+                                        {{ $ip->ip }}
                                     </td>
-                                    <td style="font-size: 1.15em; font-weight:300;">
-                                        {{ App\IpAddress::getFreeForSubnet($subnet->subnet) }} / {{ $subnet->count }}
+                                    <td>
+                                        {!! $ip->device ? $ip->device->title : '- unassigned - <a href="#" data-action="assign" data-assign-id="' . $ip->id . '">assign now?</a>' !!}
                                     </td>
                                     <td style="width: 1%; white-space: nowrap;">
-                                        <a href="{{ route('ip.subnet', ['subnet' => str_replace('/', '-', $subnet->subnet)]) }}" class="table-link">
+                                        <a href="{{ route('ip.show', ['category' => $ip->category_id, 'id' => $ip->id]) }}" class="table-link">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
                                                 <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
                                             </span>
                                         </a>
-
-                                        @can('admin')
-                                        {!! Form::open(['route' => ['ip.destroy', str_replace('/', '-', $subnet->subnet)], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
-                                        <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this subnet?')) $(this).closest('form').submit();">
+                                        <a href="#" class="table-link" data-action="assign" data-assign-id="{{ $ip->id }}">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
-                                                <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
+                                                <i class="fa fa-check-square-o fa-stack-1x fa-inverse"></i>
                                             </span>
                                         </a>
-                                        {!! Form::close() !!}
-                                        @endcan
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
                                     <td colspan="3" style="text-align:center;">
-                                        There are currently no Subnets added. How about <a data-toggle="modal" href="#myModal">creating one</a> now?
+                                        There are currently no Subnets added. How about <a href="{{ route('ip.create', $ipCategory->id) }}">creating one</a> now?
                                     </td>
                                 </tr>
                             @endforelse
@@ -85,6 +79,30 @@
     </div>
 
     @include('ips._add-subnet-modal')
+
+    <div class="modal fade" id="assign-now" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Assign IP To Device</h4>
+                </div>
+                {!! Form::open(['route' => ['ip.assign', $ipCategory->id], 'role' => 'form', 'method' => 'POST']) !!}
+                    <input type="hidden" class="id">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="subnetInput">Device</label>
+                            <input type="text" name="subnet" class="form-control" id="subnetInput" placeholder="127.0.0.1/32">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary">Add</button>
+                    </div>
+                {!! Form::close() !!}
+            </div>
+        </div>
+    </div>
 
     <style type="text/css">
         @media (max-width: 760px) {
@@ -99,3 +117,16 @@
         }
     </style>
 @stop
+
+@section('footer')
+    <script>
+        $(document).ready(function() {
+            $('[data-action="assign"]').click(function() {
+                $('#assign-now .id').val($(this).data('assign-id'));
+                $('#assign-now').modal('show');
+
+                return false;
+            });
+        });
+    </script>
+@append

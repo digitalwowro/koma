@@ -24,6 +24,16 @@ class Device extends Model
     }
 
     /**
+     * Relationship with IpAddress
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function ips()
+    {
+        return $this->hasMany('App\IpAddress');
+    }
+
+    /**
      * Auto encode the data field
      *
      * @param string $value

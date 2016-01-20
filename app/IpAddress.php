@@ -11,7 +11,7 @@ class IpAddress extends Model
      *
      * @var array
      */
-    protected $fillable = ['ip', 'ip_class', 'category_id', 'data'];
+    protected $fillable = ['ip', 'subnet', 'category_id', 'data'];
 
     /**
      * Relationship with IpCategory
@@ -30,7 +30,7 @@ class IpAddress extends Model
      */
     public function device()
     {
-        return $this->belongsTo('App\Device', 'device_id');
+        return $this->belongsTo('App\Device');
     }
 
     /**
@@ -64,4 +64,66 @@ class IpAddress extends Model
             return [];
         }
     }
+
+    /**
+     * Create a new subnet
+     *
+     * @param string $subnet
+     * @param int $categoryId
+     */
+    public static function createSubnet($subnet, $categoryId)
+    {
+        list($ip, $mask) = explode('/', $subnet);
+
+        $ipEnc = ip2long($ip);
+
+        // convert last (32-$mask) bits to zeroes
+        $currentIp = $ipEnc | pow(2, (32 - $mask)) - pow(2, (32 - $mask));
+
+        for ($pos = 0; $pos < pow(2, (32 - $mask)); ++$pos)
+        {
+            self::create([
+                'ip'          => long2ip($currentIp + $pos),
+                'subnet'      => $subnet,
+                'category_id' => $categoryId,
+            ]);
+        }
+    }
+
+    /**
+     * Get subnets for given category ID
+     *
+     * @param $categoryId
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getSubnetsFor($categoryId)
+    {
+        return self::selectRaw('count(*) as count, subnet, category_id')
+            ->where('category_id', $categoryId)
+            ->groupBy('subnet')
+            ->get();
+    }
+
+    /**
+     * Get number of used IPs in given subnet
+     *
+     * @param string $subnet
+     * @return int
+     */
+    public static function getFreeForSubnet($subnet)
+    {
+        return self::where('subnet', $subnet)->whereNull('device_id')->count();
+    }
+
+    /**
+     * Get all IPs for given subnet
+     *
+     * @param string $subnet
+     * @return \Illuminate\Support\Collection
+     */
+    public function getIPsForSubnet($subnet)
+    {
+        return self::where('subnet', $subnet)->orderBy('id')->get();
+    }
+
 }

@@ -24,11 +24,13 @@ Route::group(['middleware' => 'auth'], function()
     Route::put   ('/devices/{id}',             ['as' => 'devices.update',  'uses' => 'DeviceController@update']);
     Route::delete('/devices/{id}',             ['as' => 'devices.destroy', 'uses' => 'DeviceController@destroy']);
 
-    Route::get   ('/ip/{category}/create',     ['as' => 'ip.create',  'uses' => 'IpController@create']);
-    Route::get   ('/ip/{category}/{id}',       ['as' => 'ip.show',    'uses' => 'IpController@show']);
-    Route::get   ('/ip/{category}',            ['as' => 'ip.index',   'uses' => 'IpController@index']);
-    Route::post  ('/ip/{category}/{id}',       ['as' => 'ip.store',   'uses' => 'IpController@store']);
-    Route::get   ('/ip/{category}/{id}/edit',  ['as' => 'ip.edit',    'uses' => 'IpController@edit']);
-    Route::put   ('/ip/{id}',                  ['as' => 'ip.update',  'uses' => 'IpController@update']);
-    Route::delete('/ip/{id}',                  ['as' => 'ip.destroy', 'uses' => 'IpController@destroy']);
+    Route::get   ('/ip/subnet/{subnet}',      ['as' => 'ip.subnet',  'uses' => 'IpController@subnet']);
+    Route::post  ('/ip/assign/{id}',          ['as' => 'ip.assign',  'uses' => 'IpController@assign']);
+    Route::get   ('/ip/{category}/create',    ['as' => 'ip.create',  'uses' => 'IpController@create']);
+    Route::get   ('/ip/{category}/{id}',      ['as' => 'ip.show',    'uses' => 'IpController@show']);
+    Route::get   ('/ip/{category}',           ['as' => 'ip.index',   'uses' => 'IpController@index']);
+    Route::post  ('/ip/{category}',           ['as' => 'ip.store',   'uses' => 'IpController@store']);
+    Route::get   ('/ip/{category}/{id}/edit', ['as' => 'ip.edit',    'uses' => 'IpController@edit']);
+    Route::put   ('/ip/{id}',                 ['as' => 'ip.update',  'uses' => 'IpController@update']);
+    Route::delete('/ip/{id}',                 ['as' => 'ip.destroy', 'uses' => 'IpController@destroy']);
 });

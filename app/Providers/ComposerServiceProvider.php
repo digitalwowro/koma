@@ -17,7 +17,11 @@ class ComposerServiceProvider extends ServiceProvider
          * Device Sections
          */
         view()->composer(
-            'layout', 'App\Composers\DeviceSectionComposer@all'
+            [
+                'layout',
+                'ip-fields._form',
+            ],
+            'App\Composers\DeviceSectionComposer@all'
         );
 
         view()->composer(

@@ -36,133 +36,48 @@ class IpController extends Controller
 
     public function index($category)
     {
-        //try
-        //{
-            $ipCategory = $this->ipCategory->findOrFail($category);
-            $ips        = $ipCategory->ips;
-            $colspan    = 1;
-            $fields     = $this->fields->all();
-
-            foreach ($fields as $field)
-            {
-                if ($field->showInDeviceList())
-                {
-                    $colspan++;
-                }
-            }
-
-            return view('ips.index', compact('ipCategory', 'ips', 'colspan', 'fields'));
-        //}
-        //catch (\Exception $e)
-        //{
-        //    return redirect()
-        //        ->back()
-        //        ->withError('Could not find IP Address');
-        //}
-    }
-
-    public function create($category)
-    {
-        $this->authorize('admin');
-
-        //try
-        //{
+        try
+        {
+            $subnets = $this->model->getSubnetsFor($category);
             $ipCategory = $this->ipCategory->findOrFail($category);
 
-            return view('ips.create', compact('ipCategory'));
-        //}
-        //catch (\Exception $e)
-        //{
-        //    return redirect()
-        //        ->back()
-        //        ->withError('Could not find IP Address');
-        //}
+            return view('ips.index', compact('ipCategory', 'subnets'));
+        }
+        catch (\Exception $e)
+        {
+            return redirect()
+                ->back()
+                ->withError('Could not find IP Address');
+        }
     }
 
     public function store($category, Request $request)
     {
         $this->authorize('admin');
 
-        //try
-        //{
-            $data = $request->input();
-
-            unset($data['_token']);
-            unset($data['_method']);
-
-            $this->model->create([
-                'category_id' => $category,
-                'data'       => $data,
-            ]);
+        try
+        {
+            $this->model->createSubnet($request->input('subnet'), $category);
 
             return redirect()
                 ->route('ip.index', $category)
                 ->withSuccess('IP Address has been added');
-        //}
-        //catch (\Exception $e)
-        //{
-        //    return redirect()
-        //        ->back()
-        //        ->withInput()
-        //        ->withError('Error saving IP Address');
-        //}
-    }
-
-    public function edit($category, $id)
-    {
-        $this->authorize('admin');
-
-        //try
-        //{
-            $ipCategory = $this->ipCategory->findOrFail($category);
-            $ip        = $this->model->findOrFail($id);
-
-            return view('ips.edit', compact('ipCategory', 'ip'));
-        //}
-        //catch (\Exception $e)
-        //{
-        //    return redirect()
-        //        ->back()
-        //        ->withError('Could not find IP Address');
-        //}
-    }
-
-    public function update($id, Request $request)
-    {
-        $this->authorize('admin');
-
-        //try
-        //{
-            $data = $request->input();
-
-            unset($data['_token']);
-            unset($data['_method']);
-
-            $ip = $this->model->findOrFail($id);
-
-            $ip->data = $data;
-
-            $ip->save();
-
+        }
+        catch (\Exception $e)
+        {
             return redirect()
-                ->route('ip.index', $ip->category_id)
-                ->withSuccess('IP Address has been updated');
-        //}
-        //catch (\Exception $e)
-        //{
-        //    return redirect()
-        //        ->back()
-        //        ->withInput()
-        //        ->withError('Error updating IP Address');
-        //}
+                ->back()
+                ->withInput()
+                ->withError('Error saving IP Address');
+        }
     }
 
     public function destroy($id)
     {
         $this->authorize('admin');
 
-        //try
-        //{
+        try
+        {
             $ip = $this->model->findOrFail($id);
 
             $ip->delete();
@@ -170,29 +85,79 @@ class IpController extends Controller
             return redirect()
                 ->back()
                 ->withSuccess('IP Address has been deleted');
-        //}
-        //catch (\Exception $e)
-        //{
-        //    return redirect()
-        //        ->back()
-        //        ->withError('Could not find IP Address');
-        //}
+        }
+        catch (\Exception $e)
+        {
+            return redirect()
+                ->back()
+                ->withError('Could not find IP Address');
+        }
     }
 
     public function show($category, $id)
     {
-        //try
-        //{
+        try
+        {
             $ipCategory = $this->ipCategory->findOrFail($category);
             $ip = $this->model->findOrFail($id);
 
             return view('ips.show', compact('ip', 'ipCategory'));
-        //}
-        //catch (\Exception $e)
-        //{
-        //    return redirect()
-        //        ->route('ip.index')
-        //        ->withError('Could not find IP Address');
-        //}
+        }
+        catch (\Exception $e)
+        {
+            return redirect()
+                ->route('ip.index')
+                ->withError('Could not find IP Address');
+        }
+    }
+
+    public function subnet($subnet)
+    {
+        try
+        {
+            $subnet = str_replace('-', '/', $subnet);
+
+            $ips   = $this->model->getIPsForSubnet($subnet);
+            $first = $ips->first();
+
+            if ( ! $first)
+            {
+                throw new \Exception('No IPs found for given subnet');
+            }
+
+            $ipCategory = $this->ipCategory->findOrFail($first->category_id);
+
+            return view('ips.subnet', compact('subnet', 'ips', 'ipCategory'));
+        }
+        catch (\Exception $e)
+        {
+          return redirect()
+              ->back()
+              ->withError($e->getMessage());
+        }
+    }
+
+    public function assign($id, Request $request)
+    {
+        try
+        {
+            $deviceId = $request->input('device_id');
+
+            $ip = $this->model->findOrFail($id);
+
+            $ip->device_id = $deviceId;
+
+            $ip->save();
+
+            return redirect()
+                ->back()
+                ->withSuccess('IP has been assigned');
+        }
+        catch (\Exception $e)
+        {
+            return redirect()
+                ->back()
+                ->withError('Error assigning IP');
+        }
     }
 }

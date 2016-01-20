@@ -104,4 +104,21 @@ class DeviceSection extends Model
         return self::orderBy('sort')->orderBy('title')->get();
     }
 
+    /**
+     * Get all field names
+     *
+     * @return array
+     */
+    public function getFieldNames()
+    {
+        $return = [];
+
+        foreach ($this->fields as $field)
+        {
+            $return[] = $field->getName();
+        }
+
+        return $return;
+    }
+
 }

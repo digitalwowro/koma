@@ -15,7 +15,7 @@ class CreateIpAddressesTable extends Migration
         Schema::create('ip_addresses', function (Blueprint $table) {
             $table->increments('id');
             $table->string('ip')->index();
-            $table->string('ip_class')->index();
+            $table->string('subnet')->index();
             $table->mediumText('data');
             $table->integer('category_id')->unsigned()->index();
             $table->foreign('category_id')->references('id')->on('ip_categories')->onDelete('cascade');
