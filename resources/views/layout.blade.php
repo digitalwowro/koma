@@ -171,28 +171,20 @@
                                     </ul>
                                 </li>
                                 @can('admin')
-                                <li>
+                                <li {!! is_route('ip.*') !!}>
                                     <a href="#" class="dropdown-toggle">
                                         <i class="fa fa-ellipsis-h"></i>
-                                        <span>IP Manager</span>
+                                        <span>IP Addresses</span>
                                         <i class="fa fa-angle-right drop-icon"></i>
                                     </a>
                                     <ul class="submenu">
-                                        <li>
-                                            <a href="email-inbox.html">
-                                                Inbox
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="email-detail.html">
-                                                Detail
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="email-compose.html">
-                                                Compose
-                                            </a>
-                                        </li>
+                                        @foreach ($ipCategories as $ipCategory)
+                                            <li>
+                                                <a href="{{ route('ip.index', $ipCategory->id) }}" {!! is_route('ip.index', true, ['category' => $ipCategory->id]) !!}>
+                                                    {{ $ipCategory->title }}
+                                                </a>
+                                            </li>
+                                        @endforeach
                                     </ul>
                                 </li>
                                 @endcan
@@ -210,9 +202,16 @@
                                 </li>
 
                                 <li>
-                                    <a href="{{ route('device-sections.index') }}">
+                                    <a href="{{ route('ip-categories.index') }}">
                                         <i class="fa fa-ellipsis-h"></i>
-                                        <span>IP Manager Sections</span>
+                                        <span>IP Categories</span>
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="{{ route('ip-fields.index') }}">
+                                        <i class="fa fa-ellipsis-h"></i>
+                                        <span>IP Fields</span>
                                     </a>
                                 </li>
 

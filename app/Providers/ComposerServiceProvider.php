@@ -25,6 +25,17 @@ class ComposerServiceProvider extends ServiceProvider
         );
 
         /**
+         * IP Categories
+         */
+        view()->composer(
+            'layout', 'App\Composers\IpCategoryComposer@all'
+        );
+
+        view()->composer(
+            'ip-categories.index', 'App\Composers\IpCategoryComposer@admin'
+        );
+
+        /**
          * Users
          */
         view()->composer(
