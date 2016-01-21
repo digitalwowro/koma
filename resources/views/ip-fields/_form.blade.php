@@ -29,7 +29,7 @@
                         {{ $deviceSection->title }}
                     </td>
                     <td>
-                        {!! Form::select('bindings[' . $deviceSection->id . ']', $deviceSection->getFieldNames(), null, [
+                        {!! Form::select('bindings[' . $deviceSection->id . ']', $deviceSection->getFieldsForSelect(), null, [
                             'class' => 'form-control',
                         ]) !!}
                     </td>

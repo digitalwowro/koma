@@ -13,6 +13,7 @@
     <!-- libraries -->
     {!! HTML::style('css/libs/font-awesome.css') !!}
     {!! HTML::style('css/libs/nanoscroller.css') !!}
+    {!! HTML::style('css/libs/select2.css') !!}
 
     <!-- global styles -->
     {!! HTML::style('css/compiled/theme_styles.css') !!}
@@ -261,6 +262,7 @@
 <!-- theme scripts -->
 {!! HTML::script('js/scripts.js') !!}
 {!! HTML::script('js/bootstrap-datepicker.js') !!}
+{!! HTML::script('js/select2.min.js') !!}
 
 <script>
     @foreach (['success', 'notice', 'warning', 'error'] as $type)

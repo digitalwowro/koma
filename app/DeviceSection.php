@@ -109,13 +109,13 @@ class DeviceSection extends Model
      *
      * @return array
      */
-    public function getFieldNames()
+    public function getFieldsForSelect()
     {
         $return = [];
 
         foreach ($this->fields as $field)
         {
-            $return[] = $field->getName();
+            $return[$field->getInputName()] = $field->getName();
         }
 
         return $return;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Device;
 use App\DeviceSection;
+use App\IpAddress;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -71,7 +72,7 @@ class DeviceController extends Controller
         }
     }
 
-    public function store($type, Request $request)
+    public function store($type, Request $request, IpAddress $ipAddress)
     {
         $this->authorize('admin');
 
@@ -82,10 +83,31 @@ class DeviceController extends Controller
             unset($data['_token']);
             unset($data['_method']);
 
-            $this->model->create([
+            $device = $this->model->create([
                 'section_id' => $type,
                 'data'       => $data,
             ]);
+
+            if (isset($data['ips']) && is_array($data['ips']))
+            {
+                $ips = $ipAddress->whereIn('id', $data['ips'])->get();
+
+                foreach ($ips as $ip)
+                {
+                    if ($ip->device_id == $device->id)
+                    {
+                        continue;
+                    }
+
+                    if ($ip->assigned())
+                    {
+                        throw new \Exception("IP {\$ip} is already assigned!");
+                    }
+
+                    $ip->device_id = $device->id;
+                    $ip->save();
+                }
+            }
 
             return redirect()
                 ->route('devices.index', $type)
@@ -119,7 +141,7 @@ class DeviceController extends Controller
         }
     }
 
-    public function update($id, Request $request)
+    public function update($id, Request $request, IpAddress $ipAddress)
     {
         $this->authorize('admin');
 
@@ -136,6 +158,29 @@ class DeviceController extends Controller
 
             $device->save();
 
+            $device->ips()->update(['device_id' => null]);
+
+            if (isset($data['ips']) && is_array($data['ips']))
+            {
+                $ips = $ipAddress->whereIn('id', $data['ips'])->get();
+
+                foreach ($ips as $ip)
+                {
+                    if ($ip->device_id == $device->id)
+                    {
+                        continue;
+                    }
+
+                    if ($ip->assigned())
+                    {
+                        throw new \Exception("IP {\$ip} is already assigned!");
+                    }
+
+                    $ip->device_id = $device->id;
+                    $ip->save();
+                }
+            }
+
             return redirect()
                 ->route('devices.index', $device->section_id)
                 ->withSuccess('Device has been updated');
@@ -145,7 +190,7 @@ class DeviceController extends Controller
             return redirect()
                 ->back()
                 ->withInput()
-                ->withError('Error updating device');
+                ->withError('Error updating device: ' . $e->getMessage());
         }
     }
 

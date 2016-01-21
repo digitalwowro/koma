@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Device;
 use Illuminate\Http\Request;
 
 use App\IpCategory;
@@ -111,7 +112,7 @@ class IpController extends Controller
         }
     }
 
-    public function subnet($subnet)
+    public function subnet($subnet, Device $deviceModel)
     {
         try
         {
@@ -126,8 +127,16 @@ class IpController extends Controller
             }
 
             $ipCategory = $this->ipCategory->findOrFail($first->category_id);
+            $devices    = $deviceModel->orderBy('section_id')->get();
+            $allDevices = [];
+            $ipFields   = $this->fields->orderBy('sort')->get();
 
-            return view('ips.subnet', compact('subnet', 'ips', 'ipCategory'));
+            foreach ($devices as $device)
+            {
+                $allDevices[$device->section->title][] = $device->title;
+            }
+
+            return view('ips.subnet', compact('subnet', 'ips', 'ipCategory', 'allDevices', 'ipFields'));
         }
         catch (\Exception $e)
         {
@@ -160,4 +169,27 @@ class IpController extends Controller
                 ->withError('Error assigning IP');
         }
     }
+
+    public function subnetList($subnet)
+    {
+        $subnet = str_replace('-', '/', $subnet);
+        $return = [];
+        $rows   = $this->model
+            ->where('subnet', $subnet)
+            ->whereNull('device_id')
+            ->orderBy('id')
+            ->get();
+
+        foreach ($rows as $row)
+        {
+            $return[] = [
+                'id'       => $row->id,
+                'ip'       => $row->ip,
+                'assigned' => $row->assigned(),
+            ];
+        }
+
+        return response()->json($return);
+    }
+
 }

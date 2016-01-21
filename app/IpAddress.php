@@ -93,14 +93,22 @@ class IpAddress extends Model
     /**
      * Get subnets for given category ID
      *
-     * @param $categoryId
+     * @param int|null $categoryId
      * @return \Illuminate\Support\Collection
      */
-    public static function getSubnetsFor($categoryId)
+    public static function getSubnetsFor($categoryId = null)
     {
-        return self::selectRaw('count(*) as count, subnet, category_id')
-            ->where('category_id', $categoryId)
+        $query = self::selectRaw('count(*) as count, subnet, category_id');
+
+        if ($categoryId)
+        {
+            $query->where('category_id', $categoryId);
+        }
+
+        return $query
             ->groupBy('subnet')
+            ->orderBy('category_id')
+            ->orderBy('subnet')
             ->get();
     }
 
@@ -124,6 +132,61 @@ class IpAddress extends Model
     public function getIPsForSubnet($subnet)
     {
         return self::where('subnet', $subnet)->orderBy('id')->get();
+    }
+
+    /**
+     * Returns whether the current IP address is assigned
+     *
+     * @return bool
+     */
+    public function assigned()
+    {
+        return $this->device_id ? true : false;
+    }
+
+    /**
+     * @param \App\IpField $field
+     * @return string
+     */
+    public function getFieldValue(IpField $field)
+    {
+        if ($this->device_id)
+        {
+            $deviceType = $this->device->section_id;
+
+            if (isset($field->bindings[$deviceType]))
+            {
+                $bindTo = $field->bindings[$deviceType];
+
+                foreach ($this->device->section->fields as $deviceField)
+                {
+                    if ($deviceField->getInputName() == $bindTo)
+                    {
+                        if (method_exists($deviceField, 'customDeviceListContent'))
+                        {
+                            return $deviceField->customDeviceListContent($this->device);
+                        }
+                        elseif (isset($this->device->data[$deviceField->getInputName()]))
+                        {
+                            if (is_array($this->device->data[$deviceField->getInputName()]))
+                            {
+                                return urlify(implode(', ', $this->device->data[$deviceField->getInputName()]));
+                            }
+                            else
+                            {
+                                return urlify($this->device->data[$deviceField->getInputName()]);
+                            }
+                        }
+                        else
+                        {
+                            return '-';
+                        }
+                    }
+                }
+            }
+        }
+
+        return '-';
     }
 
 }

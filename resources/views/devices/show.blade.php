@@ -40,8 +40,21 @@
                             </div>
                         </div>
                     @endforeach
+                </div>
 
-                    <br>
+                <header class="main-box-header clearfix">
+                    <h2 class="pull-left">Associated IP Addresses</h2>
+                </header>
+
+                <div class="main-box-body clearfix">
+                    <ul>
+                        @forelse ($device->ips as $ip)
+                            <li>{{ $ip->ip }}</li>
+                        @empty
+                            <li style="font-size:.9em; color:grey; font-style: italic;">there are no IP Addresses associated to this device</li>
+                        @endforelse
+                    </ul>
+
                     <a href="{{ route('devices.index', $deviceSection->id) }}" class="btn btn-default btn-xs">Go Back</a>
                 </div>
             </div>

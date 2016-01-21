@@ -35,7 +35,12 @@
                             <thead>
                             <tr>
                                 <th>IP Address</th>
-                                <th>Device</th>
+                                <th>Status</th>
+                                @foreach ($ipFields as $ipField)
+                                <th>
+                                    {{ $ipField->title }}
+                                </th>
+                                @endforeach
                                 <th>&nbsp;</th>
                             </tr>
                             </thead>
@@ -46,8 +51,17 @@
                                         {{ $ip->ip }}
                                     </td>
                                     <td>
-                                        {!! $ip->device ? $ip->device->title : '- unassigned - <a href="#" data-action="assign" data-assign-id="' . $ip->id . '">assign now?</a>' !!}
+                                        @if ($ip->assigned())
+                                        <span class="label label-success">Assigned</span>
+                                        @else
+                                        <span class="label label-danger">Unassigned</span>
+                                        @endif
                                     </td>
+                                    @foreach ($ipFields as $ipField)
+                                    <td>
+                                        {!! $ip->getFieldValue($ipField) !!}
+                                    </td>
+                                    @endforeach
                                     <td style="width: 1%; white-space: nowrap;">
                                         <a href="{{ route('ip.show', ['category' => $ip->category_id, 'id' => $ip->id]) }}" class="table-link">
                                             <span class="fa-stack">
@@ -55,12 +69,12 @@
                                                 <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
                                             </span>
                                         </a>
-                                        <a href="#" class="table-link" data-action="assign" data-assign-id="{{ $ip->id }}">
+                                        {{--<a href="#" class="table-link" data-action="assign" data-assign-id="{{ $ip->id }}">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
                                                 <i class="fa fa-check-square-o fa-stack-1x fa-inverse"></i>
                                             </span>
-                                        </a>
+                                        </a>--}}
                                     </td>
                                 </tr>
                             @empty
@@ -80,29 +94,29 @@
 
     @include('ips._add-subnet-modal')
 
-    <div class="modal fade" id="assign-now" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Assign IP To Device</h4>
-                </div>
-                {!! Form::open(['route' => ['ip.assign', $ipCategory->id], 'role' => 'form', 'method' => 'POST']) !!}
-                    <input type="hidden" class="id">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="subnetInput">Device</label>
-                            <input type="text" name="subnet" class="form-control" id="subnetInput" placeholder="127.0.0.1/32">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary">Add</button>
-                    </div>
-                {!! Form::close() !!}
-            </div>
-        </div>
-    </div>
+{{--    <div class="modal fade" id="assign-now" tabindex="-1" role="dialog" aria-hidden="true">--}}
+{{--        <div class="modal-dialog">--}}
+{{--            <div class="modal-content">--}}
+{{--                <div class="modal-header">--}}
+{{--                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>--}}
+{{--                    <h4 class="modal-title">Assign IP To Device</h4>--}}
+{{--                </div>--}}
+{{--                {!! Form::open(['route' => ['ip.assign', $ipCategory->id], 'role' => 'form', 'method' => 'POST']) !!}--}}
+{{--                    <input type="hidden" class="id">--}}
+{{--                    <div class="modal-body">--}}
+{{--                        <div class="form-group">--}}
+{{--                            <label for="subnetInput">Device</label>--}}
+{{--                            <input type="text" name="subnet" class="form-control" id="subnetInput" placeholder="127.0.0.1/32">--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+{{--                    <div class="modal-footer">--}}
+{{--                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>--}}
+{{--                        <button type="button" class="btn btn-primary">Add</button>--}}
+{{--                    </div>--}}
+{{--                {!! Form::close() !!}--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
 
     <style type="text/css">
         @media (max-width: 760px) {
@@ -119,7 +133,7 @@
 @stop
 
 @section('footer')
-    <script>
+    {{--<script>
         $(document).ready(function() {
             $('[data-action="assign"]').click(function() {
                 $('#assign-now .id').val($(this).data('assign-id'));
@@ -128,5 +142,5 @@
                 return false;
             });
         });
-    </script>
+    </script>--}}
 @append

@@ -14,6 +14,7 @@ class CreateIpFieldsTable extends Migration
     {
         Schema::create('ip_fields', function (Blueprint $table) {
             $table->increments('id');
+            $table->tinyInteger('sort')->unsigned()->default(0);
             $table->string('title');
             $table->text('bindings');
             $table->timestamps();
