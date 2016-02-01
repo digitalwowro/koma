@@ -305,19 +305,22 @@
             format: 'yyyy-mm-dd'
         });
 
-        var tableFixed = $('.datatable').dataTable({
-            sDom: 'lTfr<"clearfix">tip',
-            stateSave: true,
-            language: {
-                infoEmpty: "No entries to show"
-            },
-            columnDefs: [{
-                orderable: false,
-                targets: -1
-            }]
-        });
+        // init data tables
+        if ($('.datatable').length) {
+            var tableFixed = $('.datatable').dataTable({
+                sDom: 'lTfr<"clearfix">tip',
+                stateSave: true,
+                language: {
+                    infoEmpty: "No entries to show"
+                },
+                columnDefs: [{
+                    orderable: false,
+                    targets: -1
+                }]
+            });
 
-        new $.fn.dataTable.FixedHeader(tableFixed);
+            new $.fn.dataTable.FixedHeader(tableFixed);
+        }
     });
 </script>
 
