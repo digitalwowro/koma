@@ -111,17 +111,17 @@ class DeviceSectionController extends Controller
 
     public function getOptions(Request $request)
     {
-        //try
-        //{
+        try
+        {
             $type  = $request->input('type');
             $index = $request->input('index');
             $field = Factory::generate('tmp', $type);
 
             return $field->renderOptions($index);
-        //}
-        //catch (\Exception $e)
-        //{
+        }
+        catch (\Exception $e)
+        {
             //
-        //}
+        }
     }
 }
