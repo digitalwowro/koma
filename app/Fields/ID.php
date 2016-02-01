@@ -12,7 +12,7 @@ class ID extends AbstractField
      */
     public function render($contents = '')
     {
-        $value  = $this->getOption('prefix', '');
+        return false;
     }
 
     /**
@@ -42,8 +42,8 @@ class ID extends AbstractField
      */
     public function renderOptions($index)
     {
-        $value  = $this->getOption('prefix', '');
-        $name   = 'fields[' . $index . '][options][prefix]';
+        $value = $this->getOption('prefix', '');
+        $name  = 'fields[' . $index . '][options][prefix]';
 
         return
             '<label>ID Prefix</label>' .

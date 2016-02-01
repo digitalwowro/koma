@@ -35,6 +35,7 @@ class Factory
             'Date',
             'Dropdown',
             'File',
+            'IP',
             'Radio',
             'Status',
             'Text',
