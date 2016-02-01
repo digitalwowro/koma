@@ -23,6 +23,10 @@
     {!! HTML::style('css/libs/ns-style-bar.css') !!}
     {!! HTML::style('css/libs/ns-style-theme.css') !!}
 
+    <!-- data tables -->
+    {!! HTML::style('css/libs/dataTables.fixedHeader.css') !!}
+    {!! HTML::style('css/libs/dataTables.tableTools.css') !!}
+
     <!-- google font libraries -->
     <link href='//fonts.googleapis.com/css?family=Open+Sans:400,600,700,300|Titillium+Web:200,300,400' rel='stylesheet' type='text/css'>
 
@@ -264,6 +268,11 @@
 {!! HTML::script('js/bootstrap-datepicker.js') !!}
 {!! HTML::script('js/select2.min.js') !!}
 
+<!-- data tables -->
+{!! HTML::script('js/jquery.dataTables.js') !!}
+{!! HTML::script('js/dataTables.fixedHeader.js') !!}
+{!! HTML::script('js/jquery.dataTables.bootstrap.js') !!}
+
 <script>
     @foreach (['success', 'notice', 'warning', 'error'] as $type)
         @if (Session::has($type) && is_string(Session::get($type)))
@@ -295,6 +304,20 @@
         $('.datepicker').datepicker({
             format: 'yyyy-mm-dd'
         });
+
+        var tableFixed = $('.datatable').dataTable({
+            sDom: 'lTfr<"clearfix">tip',
+            stateSave: true,
+            language: {
+                infoEmpty: "No entries to show"
+            },
+            columnDefs: [{
+                orderable: false,
+                targets: -1
+            }]
+        });
+
+        new $.fn.dataTable.FixedHeader(tableFixed);
     });
 </script>
 
