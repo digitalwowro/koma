@@ -7,7 +7,9 @@ Route::controller('auth', 'Auth\AuthController');
 
 Route::group(['middleware' => 'auth'], function()
 {
-    Route::get('/', ['as' => 'home', 'uses' => 'DashboardController@index']);
+    Route::get ('/',        ['as' => 'home',           'uses' => 'DashboardController@index']);
+    Route::get ('/profile', ['as' => 'profile',        'uses' => 'ProfileController@index']);
+    Route::post('/profile', ['as' => 'profile.update', 'uses' => 'ProfileController@update']);
 
     Route::resource('users',           'UserController');
     Route::resource('device-sections', 'DeviceSectionController');

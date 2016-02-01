@@ -26,7 +26,7 @@
             'id'          => 'password',
             'class'       => 'form-control',
             'style'       => 'font-style:italic;',
-            'placeholder' => 'leave blank if you don\'t want to assign or change the user\'s password',
+            'placeholder' => 'leave blank if you don\'t want to assign or change the password',
         ]) !!}
     </div>
 </div>

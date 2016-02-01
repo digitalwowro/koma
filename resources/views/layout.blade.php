@@ -105,7 +105,7 @@
                                 <span class="hidden-xs">{{ auth()->user()->name }}</span> <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-right">
-                                <li><a href="{{ route('users.edit', auth()->id()) }}"><i class="fa fa-user"></i>Profile</a></li>
+                                <li><a href="{{ route('profile') }}"><i class="fa fa-user"></i>Profile</a></li>
                                 <li><a href="/auth/logout"><i class="fa fa-power-off"></i>Logout</a></li>
                             </ul>
                         </li>
@@ -133,7 +133,7 @@
                                             <i class="fa fa-angle-down"></i>
                                         </a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="{{ route('users.edit', auth()->id()) }}"><i class="fa fa-user"></i>Profile</a></li>
+                                            <li><a href="{{ route('profile') }}"><i class="fa fa-user"></i>Profile</a></li>
                                             <li><a href="/auth/logout"><i class="fa fa-power-off"></i>Logout</a></li>
                                         </ul>
                                     </span>

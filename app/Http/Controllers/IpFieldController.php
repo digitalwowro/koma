@@ -109,4 +109,25 @@ class IpFieldController extends Controller
             }
         }
     }
+
+    public function destroy($id)
+    {
+        try
+        {
+            $field = $this->model->findOrFail($id);
+
+            $field->delete();
+
+            return redirect()
+                ->route('ip-fields.index')
+                ->withSuccess('Field has been deleted');
+        }
+        catch (\Exception $e)
+        {
+            return redirect()
+                ->back()
+                ->withError('Could not find field');
+        }
+    }
+
 }
