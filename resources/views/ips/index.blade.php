@@ -30,7 +30,7 @@
 
                 <div class="main-box-body clearfix">
                     <div class="table-responsive">
-                        <table class="table table-responsive table-hover table-striped datatable">
+                        <table class="table table-responsive table-hover table-striped{{ $subnets->count() ? ' datatable' : '' }}">
                             <thead>
                             <tr>
                                 <th>Subnet</th>
