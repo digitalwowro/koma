@@ -167,6 +167,24 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try
+        {
+            if ($id == auth()->id())
+            {
+                throw new \Exception('You can\'t delete yourself');
+            }
+
+            User::findOrFail($id)->delete();
+
+            return redirect()
+                ->back()
+                ->withSuccess('User has been deleted');
+        }
+        catch (\Exception $e)
+        {
+            return redirect()
+                ->back()
+                ->withError('There was an error deleting the user');
+        }
     }
 }
