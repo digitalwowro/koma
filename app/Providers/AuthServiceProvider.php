@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\DeviceSection;
+use App\Permission;
 use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -32,6 +34,18 @@ class AuthServiceProvider extends ServiceProvider
 
         $gate->define('admin', function($user) {
             return $user->isAdmin();
+        });
+
+        $gate->define('list-section', function($user, DeviceSection $section) {
+            return $user->isAdmin() || Permission::canList($section);
+        });
+
+        $gate->define('view', function($user, $resource) {
+            return $user->isAdmin() || Permission::can('view', $resource);
+        });
+
+        $gate->define('edit', function($user, $resource) {
+            return $user->isAdmin() || Permission::can('edit', $resource);
         });
     }
 }

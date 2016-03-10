@@ -58,6 +58,9 @@ class UserController extends Controller
         $data = $request->input();
 
         unset($data['_token']);
+        unset($data['permissions']);
+
+        $permissions = $request->input('permissions');
 
         $validator = Validator::make($data, [
             'email' => 'required|unique:users|email',
@@ -81,8 +84,11 @@ class UserController extends Controller
         }
 
         User::unguard();
-        User::create($data);
+        $row = User::create($data);
         User::reguard();
+
+        if ( ! is_array($permissions)) $permissions = [];
+        $row->syncPermissions($permissions);
 
         return redirect()
             ->route('users.index')
@@ -100,7 +106,7 @@ class UserController extends Controller
     {
         try
         {
-            $user = $this->model->findOrFail($id);
+            $user = $this->model->findOrFail($id)->load('permissions');
 
             return view('users.edit', compact('user'));
         }
@@ -124,7 +130,8 @@ class UserController extends Controller
         {
             $row = User::findOrFail($id);
 
-            $data = Input::except(['_method', '_token']);
+            $data = Input::except(['_method', '_token', 'permissions']);
+            $permissions = Input::get('permissions');
 
             if (isset($data['password']) && empty($data['password']))
             {
@@ -139,6 +146,9 @@ class UserController extends Controller
             $row->unguard();
 
             $row->update($data);
+
+            if ( ! is_array($permissions)) $permissions = [];
+            $row->syncPermissions($permissions);
 
             return redirect()
                 ->route('users.index')

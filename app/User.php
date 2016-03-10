@@ -54,6 +54,16 @@ class User extends Model implements AuthenticatableContract,
     }
 
     /**
+     * Relationship with Permission
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function permissions()
+    {
+        return $this->hasMany('App\Permission');
+    }
+
+    /**
      * Returns whether current user is superadmin
      *
      * @return bool
@@ -76,5 +86,56 @@ class User extends Model implements AuthenticatableContract,
     public static function pagedForAdmin()
     {
         return self::orderBy('id')->paginate(30);
+    }
+
+    /**
+     * @param array $permissions
+     */
+    public function syncPermissions(array $permissions)
+    {
+        $this->permissions()->delete();
+        foreach ($permissions as $permission)
+        {
+            unset($resourceType);
+            unset($resourceId);
+            unset($grantType);
+
+            if (isset($permission['type']))
+            {
+                switch ($permission['type'])
+                {
+                    case 'global':
+                        $resourceType = Permission::RESOURCE_TYPE_DEVICES_FULL;
+                        break;
+                    case 'section':
+                        $resourceType = Permission::RESOURCE_TYPE_DEVICES_SECTION;
+                        break;
+                    case 'device':
+                        $resourceType = Permission::RESOURCE_TYPE_DEVICES_DEVICE;
+                        break;
+                }
+            }
+
+            if (isset($permission['id']))
+            {
+                $resourceId = $permission['id'];
+            }
+
+            if (isset($permission['level']) && in_array($permission['level'], [Permission::GRANT_TYPE_READ, Permission::GRANT_TYPE_WRITE]))
+            {
+                $grantType = $permission['level'];
+            }
+
+            if (isset($resourceType, $resourceId, $grantType))
+            {
+                $this->permissions()->create([
+                    'resource_type' => $resourceType,
+                    'resource_id'   => $resourceId ? $resourceId : null,
+                    'grant_type'    => $grantType,
+                ]);
+            }
+        }
+
+        Permission::flushCache();
     }
 }

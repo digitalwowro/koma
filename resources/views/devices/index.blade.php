@@ -19,7 +19,7 @@
                 <header class="main-box-header clearfix">
                     <h2 class="pull-left">All {{ $deviceSection->title }}</h2>
 
-                    @can('admin')
+                    @can('edit', $deviceSection)
                     <div class="filter-block pull-right">
                         <a href="{{ route('devices.create', $deviceSection->id) }}" class="btn btn-primary pull-right">
                             <i class="fa fa-plus-circle fa-lg"></i> Add device
@@ -44,6 +44,7 @@
                             </thead>
                             <tbody>
                             @forelse ($devices as $device)
+                                @can('view', $device)
                                 <tr>
                                     @foreach ($deviceSection->fields as $field)
                                         @if ($field->showInDeviceList())
@@ -71,7 +72,7 @@
                                             </span>
                                         </a>
 
-                                        @can('admin')
+                                        @can('edit', $device)
                                         <a href="{{ route('devices.edit', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
@@ -89,6 +90,7 @@
                                         @endcan
                                     </td>
                                 </tr>
+                                @endcan
                             @empty
                                 <tr>
                                     <td colspan="{{ $colspan }}" style="text-align:center;">

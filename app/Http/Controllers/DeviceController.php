@@ -56,11 +56,11 @@ class DeviceController extends Controller
 
     public function create($type)
     {
-        $this->authorize('admin');
-
         try
         {
             $deviceSection = $this->deviceSection->findOrFail($type);
+
+            $this->authorize('edit', $deviceSection);
 
             return view('devices.create', compact('deviceSection'));
         }
@@ -74,10 +74,12 @@ class DeviceController extends Controller
 
     public function store($type, Request $request, IpAddress $ipAddress)
     {
-        $this->authorize('admin');
-
         try
         {
+            $section = $this->deviceSection->findOrFail($type);
+
+            $this->authorize('edit', $section);
+
             $data = $request->input();
 
             unset($data['_token']);
@@ -124,27 +126,25 @@ class DeviceController extends Controller
 
     public function edit($type, $id)
     {
-        $this->authorize('admin');
-
         try
         {
             $deviceSection = $this->deviceSection->findOrFail($type);
             $device        = $this->model->findOrFail($id);
+
+            $this->authorize('edit', $device);
 
             return view('devices.edit', compact('deviceSection', 'device'));
         }
         catch (\Exception $e)
         {
             return redirect()
-                ->back()
+                ->route('devices.index', $type)
                 ->withError('Could not find device');
         }
     }
 
     public function update($id, Request $request, IpAddress $ipAddress)
     {
-        $this->authorize('admin');
-
         try
         {
             $data = $request->input();
@@ -153,6 +153,8 @@ class DeviceController extends Controller
             unset($data['_method']);
 
             $device = $this->model->findOrFail($id);
+
+            $this->authorize('edit', $device);
 
             $device->data = $data;
 
@@ -196,11 +198,11 @@ class DeviceController extends Controller
 
     public function destroy($id)
     {
-        $this->authorize('admin');
-
         try
         {
             $device = $this->model->findOrFail($id);
+
+            $this->authorize('edit', $device);
 
             $device->delete();
 
@@ -212,7 +214,7 @@ class DeviceController extends Controller
         {
             return redirect()
                 ->back()
-                ->withError('Could not find device');
+                ->withError('Error deleting device: ' . $e->getMessage());
         }
     }
 
@@ -223,12 +225,14 @@ class DeviceController extends Controller
             $deviceSection = $this->deviceSection->findOrFail($type);
             $device = $this->model->findOrFail($id);
 
+            $this->authorize('view', $device);
+
             return view('devices.show', compact('device', 'deviceSection'));
         }
         catch (\Exception $e)
         {
             return redirect()
-                ->route('devices.index')
+                ->route('devices.index', $type)
                 ->withError('Could not find device');
         }
     }

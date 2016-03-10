@@ -165,6 +165,7 @@
                                     </a>
                                     <ul class="submenu">
                                         @foreach ($deviceSections as $deviceSection)
+                                        @can('list-section', $deviceSection)
                                         <li>
                                             <a href="{{ route('devices.index', $deviceSection->id) }}" {!! is_route('devices.index', true, ['type' => $deviceSection->id]) !!} style="padding-left:44px;">
                                                 {!! $deviceSection->present()->icon !!}
@@ -172,6 +173,7 @@
                                                 {{ $deviceSection->title }}
                                             </a>
                                         </li>
+                                        @endcan
                                         @endforeach
                                     </ul>
                                 </li>
