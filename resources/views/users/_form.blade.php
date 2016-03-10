@@ -73,122 +73,122 @@
     </div>
 @endif
 
-@if (isset($user) && auth()->id() != $user->id && ! $user->isAdmin() && ! $user->isSuperAdmin())
-    <div class="form-group">
-        <label for="input1" class="col-xs-2 control-label">Permissions</label>
-        <div class="col-xs-10">
-            <table class="table table-condensed table-permissions">
-                <thead>
-                    <tr>
-                        <th>Resource</th>
-                        <th>Permission</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="empty">
-                        <td colspan="3" style="text-align: center;">This user currently has no permissions granted.</td>
-                    </tr>
-                    @foreach ($user->permissions as $i => $permission)
-                    @if ($permission->preloadResource())
-                    <tr>
-                        @if ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_FULL)
-                        <td>
-                            <i class="fa fa-star"></i>
+<div class="form-group" id="permissions-section" style="display:{{ isset($user) && auth()->id() != $user->id && ! $user->isAdmin() && ! $user->isSuperAdmin() ? '' : 'none' }};">
+    <label for="input1" class="col-xs-2 control-label">Permissions</label>
+    <div class="col-xs-10">
+        <table class="table table-condensed table-permissions">
+            <thead>
+                <tr>
+                    <th>Resource</th>
+                    <th>Permission</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="empty">
+                    <td colspan="3" style="text-align: center;">This user currently has no permissions granted.</td>
+                </tr>
+                @if (isset($user))
+                @foreach ($user->permissions as $i => $permission)
+                @if ($permission->preloadResource())
+                <tr>
+                    @if ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_FULL)
+                    <td>
+                        <i class="fa fa-star"></i>
 
-                            Global
+                        Global
 
-                            <input type="hidden" name="permissions[{{ $i }}][type]" value="global">
-                            <input type="hidden" name="permissions[{{ $i }}][id]" value="">
-                        </td>
-                        @elseif ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_SECTION)
-                        <td>
-                            <i class="fa fa-server"></i>
+                        <input type="hidden" name="permissions[{{ $i }}][type]" value="global">
+                        <input type="hidden" name="permissions[{{ $i }}][id]" value="">
+                    </td>
+                    @elseif ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_SECTION)
+                    <td>
+                        <i class="fa fa-server"></i>
 
-                            <a href="{{ route('devices.index', $permission->resource->id) }}" target="_blank">
-                                {{ $permission->resource->title }}
-                            </a>
+                        <a href="{{ route('devices.index', $permission->resource->id) }}" target="_blank">
+                            {{ $permission->resource->title }}
+                        </a>
 
-                            <input type="hidden" name="permissions[{{ $i }}][type]" value="section">
-                            <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
-                        </td>
-                        @elseif ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_DEVICE)
-                        <td>
-                            <i class="fa fa-server"></i>
+                        <input type="hidden" name="permissions[{{ $i }}][type]" value="section">
+                        <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
+                    </td>
+                    @elseif ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_DEVICE)
+                    <td>
+                        <i class="fa fa-server"></i>
 
-                            <a href="{{ route('devices.index', $permission->resource->section_id) }}" target="_blank">
-                                {{ $permission->resource->section->title }}
-                            </a>
+                        <a href="{{ route('devices.index', $permission->resource->section_id) }}" target="_blank">
+                            {{ $permission->resource->section->title }}
+                        </a>
 
-                            &gt;
+                        &gt;
 
-                            <a href="{{ route('devices.show', ['type' => $permission->resource->section_id, 'id' => $permission->resource->id]) }}" target="_blank">
-                                {{ @reset($permission->resource->data) }}
-                            </a>
+                        <a href="{{ route('devices.show', ['type' => $permission->resource->section_id, 'id' => $permission->resource->id]) }}" target="_blank">
+                            {{ @reset($permission->resource->data) }}
+                        </a>
 
-                            <input type="hidden" name="permissions[{{ $i }}][type]" value="device">
-                            <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
-                        @else
-                        <td></td>
-                        @endif
-
-                        <td>
-                            <div class="radio pull-left" style="margin-right: 10px;">
-                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ, $permission->grant_type == $permission::GRANT_TYPE_READ, [
-                                    'id'       => "grant-{$i}-view",
-                                    'class'    => 'form-control',
-                                    'required' => true,
-                                ]) !!}
-                                <label for="grant-{{ $i }}-view">
-                                    View
-                                </label>
-                            </div>
-
-                            <div class="radio pull-left" style="margin-right: 10px;">
-                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_WRITE, $permission->grant_type == $permission::GRANT_TYPE_WRITE, [
-                                    'id'       => "grant-{$i}-edit",
-                                    'class'    => 'form-control',
-                                    'required' => true,
-                                ]) !!}
-                                <label for="grant-{{ $i }}-edit">
-                                    View &amp; Edit
-                                </label>
-                            </div>
-                        </td>
-
-                        <td>
-                            <a href="#" style="color:red;" class="delete-this-permission" title="Delete">
-                                <i class="fa fa-trash-o"></i>
-                            </a>
-                        </td>
-                    </tr>
+                        <input type="hidden" name="permissions[{{ $i }}][type]" value="device">
+                        <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
+                    @else
+                    <td></td>
                     @endif
-                    @endforeach
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3" style="text-align:right;">
-                            <a class="btn btn-primary btn-xs add-global-access">
-                                <i class="fa fa-star"></i>
-                                Add Global Access
-                            </a>
 
-                            <a class="btn btn-primary btn-xs" href="#addSectionModal" data-toggle="modal">
-                                <i class="fa fa-server"></i>
-                                Add Device Section
-                            </a>
+                    <td>
+                        <div class="radio pull-left" style="margin-right: 10px;">
+                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ, $permission->grant_type == $permission::GRANT_TYPE_READ, [
+                                'id'       => "grant-{$i}-view",
+                                'class'    => 'form-control',
+                                'required' => true,
+                            ]) !!}
+                            <label for="grant-{{ $i }}-view">
+                                View
+                            </label>
+                        </div>
 
-                            <a class="btn btn-primary btn-xs" href="#addDeviceModal" data-toggle="modal">
-                                <i class="fa fa-server"></i>
-                                Add Device
-                            </a>
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+                        <div class="radio pull-left" style="margin-right: 10px;">
+                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_WRITE, $permission->grant_type == $permission::GRANT_TYPE_WRITE, [
+                                'id'       => "grant-{$i}-edit",
+                                'class'    => 'form-control',
+                                'required' => true,
+                            ]) !!}
+                            <label for="grant-{{ $i }}-edit">
+                                View &amp; Edit
+                            </label>
+                        </div>
+                    </td>
+
+                    <td>
+                        <a href="#" style="color:red;" class="delete-this-permission" title="Delete">
+                            <i class="fa fa-trash-o"></i>
+                        </a>
+                    </td>
+                </tr>
+                @endif
+                @endforeach
+                @endif
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" style="text-align:right;">
+                        <a class="btn btn-primary btn-xs add-global-access">
+                            <i class="fa fa-star"></i>
+                            Add Global Access
+                        </a>
+
+                        <a class="btn btn-primary btn-xs" href="#addSectionModal" data-toggle="modal">
+                            <i class="fa fa-server"></i>
+                            Add Device Section
+                        </a>
+
+                        <a class="btn btn-primary btn-xs" href="#addDeviceModal" data-toggle="modal">
+                            <i class="fa fa-server"></i>
+                            Add Device
+                        </a>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
     </div>
-@endif
+</div>
 
 <div class="form-group">
     <div class="col-lg-offset-2 col-xs-10">
@@ -379,6 +379,14 @@
 
             $('#device-select').html(html);
         }).change();
+
+        $('input[type=radio][name=role]').click(function() {
+            if ($(this).val() == '{{ App\User::ROLE_SYSADMIN }}') {
+                $('#permissions-section').show();
+            } else {
+                $('#permissions-section').hide();
+            }
+        });
     });
 </script>
 @append

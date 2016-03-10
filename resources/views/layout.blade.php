@@ -208,14 +208,14 @@
                                     </a>
                                 </li>
 
-                                <li>
+                                <li {!! is_route('ip-categories.*') !!}>
                                     <a href="{{ route('ip-categories.index') }}">
                                         <i class="fa fa-ellipsis-h"></i>
                                         <span>IP Categories</span>
                                     </a>
                                 </li>
 
-                                <li>
+                                <li {!! is_route('ip-fields.*') !!}>
                                     <a href="{{ route('ip-fields.index') }}">
                                         <i class="fa fa-ellipsis-h"></i>
                                         <span>IP Fields</span>
@@ -223,7 +223,7 @@
                                 </li>
 
                                 @can('superadmin')
-                                <li>
+                                <li {!! is_route('users.*') !!}>
                                     <a href="{{ route('users.index') }}">
                                         <i class="fa fa-users"></i>
                                         <span>User Management</span>
