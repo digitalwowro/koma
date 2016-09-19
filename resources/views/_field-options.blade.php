@@ -3,6 +3,7 @@
         <i class="fa fa-reorder"></i>
     </td>
     <td>
+        <input type="hidden" class="field-key" name="fields[{{ $i }}][key]" value="{{ $field->getKey() }}">
         <input type="text" class="field-name form-control" name="fields[{{ $i }}][name]" value="{{ $field->getName() }}">
     </td>
     <td>

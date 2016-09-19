@@ -77,9 +77,9 @@ class AuthController extends Controller
     {
         $encryptionKey = decrypt($user->encryption_key, $request->input('password'));
 
-        Session::put('encryption_key', $encryptionKey);
-
-        return redirect()->intended($this->redirectPath());
+        return redirect()
+            ->intended($this->redirectPath())
+            ->withCookie(cookie()->forever('key', $encryptionKey));
     }
 
     /**
@@ -91,9 +91,8 @@ class AuthController extends Controller
     {
         auth()->logout();
 
-        Session::forget('encryption_key');
-
-        return redirect(property_exists($this, 'redirectAfterLogout') ? $this->redirectAfterLogout : '/');
+        return redirect(property_exists($this, 'redirectAfterLogout') ? $this->redirectAfterLogout : '/')
+            ->withCookie(cookie()->forget('key'));
     }
 
 }

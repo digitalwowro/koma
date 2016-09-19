@@ -62,6 +62,7 @@
                         <i class="fa fa-reorder"></i>
                     </td>
                     <td>
+                        <input type="hidden" class="field-key">
                         <input type="text" class="field-name form-control">
                     </td>
                     <td>
@@ -109,16 +110,33 @@
                 });
             }
 
+            function makeid() {
+                var text = "";
+                var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+                for( var i=0; i < 24; i++ )
+                    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+                return text;
+            }
+
             function refreshAllIndexes() {
                 $('table.table-field-options tbody tr').each(function(i) {
-                    var $this = $(this);
+                    var $this = $(this),
+                        $key = $this.find('.field-key');
 
+                    if ($key.val() == '') {
+                        $key.val(makeid());
+                    }
+
+                    $key.attr('name', 'fields[' + i + '][key]');
                     $this.find('.field-name').attr('name', 'fields[' + i + '][name]');
                     $this.find('.field-type').attr('name', 'fields[' + i + '][type]');
                     $this.find('.field-options').find('[name^="fields\["]').each(function() {
-                        var name = $(this).attr('name');
+                        var name = $(this).attr('name'),
+                            new_name = name.replace(/^fields\[\d+\]/, 'fields[' + i + ']');
 
-                        $(this).attr('name', name.substr(0,7) + i + name.substr(8));
+                        $(this).attr('name', new_name);
                     });
                 });
             }
@@ -156,11 +174,13 @@
                 }
             });
 
-            $('table.table-field-options').on('click', '.delete-field', function() {
+            $('table.table-field-options').on('click', '.delete-field', function(e) {
                 if (confirm('Are you sure you want to delete this field?')) {
                     $(this).closest('tr').remove();
                     refreshAllIndexes();
                 }
+
+                e.preventDefault();
             });
     });
     </script>

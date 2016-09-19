@@ -5,13 +5,14 @@ namespace App\Fields;
 class Factory
 {
     /**
+     * @param string $key
      * @param string $name
      * @param string $type
      * @param array $config
      * @return mixed
      * @throws \Exception
      */
-    public static function generate($name, $type, array $config = [])
+    public static function generate($key, $name, $type, array $config = [])
     {
         $nameSpace = self::class;
         $nameSpace = explode('\\', $nameSpace);
@@ -24,9 +25,12 @@ class Factory
             throw new \Exception("Invalid field type {$type}");
         }
 
-        return (new $class($name, $config));
+        return (new $class($key, $name, $config));
     }
 
+    /**
+     * @return array
+     */
     public static function getFieldTypes()
     {
         return [

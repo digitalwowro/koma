@@ -103,7 +103,7 @@ class DeviceController extends Controller
 
                     if ($ip->assigned())
                     {
-                        throw new \Exception("IP {\$ip} is already assigned!");
+                        throw new \Exception("IP {$ip} is already assigned!");
                     }
 
                     $ip->device_id = $device->id;

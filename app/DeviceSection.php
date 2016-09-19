@@ -73,6 +73,7 @@ class DeviceSection extends Model
                 $options = isset($item['options']) ? $item['options']: [];
 
                 $return[] = Factory::generate(
+                    $item['key'],
                     $item['name'],
                     $item['type'],
                     $options

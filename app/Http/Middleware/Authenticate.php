@@ -40,6 +40,14 @@ class Authenticate
             } else {
                 return redirect()->guest('auth/login');
             }
+        } else {
+            // if we're logged in but the decipher key is missing,
+            // log out and redirect back to login page
+            if ( ! $request->hasCookie('key')) {
+                auth()->logout();
+
+                return redirect()->guest('auth/login');
+            }
         }
 
         return $next($request);

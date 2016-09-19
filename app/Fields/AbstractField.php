@@ -21,6 +21,11 @@ abstract class AbstractField
     /**
      * @var string
      */
+    protected $key;
+
+    /**
+     * @var string
+     */
     protected $name;
 
     /**
@@ -31,11 +36,13 @@ abstract class AbstractField
     /**
      * AbstractField constructor.
      *
+     * @param string $key
      * @param string $name
      * @param array $options
      */
-    public function __construct($name, array $options = [])
+    public function __construct($key, $name, array $options = [])
     {
+        $this->key     = $key;
         $this->name    = $name;
         $this->options = $options;
     }
@@ -48,6 +55,16 @@ abstract class AbstractField
     public function getType()
     {
         return @end(explode('\\', get_class($this)));
+    }
+
+    /**
+     * Get field key
+     *
+     * @return string
+     */
+    public function getKey()
+    {
+        return $this->key;
     }
 
     /**
@@ -67,7 +84,7 @@ abstract class AbstractField
      */
     public function getInputName()
     {
-        return clean_url($this->getName());
+        return $this->getKey();
     }
 
     /**

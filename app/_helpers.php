@@ -58,7 +58,7 @@ function encrypt($str, $key = null)
 {
     if (is_null($key))
     {
-        $key = Session::get('encryption_key');
+        $key = request()->cookie('key');
     }
 
     $key    = md5($key . Config::get('app.key'));
@@ -88,7 +88,7 @@ function decrypt($str, $key = null)
 {
     if (is_null($key))
     {
-        $key = Session::get('encryption_key');
+        $key = request()->cookie('key');
     }
 
     $key    = md5($key . Config::get('app.key'));

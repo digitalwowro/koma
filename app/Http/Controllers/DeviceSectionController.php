@@ -115,7 +115,7 @@ class DeviceSectionController extends Controller
         {
             $type  = $request->input('type');
             $index = $request->input('index');
-            $field = Factory::generate('tmp', $type);
+            $field = Factory::generate('', 'tmp', $type);
 
             return $field->renderOptions($index);
         }
