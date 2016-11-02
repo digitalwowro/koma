@@ -91,6 +91,25 @@ class IpAddress extends Model
     }
 
     /**
+     * @param $query
+     */
+    public function scopeHasSubnet($query)
+    {
+        $query->whereNotNull('subnet');
+    }
+
+    /**
+     * Returns whether the IP is a custom one, or if it belongs to a
+     * predefined IP class
+     *
+     * @return bool
+     */
+    public function isCustom()
+    {
+        return is_null($this->subnet) || is_null($this->category_id);
+    }
+
+    /**
      * Get subnets for given category ID
      *
      * @param int|null $categoryId
@@ -106,6 +125,7 @@ class IpAddress extends Model
         }
 
         return $query
+            ->hasSubnet()
             ->groupBy('subnet')
             ->orderBy('category_id')
             ->orderBy('subnet')

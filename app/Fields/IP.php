@@ -25,9 +25,10 @@ class IP extends AbstractField
     public function customDeviceListContent(Device $model)
     {
         $subnets = $this->getOption('subnets', []);
+        $showCustom = in_array('c', $subnets);
 
-        return $model->ips->filter(function ($item) use ($subnets) {
-            return in_array($item->subnet, $subnets);
+        return $model->ips->filter(function ($item) use ($subnets, $showCustom) {
+            return in_array($item->subnet, $subnets) || ($showCustom && is_null($item->subnet));
         })->pluck('ip')->implode(', ');
     }
 
@@ -60,6 +61,8 @@ class IP extends AbstractField
             $output .= '<option value="' . htmlentities($subnet->subnet) . '"'. $selected .'>' . htmlentities($subnet->category->title) . ':' . htmlentities($subnet->subnet) . '</option>';
         }
 
+        $custom  = in_array('c', $value) ? ' selected' : '';
+        $output .= '<option value="c"' . $custom . '>Custom IPs</option>';
         $output .= '</select>';
         $output .= "<script>setTimeout(function(){ $('#{$rand}').select2(); }, 200)</script>";
 

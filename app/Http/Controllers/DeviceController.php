@@ -22,10 +22,16 @@ class DeviceController extends Controller
      */
     private $deviceSection;
 
-    public function __construct(Device $model, DeviceSection $deviceSection)
+    /**
+     * @var \App\IpAddress
+     */
+    private $ipAddress;
+
+    public function __construct(Device $model, DeviceSection $deviceSection, IpAddress $ipAddress)
     {
         $this->model = $model;
         $this->deviceSection = $deviceSection;
+        $this->ipAddress = $ipAddress;
     }
 
     public function index($type)
@@ -72,7 +78,60 @@ class DeviceController extends Controller
         }
     }
 
-    public function store($type, Request $request, IpAddress $ipAddress)
+    /**
+     * Assign list of IPs to given device
+     * Also creates single IPs as needed
+     *
+     * @param array $ipArray
+     * @param \App\Device $device
+     * @throws \Exception
+     */
+    private function assignIpsToDevice(array $ipArray, Device $device)
+    {
+        $idArray = [];
+
+        foreach ($ipArray as $key => $ip) {
+            if (is_numeric($ip)) {
+                $idArray[] = $ip;
+                unset($ipArray[$key]);
+            } else {
+                if ($existingIp = $this->ipAddress->where('ip', $ipArray)->first()) {
+                    $idArray[] = $existingIp->id;
+                    unset($ipArray[$key]);
+                }
+            }
+        }
+
+        $ips = $this->ipAddress->whereIn('id', $idArray)->get();
+
+        // preset IPs
+        foreach ($ips as $ip) {
+            if ($ip->device_id == $device->id) {
+                continue;
+            }
+
+            if ($ip->assigned()) {
+                throw new \Exception("IP {$ip->ip} is already assigned!");
+            }
+
+            $ip->device_id = $device->id;
+            $ip->save();
+        }
+
+        // custom IPs
+        foreach ($ipArray as $customIp) {
+            if ( ! filter_var($customIp, FILTER_VALIDATE_IP)) {
+                throw new \Exception("IP {$customIp} is not a valid IP address");
+            }
+
+            $this->ipAddress->forceCreate([
+                'ip' => $customIp,
+                'device_id' => $device->id,
+            ]);
+        }
+    }
+
+    public function store($type, Request $request)
     {
         try
         {
@@ -90,25 +149,9 @@ class DeviceController extends Controller
                 'data'       => $data,
             ]);
 
-            if (isset($data['ips']) && is_array($data['ips']))
-            {
-                $ips = $ipAddress->whereIn('id', $data['ips'])->get();
 
-                foreach ($ips as $ip)
-                {
-                    if ($ip->device_id == $device->id)
-                    {
-                        continue;
-                    }
-
-                    if ($ip->assigned())
-                    {
-                        throw new \Exception("IP {$ip} is already assigned!");
-                    }
-
-                    $ip->device_id = $device->id;
-                    $ip->save();
-                }
+            if (isset($data['ips']) && is_array($data['ips'])) {
+                $this->assignIpsToDevice($data['ips'], $device);
             }
 
             return redirect()
@@ -161,26 +204,10 @@ class DeviceController extends Controller
             $device->save();
 
             $device->ips()->update(['device_id' => null]);
+            $this->ipAddress->whereNull('device_id')->whereNull('subnet')->delete();
 
-            if (isset($data['ips']) && is_array($data['ips']))
-            {
-                $ips = $ipAddress->whereIn('id', $data['ips'])->get();
-
-                foreach ($ips as $ip)
-                {
-                    if ($ip->device_id == $device->id)
-                    {
-                        continue;
-                    }
-
-                    if ($ip->assigned())
-                    {
-                        throw new \Exception("IP {\$ip} is already assigned!");
-                    }
-
-                    $ip->device_id = $device->id;
-                    $ip->save();
-                }
+            if (isset($data['ips']) && is_array($data['ips'])) {
+                $this->assignIpsToDevice($data['ips'], $device);
             }
 
             return redirect()
