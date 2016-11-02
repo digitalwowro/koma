@@ -36,7 +36,7 @@ class Text extends AbstractField
 
             $return = urlify($content);
 
-            if ($content && filter_var($this->getOption('copypaste', ''), FILTER_VALIDATE_BOOLEAN))
+            if ($content && $this->copyPaste())
             {
                 $return .= ' <a href="#" class="copy-this" data-clipboard-text="' . htmlentities($content) . '"><i class="fa fa-copy" title="Copy to Clipboard"></i></a>';
             }
@@ -50,7 +50,7 @@ class Text extends AbstractField
      */
     public function renderOptions($index)
     {
-        $checked = filter_var($this->getOption('copypaste', ''), FILTER_VALIDATE_BOOLEAN);
+        $checked = $this->copyPaste();
         $rand    = $this->getTotallyRandomString();
         $name    = 'fields[' . $index . '][options][copypaste]';
 

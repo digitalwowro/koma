@@ -19,13 +19,40 @@
                 <header class="main-box-header clearfix">
                     <h2 class="pull-left">All {{ $deviceSection->title }}</h2>
 
-                    @can('edit', $deviceSection)
                     <div class="filter-block pull-right">
-                        <a href="{{ route('devices.create', $deviceSection->id) }}" class="btn btn-primary pull-right">
+                        <?php $ithColumn = 0; ?>
+                        @foreach ($deviceSection->fields as $field)
+                            @if ($field->showInDeviceList())
+                            @if ($field->showFilter())
+                            <div class="multi-select pull-left" data-opener-id="{{ $field->getInputName() }}" data-ith="{{ $ithColumn }}">
+                                <a href="#" class="btn btn-default" data-filter-name="{{ $field->getName() }}">
+                                    <i class="fa fa-square-o"></i>
+                                    {{ $field->getName() }}
+                                    <i class="fa fa-chevron-down"></i>
+                                </a>
+
+                                <div class="multi-choices" data-auto-close="{{ $field->getInputName() }}">
+                                    @foreach ($field->getNiceOptions() as $choice)
+                                        <label>
+                                            <input type="checkbox" value="{{ $choice['label'] }}"{{ ! isset($filters[$field->getInputName()]) || in_array($choice['label'], $filters[$field->getInputName()]) ? ' checked' : '' }}>
+                                            <span class="label label-{{ $choice['type'] }}">
+                                                {{ $choice['label'] }}
+                                            </span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
+                            <?php $ithColumn++; ?>
+                            @endif
+                        @endforeach
+
+                        @can('edit', $deviceSection)
+                        <a href="{{ route('devices.create', $deviceSection->id) }}" class="btn btn-primary pull-left">
                             <i class="fa fa-plus-circle fa-lg"></i> Add device
                         </a>
+                        @endcan
                     </div>
-                    @endcan
                 </header>
 
                 <div class="main-box-body clearfix">

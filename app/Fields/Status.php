@@ -9,7 +9,7 @@ class Status extends AbstractField
 {
     private $types  = ['primary', 'success', 'danger', 'info', 'warning', 'default'];
 
-    private function getNiceOptions()
+    public function getNiceOptions()
     {
         $options = [];
 
@@ -109,7 +109,19 @@ class Status extends AbstractField
                 ]);
         }
 
-        return $return . '<hr>' . parent::renderOptions($index);
+        $rand = $this->getTotallyRandomString();
+
+        $showFilter =
+            '<div class="checkbox-nice">' .
+            Form::checkbox($name('show_filter'), 1, $this->showFilter(), [
+                'id' => $rand,
+            ]) .
+            '<label for="' . $rand . '">' .
+            'Enable filter for this field in the device listing' .
+            '</label>' .
+            '</div>';
+
+        return $return . '<hr>' . parent::renderOptions($index) . $showFilter;
     }
 
 }

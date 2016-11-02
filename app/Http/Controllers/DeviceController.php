@@ -42,6 +42,12 @@ class DeviceController extends Controller
             $devices       = $deviceSection->devices;
             $colspan       = 1;
 
+            try {
+                $filters = json_decode(request()->cookie('device-filters'), true);
+            } catch (\Exception $e) {
+                $filters = [];
+            }
+
             foreach ($deviceSection->fields as $field)
             {
                 if ($field->showInDeviceList())
@@ -50,7 +56,7 @@ class DeviceController extends Controller
                 }
             }
 
-            return view('devices.index', compact('deviceSection', 'devices', 'colspan'));
+            return view('devices.index', compact('deviceSection', 'devices', 'colspan', 'filters'));
         }
         catch (\Exception $e)
         {

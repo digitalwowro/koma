@@ -254,26 +254,29 @@
     </div>
 </div>
 
-<!-- global scripts -->
+{{-- global scripts --}}
 {!! HTML::script('js/jquery.js') !!}
 {!! HTML::script('js/jquery-ui.custom.min.js') !!}
 {!! HTML::script('js/bootstrap.js') !!}
 {!! HTML::script('js/jquery.nanoscroller.min.js') !!}
+{!! HTML::script('js/js.cookie.js') !!}
 
-<!-- notifications -->
+{{-- notifications --}}
 {!! HTML::script('js/modernizr.custom.js') !!}
 {!! HTML::script('js/classie.js') !!}
 {!! HTML::script('js/notificationFx.js') !!}
 
-<!-- theme scripts -->
-{!! HTML::script('js/scripts.js') !!}
+{{-- theme scripts --}}
 {!! HTML::script('js/bootstrap-datepicker.js') !!}
 {!! HTML::script('js/select2.min.js') !!}
 
-<!-- data tables -->
+{{-- data tables --}}
 {!! HTML::script('js/jquery.dataTables.js') !!}
 {!! HTML::script('js/dataTables.fixedHeader.js') !!}
 {!! HTML::script('js/jquery.dataTables.bootstrap.js') !!}
+
+{{-- custom scripts --}}
+{!! HTML::script('js/scripts.js') !!}
 
 <script>
     @foreach (['success', 'notice', 'warning', 'error'] as $type)
@@ -301,29 +304,6 @@
         // show the notification
         notification.show();
     @endif
-
-    $(document).ready(function() {
-        $('.datepicker').datepicker({
-            format: 'yyyy-mm-dd'
-        });
-
-        // init data tables
-        if ($('.datatable').length) {
-            var tableFixed = $('.datatable').dataTable({
-                sDom: 'lTfr<"clearfix">tip',
-                stateSave: true,
-                language: {
-                    infoEmpty: "No entries to show"
-                },
-                columnDefs: [{
-                    orderable: false,
-                    targets: -1
-                }]
-            });
-
-            new $.fn.dataTable.FixedHeader(tableFixed);
-        }
-    });
 </script>
 
 @yield('footer')

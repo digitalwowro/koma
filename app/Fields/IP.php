@@ -27,9 +27,15 @@ class IP extends AbstractField
         $subnets = $this->getOption('subnets', []);
         $showCustom = in_array('c', $subnets);
 
-        return $model->ips->filter(function ($item) use ($subnets, $showCustom) {
+        $return = $model->ips->filter(function ($item) use ($subnets, $showCustom) {
             return in_array($item->subnet, $subnets) || ($showCustom && is_null($item->subnet));
         })->pluck('ip')->implode(', ');
+
+        if ($return && $this->copyPaste()) {
+            $return .= ' <a href="#" class="copy-this" data-clipboard-text="' . htmlentities($return) . '"><i class="fa fa-copy" title="Copy to Clipboard"></i></a>';
+        }
+
+        return $return;
     }
 
     /**
@@ -65,6 +71,20 @@ class IP extends AbstractField
         $output .= '<option value="c"' . $custom . '>Custom IPs</option>';
         $output .= '</select>';
         $output .= "<script>setTimeout(function(){ $('#{$rand}').select2(); }, 200)</script>";
+        $output .= '<hr>';
+
+        $checked = filter_var($this->getOption('copypaste', ''), FILTER_VALIDATE_BOOLEAN);
+        $rand    = $this->getTotallyRandomString();
+        $name    = 'fields[' . $index . '][options][copypaste]';
+
+        $output .= '<div class="checkbox-nice">' .
+            Form::checkbox($name, 1, $checked, [
+                'id' => $rand,
+            ]) .
+        '<label for="' . $rand . '">' .
+        'Show copy text button for this field' .
+        '</label>' .
+        '</div>';
 
         return $output;
     }

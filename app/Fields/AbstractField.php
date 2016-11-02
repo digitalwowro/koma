@@ -88,6 +88,16 @@ abstract class AbstractField
     }
 
     /**
+     * Returns whether copy/paste in device listing icon is enabled for this field
+     *
+     * @return mixed
+     */
+    public function copyPaste()
+    {
+        return filter_var($this->getOption('copypaste', ''), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
      * Returns whether the current field should be shown in the devices list
      *
      * @return bool
@@ -95,6 +105,16 @@ abstract class AbstractField
     public function showInDeviceList()
     {
         return $this->getOption('showlist') ? true : false;
+    }
+
+    /**
+     * Returns whether the current field should have a filter in the device list
+     *
+     * @return bool
+     */
+    public function showFilter()
+    {
+        return $this->getOption('show_filter') ? true : false;
     }
 
     /**
@@ -118,7 +138,6 @@ abstract class AbstractField
                     'Show this field in the device listing' .
                 '</label>' .
             '</div>';
-
     }
 
     /**

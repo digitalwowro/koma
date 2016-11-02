@@ -1,5 +1,4 @@
 @media (max-width: 760px) {
-
     /* Force table to not be like tables anymore */
     table.table-responsive,
     table.table-responsive > thead,
@@ -46,3 +45,57 @@
 
 table.table-field-options .fa-reorder { cursor: move; }
 table.table-field-options .fa-trash-o { color: red; }
+
+/**
+ * Multi-select dropdowns
+ */
+.multi-select {
+    position: relative;
+}
+.multi-select .multi-choices {
+    background: white;
+    border: 1px #dadada solid;
+    padding: 5px;
+    position: absolute;
+    right: 0;
+    display: none;
+    z-index: 1000;
+    min-width: 130px;
+}
+.multi-select .multi-choices label {
+    display: block;
+    padding-left: 18px;
+    max-width: none;
+    white-space: nowrap;
+    cursor: pointer;
+    color: black;
+    text-align: left;
+}
+.multi-select .multi-choices label input {
+    float: left;
+    margin-left: -18px;
+    cursor: pointer;
+}
+.multi-select .multi-choices .custom-range {
+    margin: 0 -6px -6px -6px;
+    width: auto;
+    background-color: #f3f3f3;
+    padding: 5px;
+}
+.multi-select .multi-choices .custom-range input {
+    font-size: 12px;
+    letter-spacing: -0.5px;
+    padding-left: 2px;
+    padding-right: 2px;
+    text-align: center;
+}
+.multi-select .multi-choices .custom-range .row > div:first-child {
+    padding-right: 2px;
+}
+.multi-select .multi-choices .custom-range .row > div:last-child {
+    padding-left: 2px;
+}
+
+a.btn:focus {
+    color: white;
+}
