@@ -79,19 +79,20 @@ class IpController extends Controller
 
         try
         {
-            $ip = $this->model->findOrFail($id);
+            $id = str_replace('-', '/', $id);
+            $ip = $this->model->where('subnet', $id);
 
             $ip->delete();
 
             return redirect()
                 ->back()
-                ->withSuccess('IP Address has been deleted');
+                ->withSuccess('Subnet has been deleted');
         }
         catch (\Exception $e)
         {
             return redirect()
                 ->back()
-                ->withError('Could not find IP Address');
+                ->withError('Could not find subnet');
         }
     }
 

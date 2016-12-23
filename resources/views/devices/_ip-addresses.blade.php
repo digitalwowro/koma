@@ -79,7 +79,7 @@
             $('#ip-select').select2();
 
             $('#subnet-select').select2().change(function() {
-                var val     = $(this).val().replace('/', '-'),
+                var val     = $(this).val() ? $(this).val().replace('/', '-') : $(this).val(),
                     url     = '{{ route('ip.subnet-list', '_SUB_') }}'.replace('_SUB_', val),
                     $select = $('#ip-select');
 
@@ -118,6 +118,14 @@
                 $('#assign-now').modal('hide');
 
                 return false;
+            });
+
+            $('#custom-ip').keydown(function(e) {
+                if (e.keyCode == 13) {
+                    $('[data-action="add-custom"]').click();
+
+                    e.preventDefault();
+                }
             });
 
             $('[data-action="add-custom"]').click(function() {
