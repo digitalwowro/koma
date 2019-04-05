@@ -47,5 +47,9 @@ class AuthServiceProvider extends ServiceProvider
         $gate->define('edit', function($user, $resource) {
             return $user->isAdmin() || Permission::can('edit', $resource);
         });
+
+        $gate->define('delete', function($user, $resource) {
+            return $user->isAdmin() || Permission::can('delete', $resource);
+        });
     }
 }

@@ -10,12 +10,30 @@ class Permission extends Model
     const GRANT_TYPE_NONE  = 0;
     const GRANT_TYPE_READ  = 1;
     const GRANT_TYPE_WRITE = 2;
+    const GRANT_TYPE_FULL  = 3;
 
     const RESOURCE_TYPE_DEVICES_FULL    = 1;
     const RESOURCE_TYPE_DEVICES_SECTION = 2;
     const RESOURCE_TYPE_DEVICES_DEVICE  = 3;
 
     private static $cachedPermissions;
+
+    private static $acl = [
+        'view' => [
+            self::GRANT_TYPE_READ,
+            self::GRANT_TYPE_WRITE,
+            self::GRANT_TYPE_FULL,
+        ],
+
+        'edit' => [
+            self::GRANT_TYPE_WRITE,
+            self::GRANT_TYPE_FULL,
+        ],
+
+        'delete' => [
+            self::GRANT_TYPE_FULL,
+        ],
+    ];
 
     /**
      * Relationship with User
@@ -34,10 +52,8 @@ class Permission extends Model
      */
     public function preloadResource()
     {
-        try
-        {
-            switch ($this->resource_type)
-            {
+        try {
+            switch ($this->resource_type) {
                 case self::RESOURCE_TYPE_DEVICES_FULL:
                     break;
                 case self::RESOURCE_TYPE_DEVICES_SECTION:
@@ -49,9 +65,7 @@ class Permission extends Model
             }
 
             return true;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             $this->delete();
 
             $this->flushCache();
@@ -70,8 +84,7 @@ class Permission extends Model
     {
         self::$cachedPermissions = Cache::get('permissions');
 
-        if ( ! self::$cachedPermissions)
-        {
+        if ( ! self::$cachedPermissions) {
             self::$cachedPermissions = self::all()->toArray();
 
             Cache::put('permissions', self::$cachedPermissions, 30);
@@ -90,48 +103,40 @@ class Permission extends Model
      */
     public static function can($action, $resource, $userId = null)
     {
-        if (is_null($userId))
-        {
+        if (!isset(self::$acl[$action])) {
+            return false;
+        }
+
+        if (is_null($userId)) {
             $userId = auth()->id();
         }
 
-        if ( ! self::$cachedPermissions)
-        {
+        if ( ! self::$cachedPermissions) {
             self::getCached();
         }
 
+        foreach (self::$cachedPermissions as $permission) {
+            if ($permission['user_id'] !== $userId) {
+                continue;
+            }
 
-        foreach (self::$cachedPermissions as $permission)
-        {
-            if ($permission['user_id'] == $userId)
-            {
-                if (($action == 'view' && ($permission['grant_type'] == self::GRANT_TYPE_READ || $permission['grant_type'] == self::GRANT_TYPE_WRITE))
-                    || $action == 'edit' && $permission['grant_type'] == self::GRANT_TYPE_WRITE)
-                {
-                    if ($permission['resource_type'] == self::RESOURCE_TYPE_DEVICES_FULL)
-                    {
-                        return true;
-                    }
+            if (!in_array($permission['grant_type'], self::$acl[$action])) {
+                continue;
+            }
 
-                    if ($resource instanceof DeviceSection)
-                    {
-                        if ($permission['resource_type'] == self::RESOURCE_TYPE_DEVICES_SECTION && $permission['resource_id'] == $resource->id)
-                        {
-                            return true;
-                        }
-                    }
-                    elseif ($resource instanceof Device)
-                    {
-                        if ($permission['resource_type'] == self::RESOURCE_TYPE_DEVICES_DEVICE && $permission['resource_id'] == $resource->id)
-                        {
-                            return true;
-                        }
+            if ($permission['resource_type'] == self::RESOURCE_TYPE_DEVICES_FULL) {
+                return true;
+            } elseif ($resource instanceof DeviceSection) {
+                if ($permission['resource_type'] == self::RESOURCE_TYPE_DEVICES_SECTION && $permission['resource_id'] == $resource->id) {
+                    return true;
+                }
+            } elseif ($resource instanceof Device) {
+                if ($permission['resource_type'] == self::RESOURCE_TYPE_DEVICES_DEVICE && $permission['resource_id'] == $resource->id) {
+                    return true;
+                }
 
-                        if ($permission['resource_type'] == self::RESOURCE_TYPE_DEVICES_SECTION && $permission['resource_id'] == $resource->section_id)
-                        {
-                            return true;
-                        }
-                    }
+                if ($permission['resource_type'] == self::RESOURCE_TYPE_DEVICES_SECTION && $permission['resource_id'] == $resource->section_id) {
+                    return true;
                 }
             }
         }
@@ -148,35 +153,28 @@ class Permission extends Model
      */
     public static function canList(DeviceSection $section, $userId = null)
     {
-        if (is_null($userId))
-        {
+        if (is_null($userId)) {
             $userId = auth()->id();
         }
 
-        if ( ! self::$cachedPermissions)
-        {
+        if ( ! self::$cachedPermissions) {
             self::getCached();
         }
 
         $devices = Device::where('section_id', $section->id)->lists('id')->toArray();
 
-        foreach (self::$cachedPermissions as $permission)
-        {
-            if ($permission['user_id'] == $userId)
-            {
-                switch($permission['resource_type'])
-                {
+        foreach (self::$cachedPermissions as $permission) {
+            if ($permission['user_id'] == $userId) {
+                switch($permission['resource_type']) {
                     case self::RESOURCE_TYPE_DEVICES_FULL:
                         return true;
                     case self::RESOURCE_TYPE_DEVICES_SECTION:
-                        if ($permission['resource_id'] == $section->id)
-                        {
+                        if ($permission['resource_id'] == $section->id) {
                             return true;
                         }
                         break;
                     case self::RESOURCE_TYPE_DEVICES_DEVICE:
-                        if (in_array($permission['resource_id'], $devices))
-                        {
+                        if (in_array($permission['resource_id'], $devices)) {
                             return true;
                         }
                         break;

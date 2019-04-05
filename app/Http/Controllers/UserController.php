@@ -75,8 +75,7 @@ class UserController extends Controller
             'password.min'      => 'Password must be at least 8 characters long',
         ]);
 
-        if ($validator->fails())
-        {
+        if ($validator->fails()) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -104,14 +103,11 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        try
-        {
+        try {
             $user = $this->model->findOrFail($id)->load('permissions');
 
             return view('users.edit', compact('user'));
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withError('User not found');
@@ -126,20 +122,17 @@ class UserController extends Controller
      */
     public function update($id)
     {
-        try
-        {
+        try {
             $row = User::findOrFail($id);
 
             $data = Input::except(['_method', '_token', 'permissions']);
             $permissions = Input::get('permissions');
 
-            if (isset($data['password']) && empty($data['password']))
-            {
+            if (isset($data['password']) && empty($data['password'])) {
                 unset($data['password']);
             }
 
-            if ($id == auth()->id())
-            {
+            if ($id == auth()->id()) {
                 unset($data['role']);
             }
 
@@ -153,13 +146,10 @@ class UserController extends Controller
             return redirect()
                 ->route('users.index')
                 ->withSuccess('The user has been saved');
-        }
-        catch (QueryException $e)
-        {
+        } catch (QueryException $e) {
             $error = $e->getMessage();
 
-            if (strpos($error, 'users_email_unique') !== false)
-            {
+            if (strpos($error, 'users_email_unique') !== false) {
                 $error = 'Email address already exists';
             }
 
@@ -177,10 +167,8 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        try
-        {
-            if ($id == auth()->id())
-            {
+        try {
+            if ($id == auth()->id()) {
                 throw new \Exception('You can\'t delete yourself');
             }
 
@@ -189,9 +177,7 @@ class UserController extends Controller
             return redirect()
                 ->back()
                 ->withSuccess('User has been deleted');
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withError('There was an error deleting the user');

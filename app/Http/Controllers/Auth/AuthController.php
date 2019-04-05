@@ -75,7 +75,7 @@ class AuthController extends Controller
      */
     public function authenticated(Request $request, User $user)
     {
-        $encryptionKey = decrypt($user->encryption_key, $request->input('password'));
+        $encryptionKey = dsDecrypt($user->encryption_key, $request->input('password'));
 
         return redirect()
             ->intended($this->redirectPath())

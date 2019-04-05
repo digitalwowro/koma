@@ -49,8 +49,9 @@ class User extends Model implements AuthenticatableContract,
      */
     public function setPasswordAttribute($value)
     {
+        $encryptionKey = request()->cookie('key');
         $this->attributes['password'] = Hash::make($value);
-        $this->attributes['encryption_key'] = encrypt(Session::get('encryption_key'), $value);
+        $this->attributes['encryption_key'] = dsEncrypt($encryptionKey, $value);
     }
 
     /**
@@ -94,16 +95,14 @@ class User extends Model implements AuthenticatableContract,
     public function syncPermissions(array $permissions)
     {
         $this->permissions()->delete();
-        foreach ($permissions as $permission)
-        {
+
+        foreach ($permissions as $permission) {
             unset($resourceType);
             unset($resourceId);
             unset($grantType);
 
-            if (isset($permission['type']))
-            {
-                switch ($permission['type'])
-                {
+            if (isset($permission['type'])) {
+                switch ($permission['type']) {
                     case 'global':
                         $resourceType = Permission::RESOURCE_TYPE_DEVICES_FULL;
                         break;
@@ -116,18 +115,15 @@ class User extends Model implements AuthenticatableContract,
                 }
             }
 
-            if (isset($permission['id']))
-            {
+            if (isset($permission['id'])) {
                 $resourceId = $permission['id'];
             }
 
-            if (isset($permission['level']) && in_array($permission['level'], [Permission::GRANT_TYPE_READ, Permission::GRANT_TYPE_WRITE]))
-            {
+            if (isset($permission['level']) && in_array($permission['level'], [Permission::GRANT_TYPE_READ, Permission::GRANT_TYPE_WRITE, Permission::GRANT_TYPE_FULL])) {
                 $grantType = $permission['level'];
             }
 
-            if (isset($resourceType, $resourceId, $grantType))
-            {
+            if (isset($resourceType, $resourceId, $grantType)) {
                 $this->permissions()->create([
                     'resource_type' => $resourceType,
                     'resource_id'   => $resourceId ? $resourceId : null,

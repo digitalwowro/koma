@@ -54,23 +54,20 @@ function gravatar($email, $size = 24)
  * @param null $key
  * @return string
  */
-function encrypt($str, $key = null)
+function dsEncrypt($str, $key = null)
 {
-    if (is_null($key))
-    {
+    if (is_null($key)) {
         $key = request()->cookie('key');
     }
 
-    $key    = md5($key . Config::get('app.key'));
-    $cipher = Config::get('app.cipher');
+    $key = md5($key . config('app.key'));
+    $cipher = config('app.cipher');
 
-    if ( ! isset($GLOBALS['encrypters']))
-    {
+    if ( ! isset($GLOBALS['encrypters'])) {
         $GLOBALS['encrypters'] = [];
     }
 
-    if ( ! isset($GLOBALS['encrypters'][$key]))
-    {
+    if ( ! isset($GLOBALS['encrypters'][$key])) {
         $GLOBALS['encrypters'][$key] = new \Illuminate\Encryption\Encrypter($key, $cipher);
     }
 
@@ -84,23 +81,20 @@ function encrypt($str, $key = null)
  * @param null $key
  * @return string
  */
-function decrypt($str, $key = null)
+function dsDecrypt($str, $key = null)
 {
-    if (is_null($key))
-    {
+    if (is_null($key)) {
         $key = request()->cookie('key');
     }
 
-    $key    = md5($key . Config::get('app.key'));
-    $cipher = Config::get('app.cipher');
+    $key = md5($key . config('app.key'));
+    $cipher = config('app.cipher');
 
-    if ( ! isset($GLOBALS['encrypters']))
-    {
+    if ( ! isset($GLOBALS['encrypters'])) {
         $GLOBALS['encrypters'] = [];
     }
 
-    if ( ! isset($GLOBALS['encrypters'][$key]))
-    {
+    if ( ! isset($GLOBALS['encrypters'][$key])) {
         $GLOBALS['encrypters'][$key] = new \Illuminate\Encryption\Encrypter($key, $cipher);
     }
 

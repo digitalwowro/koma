@@ -15,7 +15,7 @@
     <label for="title" class="col-lg-2 control-label">
         Icon
         <br>
-        <a href="http://fontawesome.io/icons/" target="_blank" style="font-style:italic; opacity:.6;">See complete list of icons here</a>
+        <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank" style="font-style:italic; opacity:.6;">See complete list of icons here</a>
     </label>
 
     <div class="col-lg-10">

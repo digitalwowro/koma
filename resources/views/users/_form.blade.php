@@ -154,6 +154,17 @@
                                 View &amp; Edit
                             </label>
                         </div>
+
+                        <div class="radio pull-left" style="margin-right: 10px;">
+                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_FULL, $permission->grant_type == $permission::GRANT_TYPE_FULL, [
+                                'id'       => "grant-{$i}-full",
+                                'class'    => 'form-control',
+                                'required' => true,
+                            ]) !!}
+                            <label for="grant-{{ $i }}-full">
+                                View, Edit &amp; Delete
+                            </label>
+                        </div>
                     </td>
 
                     <td>
@@ -266,17 +277,17 @@
         function addPerm(type, section_id, device_id) {
             var to_add = '<tr><td>',
                 nextId = $table.find('tbody tr:not(.empty)').length
-                            ? (parseInt($table.find('tbody tr:last [name^=permissions]').first().attr('name').split('[')[1].replace(/[^0-9]/g, '')) + 1)
-                            : 0;
+                    ? (parseInt($table.find('tbody tr:last [name^=permissions]').first().attr('name').split('[')[1].replace(/[^0-9]/g, '')) + 1)
+                    : 0;
 
-            if (type == 'global') {
+            if (type === 'global') {
                 to_add = to_add + '<i class="fa fa-star"></i>' +
                     '' +
                     'Global' +
                     '' +
                     '<input type="hidden" name="permissions[' + nextId + '][type]" value="global">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="">';
-            } else if (type == 'section') {
+            } else if (type === 'section') {
                 to_add = to_add + '<i class="fa fa-server"></i>' +
                     '' +
                     '<a href="' + '{{ route('devices.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
@@ -285,7 +296,7 @@
 
                     '<input type="hidden" name="permissions[' + nextId + '][type]" value="section">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + section_id + '">';
-            } else if (type == 'device') {
+            } else if (type === 'device') {
                 to_add = to_add + '<i class="fa fa-server"></i>' +
                     '' +
                     '<a href="' + '{{ route('devices.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
@@ -319,6 +330,14 @@
                                 'View &amp; Edit' +
                             '</label>' +
                         '</div>' +
+
+                        '<div class="radio pull-left" style="margin-right: 10px;">' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-full" class="form-control" value="{{ \App\Permission::GRANT_TYPE_FULL }}" required>' +
+
+                            '<label for="grant-' + nextId + '-full">' +
+                                'View, Edit &amp; Delete' +
+                            '</label>' +
+                        '</div>' +
                     '</td>' +
                     '<td>' +
                         '<a href="#" style="color:red;" class="delete-this-permission" title="Delete">' +
@@ -334,7 +353,7 @@
         $table.on('click', '.delete-this-permission', function(e) {
             $(this).closest('tr').remove();
 
-            if ($table.find('tbody tr:not(.empty)').length == 0) {
+            if (!$table.find('tbody tr:not(.empty)').length) {
                 $table.find('tr.empty').show();
             }
 

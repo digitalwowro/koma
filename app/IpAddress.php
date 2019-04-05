@@ -40,7 +40,7 @@ class IpAddress extends Model
      */
     public function setDataAttribute($value)
     {
-        $this->attributes['data'] = encrypt(json_encode($value));
+        $this->attributes['data'] = dsEncrypt(json_encode($value));
     }
 
     /**
@@ -53,7 +53,7 @@ class IpAddress extends Model
     {
         try
         {
-            $return = @json_decode(decrypt($value), true);
+            $return = @json_decode(dsDecrypt($value), true);
 
             if ( ! is_array($return)) return [];
 
