@@ -9,8 +9,7 @@ class Date extends AbstractField
     /**
      * {@inheritDoc}
      */
-    public function render($contents = '')
-    {
+    public function render($contents = '') {
         return
             $this->prerender() .
             Form::text($this->getInputName(), $contents, [

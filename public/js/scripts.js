@@ -247,7 +247,7 @@ $(document).ready(function() {
                 choices = [],
                 field_id = $(this).data('opener-id');
 
-            if ($selected.length == 0) {
+            if (!$selected.length) {
                 $(this).find('input[type=checkbox]').prop('checked', true);
                 $selected = $(this).find('input[type=checkbox]:checked');
             }
@@ -260,7 +260,7 @@ $(document).ready(function() {
 
             var tableColumn = $.tableFixed.api().column($(this).data('ith'));
 
-            if (choices.length == 0 || choices.length == $(this).find('input[type=checkbox]').length) {
+            if (!choices.length || choices.length === $(this).find('input[type=checkbox]').length) {
                 $btn
                     .html('<i class="fa fa-square-o"></i> ' + $btn.data('filter-name') + ' <i class="fa fa-chevron-down"></i>')
                     .removeClass('btn-danger')

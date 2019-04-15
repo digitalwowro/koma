@@ -16,8 +16,7 @@ class Radio extends AbstractField
 
         $return = $this->prerender();
 
-        foreach ($options as $option)
-        {
+        foreach ($options as $option) {
             $rand = md5(time() . mt_rand(0, 999999) . rand(0, 999999));
             $checked = $contents == $option;
 
@@ -40,13 +39,13 @@ class Radio extends AbstractField
      */
     public function renderOptions($index)
     {
-        $value  = $this->getOption('options', '');
-        $name   = 'fields[' . $index . '][options][options]';
+        $value = $this->getOption('options', '');
+        $name = 'fields[' . $index . '][options][options]';
 
         return
             '<label>Comma separated options</label>' .
             Form::text($name, $value, [
-                'class'       => 'form-control',
+                'class' => 'form-control',
                 'placeholder' => 'e.g: Ubuntu,Debian,CentOS',
             ]) .
             '<hr>' .

@@ -20,8 +20,7 @@ class Factory
         $nameSpace = implode('\\', $nameSpace);
         $class     = "\\{$nameSpace}\\{$type}";
 
-        if ( ! class_exists($class))
-        {
+        if (!class_exists($class)) {
             throw new \Exception("Invalid field type {$type}");
         }
 

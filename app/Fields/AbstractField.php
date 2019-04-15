@@ -16,7 +16,7 @@ abstract class AbstractField
      * @param string|null $contents
      * @return string
      */
-    abstract public function render($contents = null);
+    abstract public function render($contents = '');
 
     /**
      * @var string
@@ -42,8 +42,8 @@ abstract class AbstractField
      */
     public function __construct($key, $name, array $options = [])
     {
-        $this->key     = $key;
-        $this->name    = $name;
+        $this->key = $key;
+        $this->name = $name;
         $this->options = $options;
     }
 
@@ -125,8 +125,8 @@ abstract class AbstractField
      */
     public function renderOptions($index)
     {
-        $name    = 'fields[' . $index . '][options][showlist]';
-        $rand    = $this->getTotallyRandomString();
+        $name = 'fields[' . $index . '][options][showlist]';
+        $rand = $this->getTotallyRandomString();
         $checked = $this->showInDeviceList();
 
         return

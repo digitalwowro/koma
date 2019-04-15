@@ -16,8 +16,7 @@ class Checkbox extends AbstractField
 
         $return = $this->prerender();
 
-        foreach ($options as $option)
-        {
+        foreach ($options as $option) {
             $rand    = $this->getTotallyRandomString();
             $checked = is_array($contents) && in_array($option, $contents);
 

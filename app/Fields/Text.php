@@ -30,14 +30,12 @@ class Text extends AbstractField
     {
         $return = '-';
 
-        if (isset($model->data[$this->getInputName()]))
-        {
+        if (isset($model->data[$this->getInputName()])) {
             $content = $model->data[$this->getInputName()];
 
             $return = urlify($content);
 
-            if ($content && $this->copyPaste())
-            {
+            if ($content && $this->copyPaste()) {
                 $return .= ' <a href="#" class="copy-this" data-clipboard-text="' . htmlentities($content) . '"><i class="fa fa-copy" title="Copy to Clipboard"></i></a>';
             }
         }
@@ -51,8 +49,8 @@ class Text extends AbstractField
     public function renderOptions($index)
     {
         $checked = $this->copyPaste();
-        $rand    = $this->getTotallyRandomString();
-        $name    = 'fields[' . $index . '][options][copypaste]';
+        $rand = $this->getTotallyRandomString();
+        $name = 'fields[' . $index . '][options][copypaste]';
 
         return
             parent::renderOptions($index) .

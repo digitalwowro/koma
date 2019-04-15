@@ -48,6 +48,14 @@ class DeviceController extends Controller
             }
 
             foreach ($deviceSection->fields as $field) {
+                if ($field->getType() === 'Status') {
+                    $id = $field->getKey();
+                    $preselected = $field->getOption('preselected');
+
+                    if ($preselected && !isset($filters[$id])) {
+                        $filters[$id] = explode(',', $preselected);
+                    }
+                }
                 if ($field->showInDeviceList()) {
                     $colspan++;
                 }

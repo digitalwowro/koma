@@ -15,8 +15,7 @@ class Dropdown extends AbstractField
         $options = explode(',', $options);
         $selectItems = [];
 
-        foreach ($options as $option)
-        {
+        foreach ($options as $option) {
             $selectItems[$option] = $option;
         }
 
