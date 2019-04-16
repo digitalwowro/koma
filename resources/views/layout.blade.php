@@ -275,6 +275,8 @@
 {!! HTML::script('js/dataTables.fixedHeader.js') !!}
 {!! HTML::script('js/jquery.dataTables.bootstrap.js') !!}
 
+<script>var userProfile = {!! json_encode(auth()->user()->profile) !!};</script>
+
 {{-- custom scripts --}}
 {!! HTML::script('js/scripts.js') !!}
 

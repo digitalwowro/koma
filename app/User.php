@@ -55,6 +55,29 @@ class User extends Model implements AuthenticatableContract,
     }
 
     /**
+     * Auto encode the data field
+     *
+     * @param string $value
+     */
+    public function setProfileAttribute($value)
+    {
+        $this->attributes['profile'] = json_encode($value);
+    }
+
+    /**
+     * Decode the data field
+     *
+     * @param string $value
+     * @return array
+     */
+    public function getProfileAttribute($value)
+    {
+        $return = @json_decode($value, true);
+
+        return is_array($return) ? $return : [];
+    }
+
+    /**
      * Relationship with Permission
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

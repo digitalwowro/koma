@@ -223,6 +223,7 @@ $(document).ready(function() {
         $.tableFixed = $('.datatable').dataTable({
             sDom: 'lTfr<"clearfix">tip',
             stateSave: true,
+            pageLength: (userProfile && userProfile.devices_per_page) ? userProfile.devices_per_page : 10,
             language: {
                 infoEmpty: "No entries to show"
             },

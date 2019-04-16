@@ -1,32 +1,44 @@
 <div class="form-group">
-    <label for="input1" class="col-xs-2 control-label">Name</label>
+    <label for="name" class="col-xs-2 control-label">Name</label>
     <div class="col-xs-10">
         {!! Form::text('name', null, [
-            'class'       => 'form-control',
+            'id' => 'name',
+            'class' => 'form-control',
             'placeholder' => 'Name',
         ]) !!}
     </div>
 </div>
 
 <div class="form-group">
-    <label for="input1" class="col-xs-2 control-label">Email</label>
+    <label for="email" class="col-xs-2 control-label">Email</label>
     <div class="col-xs-10">
         {!! Form::email('email', (! isset($user) || filter_var($user->email, FILTER_VALIDATE_EMAIL) ? null : ''), [
-            'class'       => 'form-control',
+            'id' => 'email',
+            'class' => 'form-control',
             'placeholder' => 'Email',
-            'required'    => true,
+            'required' => true,
         ]) !!}
     </div>
 </div>
 
 <div class="form-group">
-    <label for="input1" class="col-xs-2 control-label">Password</label>
+    <label for="password" class="col-xs-2 control-label">Password</label>
     <div class="col-xs-10">
         {!! Form::password('password', [
-            'id'          => 'password',
-            'class'       => 'form-control',
-            'style'       => 'font-style:italic;',
+            'id' => 'password',
+            'class' => 'form-control',
+            'style' => 'font-style:italic;',
             'placeholder' => 'leave blank if you don\'t want to assign or change the password',
+        ]) !!}
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="devices_per_page" class="col-xs-2 control-label">Default devices per page</label>
+    <div class="col-xs-10">
+        {!! Form::select('devices_per_page', [10 => 10, 25 => 25, 50 => 50, 100 => 100], $user->profile['devices_per_page'] ?? null, [
+            'id' => 'devices_per_page',
+            'class' => 'form-control',
         ]) !!}
     </div>
 </div>
@@ -38,8 +50,8 @@
             <div class="col-xs-10">
                 <div class="radio">
                     {!! Form::radio('role', App\User::ROLE_SYSADMIN, null, [
-                        'id'       => 'role-sysadmin',
-                        'class'    => 'form-control',
+                        'id' => 'role-sysadmin',
+                        'class' => 'form-control',
                         'required' => true,
                     ]) !!}
                     <label for="role-sysadmin">
@@ -49,8 +61,8 @@
 
                 <div class="radio">
                     {!! Form::radio('role', App\User::ROLE_ADMIN, null, [
-                        'id'       => 'role-admin',
-                        'class'    => 'form-control',
+                        'id' => 'role-admin',
+                        'class' => 'form-control',
                         'required' => true,
                     ]) !!}
                     <label for="role-admin">
@@ -60,8 +72,8 @@
 
                 <div class="radio">
                     {!! Form::radio('role', App\User::ROLE_SUPERADMIN, null, [
-                        'id'       => 'role-superadmin',
-                        'class'    => 'form-control',
+                        'id' => 'role-superadmin',
+                        'class' => 'form-control',
                         'required' => true,
                     ]) !!}
                     <label for="role-superadmin">
@@ -135,8 +147,8 @@
                     <td>
                         <div class="radio pull-left" style="margin-right: 10px;">
                             {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ, $permission->grant_type == $permission::GRANT_TYPE_READ, [
-                                'id'       => "grant-{$i}-view",
-                                'class'    => 'form-control',
+                                'id' => "grant-{$i}-view",
+                                'class' => 'form-control',
                                 'required' => true,
                             ]) !!}
                             <label for="grant-{{ $i }}-view">
@@ -146,8 +158,8 @@
 
                         <div class="radio pull-left" style="margin-right: 10px;">
                             {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_WRITE, $permission->grant_type == $permission::GRANT_TYPE_WRITE, [
-                                'id'       => "grant-{$i}-edit",
-                                'class'    => 'form-control',
+                                'id' => "grant-{$i}-edit",
+                                'class' => 'form-control',
                                 'required' => true,
                             ]) !!}
                             <label for="grant-{{ $i }}-edit">
@@ -157,8 +169,8 @@
 
                         <div class="radio pull-left" style="margin-right: 10px;">
                             {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_FULL, $permission->grant_type == $permission::GRANT_TYPE_FULL, [
-                                'id'       => "grant-{$i}-full",
-                                'class'    => 'form-control',
+                                'id' => "grant-{$i}-full",
+                                'class' => 'form-control',
                                 'required' => true,
                             ]) !!}
                             <label for="grant-{{ $i }}-full">

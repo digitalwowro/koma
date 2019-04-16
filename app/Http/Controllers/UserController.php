@@ -47,6 +47,34 @@ class UserController extends Controller
         return view('users.create');
     }
 
+    protected function validator($data, $updateId = 0)
+    {
+        $updateSelf = intval($updateId) === auth()->id();
+
+        return Validator::make($data, [
+            'email' => "required|unique:users,email,{$updateId}|email",
+            'role' => ($updateSelf ? '' : 'required|') . 'between:1,3',
+            'password' => 'min:8',
+            'devices_per_page' => 'in:10,25,50,100',
+        ], [
+            'email.required' => 'Email is required',
+            'email.unique' => 'Email already exists',
+            'email.email' => 'Invalid email address',
+            'role.required' => 'Role is required',
+            'role.between' => 'Role is invalid',
+            'password.min' => 'Password must be at least 8 characters long',
+        ]);
+    }
+
+    protected function profileSettings(Request $request, array $current = [])
+    {
+        if (in_array($request->input('devices_per_page'), [10, 25, 50, 100])) {
+            $current['devices_per_page'] = $request->input('devices_per_page');
+        }
+
+        return $current;
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -55,25 +83,11 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->input();
-
-        unset($data['_token']);
-        unset($data['permissions']);
+        $data = Input::only(['name', 'email', 'password', 'role']);
 
         $permissions = $request->input('permissions');
 
-        $validator = Validator::make($data, [
-            'email' => 'required|unique:users|email',
-            'role' => 'required|between:1,2',
-            'password' => 'min:8',
-        ], [
-            'email.required'    => 'Email is required',
-            'email.unique'      => 'Email already exists',
-            'email.email'       => 'Invalid email address',
-            'role.required'     => 'Role is required',
-            'role.between'      => 'Role is invalid',
-            'password.min'      => 'Password must be at least 8 characters long',
-        ]);
+        $validator = $this->validator($data);
 
         if ($validator->fails()) {
             return redirect()
@@ -82,11 +96,16 @@ class UserController extends Controller
                 ->withError($validator->errors()->first());
         }
 
+        $data['profile'] = $this->profileSettings($request);
+
         User::unguard();
         $row = User::create($data);
         User::reguard();
 
-        if ( ! is_array($permissions)) $permissions = [];
+        if ( ! is_array($permissions)) {
+            $permissions = [];
+        }
+
         $row->syncPermissions($permissions);
 
         return redirect()
@@ -120,13 +139,21 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update($id)
+    public function update($id, Request $request)
     {
         try {
             $row = User::findOrFail($id);
 
-            $data = Input::except(['_method', '_token', 'permissions']);
+            $data = Input::only(['name', 'email', 'password', 'role']);
             $permissions = Input::get('permissions');
+            $validator = $this->validator($data, $id);
+
+            if ($validator->fails()) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->withError($validator->errors()->first());
+            }
 
             if (isset($data['password']) && empty($data['password'])) {
                 unset($data['password']);
@@ -138,9 +165,14 @@ class UserController extends Controller
 
             $row->unguard();
 
+            $data['profile'] = $this->profileSettings($request, $row->profile);
+
             $row->update($data);
 
-            if ( ! is_array($permissions)) $permissions = [];
+            if (!is_array($permissions)) {
+                $permissions = [];
+            }
+
             $row->syncPermissions($permissions);
 
             return redirect()
