@@ -39,6 +39,7 @@ class Factory
             'Dropdown',
             'File',
             'IP',
+            'Password',
             'Radio',
             'Status',
             'Text',

@@ -99,3 +99,9 @@ table.table-field-options .fa-trash-o { color: red; }
 a.btn:focus {
     color: white;
 }
+
+#passwordGenerateModal .well .col-md-6 > label {
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 14px;
+}

@@ -14,6 +14,26 @@ $('.copy-this').click(function(e) {
     e.preventDefault();
 });
 
+$('.mask-this').click(function(e) {
+    var $span = $(this).parent().find('span'),
+        unmasked = $(this).data('value');
+
+    if (/^\*+$/.test($.trim($span.text()))) {
+        // input masked, need to unmask
+        $span.html(unmasked);
+    } else {
+        var masked = '';
+
+        for (var i = 0; i < unmasked.length; i++) {
+            masked = masked + '*';
+        }
+
+        $span.html(masked);
+    }
+
+    e.preventDefault();
+});
+
 var clipboard = new Clipboard('.copy-this');
 
 clipboard.on('success', function(e) {

@@ -7,10 +7,10 @@
                 <li><a href="{{ route('home') }}">Home</a></li>
                 <li><span>Devices</span></li>
                 <li><a href="{{ route('devices.index', $deviceSection->id) }}"><span>{{ $deviceSection->title }}</span></a></li>
-                <li class="active"><span>Add new</span></li>
+                <li class="active"><span>Edit</span></li>
             </ol>
 
-            <h1>Devices<small>Add New {{ str_singular($deviceSection->title) }}</small></h1>
+            <h1>Devices<small>Edit {{ str_singular($deviceSection->title) }}</small></h1>
         </div>
     </div>
 
@@ -22,7 +22,7 @@
                     <h2 class="pull-left">Enter {{ str_singular($deviceSection->title) }} Details</h2>
                 </header>
 
-                <div class="main-box-body clearfix">
+                <div class="main-box-body clearfix device-form-fields">
                     @include('devices._form')
                 </div>
             </div>
@@ -51,4 +51,6 @@
         </div>
     </div>
     {!! Form::close() !!}
+
+    @include('devices._modals')
 @stop

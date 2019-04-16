@@ -22,7 +22,7 @@
                     <h2 class="pull-left">Enter {{ str_singular($deviceSection->title) }} Details</h2>
                 </header>
 
-                <div class="main-box-body clearfix">
+                <div class="main-box-body clearfix device-form-fields">
                     @include('devices._form')
                 </div>
             </div>
@@ -48,4 +48,6 @@
         </div>
     </div>
     {!! Form::close() !!}
+
+    @include('devices._modals')
 @stop
