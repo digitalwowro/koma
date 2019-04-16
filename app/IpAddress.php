@@ -51,16 +51,13 @@ class IpAddress extends Model
      */
     public function getDataAttribute($value)
     {
-        try
-        {
+        try {
             $return = @json_decode(dsDecrypt($value), true);
 
             if ( ! is_array($return)) return [];
 
             return $return;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return [];
         }
     }
@@ -80,8 +77,7 @@ class IpAddress extends Model
         // convert last (32-$mask) bits to zeroes
         $currentIp = $ipEnc | pow(2, (32 - $mask)) - pow(2, (32 - $mask));
 
-        for ($pos = 0; $pos < pow(2, (32 - $mask)); ++$pos)
-        {
+        for ($pos = 0; $pos < pow(2, (32 - $mask)); ++$pos) {
             self::create([
                 'ip'          => long2ip($currentIp + $pos),
                 'subnet'      => $subnet,
@@ -119,8 +115,7 @@ class IpAddress extends Model
     {
         $query = self::selectRaw('count(*) as count, subnet, category_id');
 
-        if ($categoryId)
-        {
+        if ($categoryId) {
             $query->where('category_id', $categoryId);
         }
 
@@ -170,35 +165,23 @@ class IpAddress extends Model
      */
     public function getFieldValue(IpField $field)
     {
-        if ($this->device_id)
-        {
+        if ($this->device_id) {
             $deviceType = $this->device->section_id;
 
-            if (isset($field->bindings[$deviceType]))
-            {
+            if (isset($field->bindings[$deviceType])) {
                 $bindTo = $field->bindings[$deviceType];
 
-                foreach ($this->device->section->fields as $deviceField)
-                {
-                    if ($deviceField->getInputName() == $bindTo)
-                    {
-                        if (method_exists($deviceField, 'customDeviceListContent'))
-                        {
+                foreach ($this->device->section->fields as $deviceField) {
+                    if ($deviceField->getInputName() == $bindTo) {
+                        if (method_exists($deviceField, 'customDeviceListContent')) {
                             return $deviceField->customDeviceListContent($this->device);
-                        }
-                        elseif (isset($this->device->data[$deviceField->getInputName()]))
-                        {
-                            if (is_array($this->device->data[$deviceField->getInputName()]))
-                            {
+                        } elseif (isset($this->device->data[$deviceField->getInputName()])) {
+                            if (is_array($this->device->data[$deviceField->getInputName()])) {
                                 return urlify(implode(', ', $this->device->data[$deviceField->getInputName()]));
-                            }
-                            else
-                            {
+                            } else {
                                 return urlify($this->device->data[$deviceField->getInputName()]);
                             }
-                        }
-                        else
-                        {
+                        } else {
                             return '-';
                         }
                     }
