@@ -28,6 +28,61 @@
 </div>
 
 <div class="form-group">
+    <label for="title" class="col-lg-2 control-label">Categories</label>
+
+    <div class="col-lg-10">
+        <table class="table table-striped table-hover table-bordered table-field-options">
+            <thead>
+            <tr>
+                <th style="text-align: center;">#</th>
+                <th>Field Name</th>
+                <th>Del</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="width:1px; white-space:nowrap; text-align: center;">
+                        <i class="fa fa-reorder"></i>
+                    </td>
+
+                    <td>
+                        Digital Ocean
+
+                        <input type="hidden" name="categories[]" value="Digital Ocean">
+                        <input type="hidden" name="categoryid[]" value="docc">
+                    </td>
+
+                    <td style="width:1px; white-space:nowrap; text-align: center;">
+                        <a href="#" title="Delete this field" class="delete-field">
+                            <i class="fa fa-trash-o"></i>
+                        </a>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="width:1px; white-space:nowrap; text-align: center;">
+                        <i class="fa fa-reorder"></i>
+                    </td>
+
+                    <td>
+                        Linode
+
+                        <input type="hidden" name="categories[]" value="Linode">
+                        <input type="hidden" name="categoryid[]" value="aaabbb">
+                    </td>
+
+                    <td style="width:1px; white-space:nowrap; text-align: center;">
+                        <a href="#" title="Delete this field" class="delete-field">
+                            <i class="fa fa-trash-o"></i>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="form-group">
     <label for="title" class="col-lg-2 control-label">Fields</label>
 
     <div class="col-lg-10">

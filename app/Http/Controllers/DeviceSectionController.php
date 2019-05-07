@@ -23,6 +23,34 @@ class DeviceSectionController extends Controller
         $this->authorize('admin');
     }
 
+    protected function getCategories(Request $request)
+    {
+        $categories = $request->input('categories');
+        $ids = $request->input('categoryid');
+        $result = [];
+
+        if (!is_array($categories) || !is_array($ids)) {
+            return $result;
+        }
+
+        foreach ($categories as $id => $category) {
+            if (isset($ids[$id])) {
+                $result[$ids[$id]] = $category;
+            }
+        }
+
+        return $result;
+    }
+
+    protected function getFields(Request $request)
+    {
+        $data = $request->only('title', 'icon', 'fields');
+
+        $data['categories'] = $this->getCategories($request);
+
+        return $data;
+    }
+
     public function index()
     {
         return view('device-sections.index');
@@ -35,16 +63,13 @@ class DeviceSectionController extends Controller
 
     public function store(Request $request)
     {
-        try
-        {
-            $this->model->create($request->input());
+        try {
+            $this->model->create($this->getFields($request));
 
             return redirect()
                 ->route('device-sections.index')
                 ->withSuccess('Device section has been added');
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -54,14 +79,11 @@ class DeviceSectionController extends Controller
 
     public function edit($id)
     {
-        try
-        {
+        try {
             $deviceSection = $this->model->findOrFail($id);
 
             return view('device-sections.edit', compact('deviceSection'));
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Could not find device section');
@@ -70,18 +92,15 @@ class DeviceSectionController extends Controller
 
     public function update(Request $request, $id)
     {
-        try
-        {
+        try {
             $deviceSection = $this->model->findOrFail($id);
 
-            $deviceSection->update($request->input());
+            $deviceSection->update($this->getFields($request));
 
             return redirect()
                 ->route('device-sections.index')
                 ->withSuccess('Device section has been updated');
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -91,8 +110,7 @@ class DeviceSectionController extends Controller
 
     public function destroy($id)
     {
-        try
-        {
+        try {
             $deviceSection = $this->model->findOrFail($id);
 
             $deviceSection->delete();
@@ -100,9 +118,7 @@ class DeviceSectionController extends Controller
             return redirect()
                 ->route('device-sections.index')
                 ->withSuccess('Device section has been deleted');
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Could not find device section');
@@ -111,16 +127,13 @@ class DeviceSectionController extends Controller
 
     public function getOptions(Request $request)
     {
-        try
-        {
-            $type  = $request->input('type');
+        try {
+            $type = $request->input('type');
             $index = $request->input('index');
             $field = Factory::generate('', 'tmp', $type);
 
             return $field->renderOptions($index);
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             //
         }
     }

@@ -34,11 +34,18 @@ class DeviceController extends Controller
         $this->ipAddress = $ipAddress;
     }
 
-    public function index($type)
+    public function index($type, $category = null)
     {
         try {
             $deviceSection = $this->deviceSection->findOrFail($type);
             $devices = $deviceSection->devices;
+
+            if ($category) {
+                $devices = $devices->filter(function ($device) use ($category) {
+                    return $device->category_id === $category;
+                });
+            }
+
             $colspan = 1;
 
             try {
