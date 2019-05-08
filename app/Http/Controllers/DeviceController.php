@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Device;
 use App\DeviceSection;
 use App\IpAddress;
+use Exception;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -41,9 +42,15 @@ class DeviceController extends Controller
             $devices = $deviceSection->devices;
 
             if ($category) {
+                if (!isset($deviceSection->categories[$category])) {
+                    return redirect()->route('devices.index', $type);
+                }
+
                 $devices = $devices->filter(function ($device) use ($category) {
                     return $device->category_id === $category;
                 });
+
+                $categoryLabel = $deviceSection->categories[$category];
             }
 
             $colspan = 1;
@@ -68,7 +75,7 @@ class DeviceController extends Controller
                 }
             }
 
-            return view('devices.index', compact('deviceSection', 'devices', 'colspan', 'filters'));
+            return view('devices.index', compact('deviceSection', 'devices', 'colspan', 'filters', 'category', 'categoryLabel', 'type'));
         } catch (\Exception $e) {
             return redirect()
                 ->back()
@@ -144,6 +151,32 @@ class DeviceController extends Controller
         }
     }
 
+    private function setCategory(Device $device, Request $request, $save = true)
+    {
+        $categories = $device->section->categories;
+        $category = $request->input('category_id');
+
+        if (empty($category)) {
+            $device->category_id = null;
+
+            if ($save) {
+                $device->save();
+            }
+
+            return;
+        }
+
+        if (!isset($categories[$category])) {
+            throw new Exception('Invalid device category');
+        }
+
+        $device->category_id = $category;
+
+        if ($save) {
+            $device->save();
+        }
+    }
+
     public function store($type, Request $request)
     {
         try {
@@ -161,6 +194,7 @@ class DeviceController extends Controller
                 'data' => $data,
             ]);
 
+            $this->setCategory($device, $request);
 
             if (isset($data['ips']) && is_array($data['ips'])) {
                 $this->assignIpsToDevice($data['ips'], $device);
@@ -207,7 +241,7 @@ class DeviceController extends Controller
 
             $device->data = $data;
 
-            $device->save();
+            $this->setCategory($device, $request);
 
             $device->ips()->update(['device_id' => null]);
             $this->ipAddress->whereNull('device_id')->whereNull('subnet')->delete();

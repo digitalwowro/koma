@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Device;
 use App\DeviceSection;
 use App\Fields\Factory;
 use Illuminate\Http\Request;
@@ -96,6 +97,22 @@ class DeviceSectionController extends Controller
             $deviceSection = $this->model->findOrFail($id);
 
             $deviceSection->update($this->getFields($request));
+
+            $categoryIds = array_keys($deviceSection->categories);
+
+            $invalid = [];
+
+            $deviceSection->devices()
+                ->pluck('category_id', 'id')
+                ->each(function ($categoryId, $id) use ($categoryIds, &$invalid) {
+                    if ($categoryId && !in_array($categoryId, $categoryIds)) {
+                        $invalid[] = $id;
+                    }
+                });
+
+            if (count($invalid)) {
+                Device::whereIn('id', $invalid)->update(['category_id' => null]);
+            }
 
             return redirect()
                 ->route('device-sections.index')

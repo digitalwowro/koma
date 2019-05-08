@@ -166,7 +166,7 @@
                                     <ul class="submenu">
                                         @foreach ($deviceSections as $deviceSection)
                                         @can('list-section', $deviceSection)
-                                        <li class="{{ is_route_bool('devices.index', ['type' => $deviceSection->id]) ? 'open' : '' }}">
+                                        <li class="{{ is_route_bool('devices.*', ['type' => $deviceSection->id]) ? 'open' : '' }}">
                                             <a
                                                 href="{{ route('devices.index', $deviceSection->id) }}"
                                                 style="padding-left:44px;"
@@ -181,7 +181,7 @@
                                             </a>
 
                                             @if (count($deviceSection->categories))
-                                            <ul class="submenu" style="{{ is_route_bool('devices.index', ['type' => $deviceSection->id]) ? 'display:block' : '' }}">
+                                            <ul class="submenu" style="{{ is_route_bool('devices.*', ['type' => $deviceSection->id]) ? 'display:block' : '' }}">
                                                 @foreach ($deviceSection->categories as $categoryId => $categoryName)
                                                 <li>
                                                     <a href="{{ route('devices.index', [$deviceSection->id, $categoryId]) }}">{{ $categoryName }}</a>

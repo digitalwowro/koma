@@ -6,7 +6,12 @@
             <ol class="breadcrumb">
                 <li><a href="{{ route('home') }}">Home</a></li>
                 <li><span>Devices</span></li>
-                <li class="active"><span>{{ $deviceSection->title }}</span></li>
+                @if (empty($categoryLabel))
+                    <li class="active"><span>{{ $deviceSection->title }}</span></li>
+                @else
+                    <li><a href="{{ route('devices.index', $type) }}"><span>{{ $deviceSection->title }}</span></a></li>
+                    <li class="active"><span>{{ $categoryLabel }}</span></li>
+                @endif
             </ol>
 
             <h1>Devices <small>{{ $deviceSection->title }}</small></h1>
@@ -48,7 +53,11 @@
                         @endforeach
 
                         @can('edit', $deviceSection)
-                        <a href="{{ route('devices.create', $deviceSection->id) }}" class="btn btn-primary pull-left">
+                            @if (empty($categoryLabel))
+                                <a href="{{ route('devices.create', $deviceSection->id) }}" class="btn btn-primary pull-left">
+                            @else
+                                <a href="{{ route('devices.create', ['type' => $deviceSection->id, 'category' => $category]) }}" class="btn btn-primary pull-left">
+                            @endif
                             <i class="fa fa-plus-circle fa-lg"></i> Add device
                         </a>
                         @endcan
@@ -124,7 +133,15 @@
                             @empty
                                 <tr>
                                     <td colspan="{{ $colspan }}" style="text-align:center;">
-                                        There are currently no devices added. How about <a href="{{ route('devices.create', $deviceSection->id) }}">creating one</a> now?
+                                        There are currently no devices added. How about
+
+                                        @if (empty($categoryLabel))
+                                            <a href="{{ route('devices.create', $deviceSection->id) }}">creating one</a>
+                                        @else
+                                            <a href="{{ route('devices.create', ['type' => $deviceSection->id, 'category' => $category]) }}">creating one</a>
+                                        @endif
+
+                                        now?
                                     </td>
                                 </tr>
                             @endforelse

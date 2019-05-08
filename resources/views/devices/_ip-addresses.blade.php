@@ -1,73 +1,85 @@
-<ul id="ip-list">
-    <li class="{{ isset($device) && $device->ips->count() ? 'hidden' : '' }}" style="font-size:.9em; color:grey; font-style: italic;">- no IP address currently assigned -</li>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="main-box clearfix">
+            <header class="main-box-header clearfix">
+                <h2 class="pull-left">Assigned IP Addresses</h2>
+            </header>
 
-    @if (isset($device))
-        @foreach ($device->ips as $ip)
-        <li>
-            {{ $ip->ip }}
-            <a href="#" data-action="unassign-ip" data-unassign-id="{{ $ip->id }}"><i class="fa fa-trash-o"></i></a>
-            <input type="hidden" name="ips[]" value="{{ $ip->isCustom() ? $ip->ip : $ip->id }}">
-        </li>
-        @endforeach
-    @endif
-</ul>
+            <div class="main-box-body clearfix">
+                <ul id="ip-list">
+                    <li class="{{ isset($device) && $device->ips->count() ? 'hidden' : '' }}" style="font-size:.9em; color:grey; font-style: italic;">- no IP address currently assigned -</li>
 
-<a href="#assign-now" data-toggle="modal" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> Assign from existing class</a>
-<a href="#add-custom" data-toggle="modal" class="btn btn-default btn-xs"><i class="fa fa-plus"></i> Add custom</a>
-
-<div class="modal fade" id="assign-now" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title">Assign IP Addresses To Device</h4>
-            </div>
-            <div class="modal-body" style="position:relative;">
-                <div class="row" style="margin-top:15px;">
-                    <div class="col-xs-6">
-                        <label>Search By Subnet</label>
-                        <select id="subnet-select" style="width:100%;">
-                        @foreach(App\IpAddress::getSubnetsFor() as $subnet)
-                            <option value="{{ $subnet->subnet }}">{{ $subnet->category->title }}: {{ $subnet->subnet }}</option>
+                    @if (isset($device))
+                        @foreach ($device->ips as $ip)
+                        <li>
+                            {{ $ip->ip }}
+                            <a href="#" data-action="unassign-ip" data-unassign-id="{{ $ip->id }}"><i class="fa fa-trash-o"></i></a>
+                            <input type="hidden" name="ips[]" value="{{ $ip->isCustom() ? $ip->ip : $ip->id }}">
+                        </li>
                         @endforeach
-                        </select>
-                    </div>
-                    <div class="col-xs-6">
-                        <label>IP Addresses To Assign</label>
+                    @endif
+                </ul>
 
-                        <select id="ip-select" multiple style="width:100%;">
-                        </select>
+                <a href="#assign-now" data-toggle="modal" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> Assign from existing class</a>
+                <a href="#add-custom" data-toggle="modal" class="btn btn-default btn-xs"><i class="fa fa-plus"></i> Add custom</a>
+
+                <div class="modal fade" id="assign-now" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title">Assign IP Addresses To Device</h4>
+                            </div>
+                            <div class="modal-body" style="position:relative;">
+                                <div class="row" style="margin-top:15px;">
+                                    <div class="col-xs-6">
+                                        <label>Search By Subnet</label>
+                                        <select id="subnet-select" style="width:100%;">
+                                        @foreach(App\IpAddress::getSubnetsFor() as $subnet)
+                                            <option value="{{ $subnet->subnet }}">{{ $subnet->category->title }}: {{ $subnet->subnet }}</option>
+                                        @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <label>IP Addresses To Assign</label>
+
+                                        <select id="ip-select" multiple style="width:100%;">
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" data-action="assign-ip">Add</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" data-action="assign-ip">Add</button>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="modal fade" id="add-custom" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title">Add Custom IP Addresses To Device</h4>
+                            </div>
+                            <div class="modal-body" style="position:relative;">
+                                <div class="row" style="margin-top:15px;">
+                                    <div class="col-xs-12">
+                                        <label>IP Addresses To Add</label>
+                                        <input type="text" id="custom-ip" class="form-control">
+                                    </div>
+                                </div>
 
-<div class="modal fade" id="add-custom" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title">Add Custom IP Addresses To Device</h4>
-            </div>
-            <div class="modal-body" style="position:relative;">
-                <div class="row" style="margin-top:15px;">
-                    <div class="col-xs-12">
-                        <label>IP Addresses To Add</label>
-                        <input type="text" id="custom-ip" class="form-control">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" data-action="add-custom">Add</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" data-action="add-custom">Add</button>
             </div>
         </div>
     </div>

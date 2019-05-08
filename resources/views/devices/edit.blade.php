@@ -10,7 +10,7 @@
                 <li class="active"><span>Edit</span></li>
             </ol>
 
-            <h1>Devices<small>Edit {{ str_singular($deviceSection->title) }}</small></h1>
+            <h1>Devices<small>Edit {{ str_singular($deviceSection->title) }} Device</small></h1>
         </div>
     </div>
 
@@ -19,7 +19,7 @@
         <div class="col-lg-12">
             <div class="main-box clearfix">
                 <header class="main-box-header clearfix">
-                    <h2 class="pull-left">Enter {{ str_singular($deviceSection->title) }} Details</h2>
+                    <h2 class="pull-left">Enter {{ str_singular($deviceSection->title) }} Device Details</h2>
                 </header>
 
                 <div class="main-box-body clearfix device-form-fields">
@@ -29,27 +29,10 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="main-box clearfix">
-                <header class="main-box-header clearfix">
-                    <h2 class="pull-left">Assigned IP Addresses</h2>
-                </header>
+    @include('devices._ip-addresses')
+    @include('devices._category')
+    @include('devices._save')
 
-                <div class="main-box-body clearfix">
-                    @include('devices._ip-addresses')
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="main-box clearfix">
-                @include('devices._save')
-            </div>
-        </div>
-    </div>
     {!! Form::close() !!}
 
     @include('devices._modals')

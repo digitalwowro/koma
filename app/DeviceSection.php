@@ -78,8 +78,7 @@ class DeviceSection extends Model
      */
     public function getFieldsAttribute($value)
     {
-        if (is_null($value))
-        {
+        if (is_null($value)) {
             return null;
         }
 
@@ -89,10 +88,8 @@ class DeviceSection extends Model
 
         $return = [];
 
-        foreach ($items as $item)
-        {
-            try
-            {
+        foreach ($items as $item) {
+            try {
                 $options = isset($item['options']) ? $item['options']: [];
 
                 $return[] = Factory::generate(
@@ -137,8 +134,7 @@ class DeviceSection extends Model
     {
         $return = [];
 
-        foreach ($this->fields as $field)
-        {
+        foreach ($this->fields as $field) {
             $return[$field->getInputName()] = $field->getName();
         }
 
