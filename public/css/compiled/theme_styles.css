@@ -2388,7 +2388,20 @@ blockquote.pull-right:before {
   @media (max-width: 767px) {
     /* line 195, Applications/MAMP/htdocs/cube/scss/theme/imports/_tables.scss */
     .dataTables_filter {
-      display: none; } }
+      margin: 0;
+      padding: 0;
+      float: none;
+    }
+
+    .dataTables_filter label {
+      width: 100%;
+      padding: 10px;
+    }
+
+    .dataTables_filter label input {
+      margin: 0;
+    }
+  }
   /* line 204, Applications/MAMP/htdocs/cube/scss/theme/imports/_tables.scss */
   .dataTables_filter input {
     margin-left: 10px; }
