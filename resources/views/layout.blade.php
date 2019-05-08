@@ -158,7 +158,7 @@
                                     </a>
                                 </li>
                                 <li {!! is_route('devices.*') !!}>
-                                    <a href="#" class="dropdown-toggle">
+                                    <a href="#" class="dropdown-toggle dropdown-nocaret">
                                         <i class="fa fa-server"></i>
                                         <span>Devices</span>
                                         <i class="fa fa-angle-right drop-icon"></i>
@@ -166,12 +166,32 @@
                                     <ul class="submenu">
                                         @foreach ($deviceSections as $deviceSection)
                                         @can('list-section', $deviceSection)
-                                        <li>
-                                            <a href="{{ route('devices.index', $deviceSection->id) }}" {!! is_route('devices.index', true, ['type' => $deviceSection->id]) !!} style="padding-left:44px;">
+                                        <li class="{{ is_route_bool('devices.*', ['type' => $deviceSection->id]) ? 'open' : '' }}">
+                                            <a
+                                                href="{{ route('devices.index', $deviceSection->id) }}"
+                                                style="padding-left:44px;"
+                                                class="{!! is_route('devices.index', false, ['type' => $deviceSection->id]) !!} {{ count($deviceSection->categories) ? 'dropdown-toggle dropdown-nocaret' : '' }}"
+                                            >
                                                 {!! $deviceSection->present()->icon !!}
                                                 &nbsp;
                                                 {{ $deviceSection->title }}
+                                                @if (count($deviceSection->categories))
+                                                <i class="fa fa-angle-right drop-icon"></i>
+                                                @endif
                                             </a>
+
+                                            @if (count($deviceSection->categories))
+                                            <ul class="submenu" style="{{ is_route_bool('devices.*', ['type' => $deviceSection->id]) ? 'display:block' : '' }}">
+                                                @foreach ($deviceSection->categories as $categoryId => $categoryName)
+                                                <li>
+                                                    <a href="{{ route('devices.index', [$deviceSection->id, $categoryId]) }}">{{ $categoryName }}</a>
+                                                </li>
+                                                @endforeach
+                                                <li>
+                                                    <a href="{{ route('devices.index', $deviceSection->id) }}">show all</a>
+                                                </li>
+                                            </ul>
+                                            @endif
                                         </li>
                                         @endcan
                                         @endforeach
@@ -257,7 +277,7 @@
 {{-- global scripts --}}
 {!! HTML::script('js/jquery.js') !!}
 {!! HTML::script('js/jquery-ui.custom.min.js') !!}
-{!! HTML::script('js/bootstrap.js') !!}
+{!! HTML::script('js/bootstrap.min.js') !!}
 {!! HTML::script('js/jquery.nanoscroller.min.js') !!}
 {!! HTML::script('js/js.cookie.js') !!}
 

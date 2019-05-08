@@ -16,12 +16,35 @@ class DeviceSection extends Model
      *
      * @var array
      */
-    protected $fillable = ['title', 'icon', 'sort', 'fields'];
+    protected $fillable = ['title', 'icon', 'sort', 'fields', 'categories'];
 
     /**
      * @var string
      */
     protected $presenter = DeviceSectionPresenter::class;
+
+    /**
+     * Auto encode the data field
+     *
+     * @param string $value
+     */
+    public function setCategoriesAttribute($value)
+    {
+        $this->attributes['categories'] = json_encode($value);
+    }
+
+    /**
+     * Decode the data field
+     *
+     * @param string $value
+     * @return array
+     */
+    public function getCategoriesAttribute($value)
+    {
+        $return = @json_decode($value, true);
+
+        return is_array($return) ? $return : [];
+    }
 
     /**
      * Relationship with DeviceSection
@@ -55,8 +78,7 @@ class DeviceSection extends Model
      */
     public function getFieldsAttribute($value)
     {
-        if (is_null($value))
-        {
+        if (is_null($value)) {
             return null;
         }
 
@@ -66,10 +88,8 @@ class DeviceSection extends Model
 
         $return = [];
 
-        foreach ($items as $item)
-        {
-            try
-            {
+        foreach ($items as $item) {
+            try {
                 $options = isset($item['options']) ? $item['options']: [];
 
                 $return[] = Factory::generate(
@@ -114,8 +134,7 @@ class DeviceSection extends Model
     {
         $return = [];
 
-        foreach ($this->fields as $field)
-        {
+        foreach ($this->fields as $field) {
             $return[$field->getInputName()] = $field->getName();
         }
 

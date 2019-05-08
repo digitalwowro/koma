@@ -5,8 +5,7 @@ Route::pattern('type', '[0-9]+');
 
 Route::controller('auth', 'Auth\AuthController');
 
-Route::group(['middleware' => 'auth'], function()
-{
+Route::group(['middleware' => 'auth'], function() {
     Route::get ('/',        ['as' => 'home',           'uses' => 'DashboardController@index']);
     Route::get ('/profile', ['as' => 'profile',        'uses' => 'ProfileController@index']);
     Route::post('/profile', ['as' => 'profile.update', 'uses' => 'ProfileController@update']);
@@ -18,13 +17,13 @@ Route::group(['middleware' => 'auth'], function()
 
     Route::post('/device-sections/get-options', ['as' => 'device-sections.get-options', 'uses' => 'DeviceSectionController@getOptions']);
 
-    Route::get   ('/devices/{type}/create',    ['as' => 'devices.create',    'uses' => 'DeviceController@create']);
-    Route::get   ('/devices/{type}/{id}',      ['as' => 'devices.show',      'uses' => 'DeviceController@show']);
-    Route::get   ('/devices/{type}',           ['as' => 'devices.index',     'uses' => 'DeviceController@index']);
-    Route::post  ('/devices/{type}',           ['as' => 'devices.store',     'uses' => 'DeviceController@store']);
-    Route::get   ('/devices/{type}/{id}/edit', ['as' => 'devices.edit',      'uses' => 'DeviceController@edit']);
-    Route::put   ('/devices/{id}',             ['as' => 'devices.update',    'uses' => 'DeviceController@update']);
-    Route::delete('/devices/{id}',             ['as' => 'devices.destroy',   'uses' => 'DeviceController@destroy']);
+    Route::get   ('/devices/{type}/create',      ['as' => 'devices.create',    'uses' => 'DeviceController@create']);
+    Route::get   ('/devices/{type}/{category?}', ['as' => 'devices.index',     'uses' => 'DeviceController@index'])->where('category', '\w{8}');
+    Route::get   ('/devices/{type}/{id}',        ['as' => 'devices.show',      'uses' => 'DeviceController@show']);
+    Route::post  ('/devices/{type}',             ['as' => 'devices.store',     'uses' => 'DeviceController@store']);
+    Route::get   ('/devices/{type}/{id}/edit',   ['as' => 'devices.edit',      'uses' => 'DeviceController@edit']);
+    Route::put   ('/devices/{id}',               ['as' => 'devices.update',    'uses' => 'DeviceController@update']);
+    Route::delete('/devices/{id}',               ['as' => 'devices.destroy',   'uses' => 'DeviceController@destroy']);
 
     Route::get   ('/ip/subnet/{subnet}/list', ['as' => 'ip.subnet-list', 'uses' => 'IpController@subnetList']);
     Route::get   ('/ip/subnet/{subnet}',      ['as' => 'ip.subnet',      'uses' => 'IpController@subnet']);

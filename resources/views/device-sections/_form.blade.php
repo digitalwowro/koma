@@ -28,6 +28,61 @@
 </div>
 
 <div class="form-group">
+    <label for="title" class="col-lg-2 control-label">Categories</label>
+
+    <div class="col-lg-10">
+        <table class="table table-striped table-hover table-bordered table-field-options">
+            <thead>
+            <tr>
+                <th style="text-align: center;">#</th>
+                <th>Name</th>
+                <th>Del</th>
+            </tr>
+            </thead>
+            <tbody>
+                @forelse ($deviceSection->categories as $key => $label)
+                    <tr>
+                        <td style="width:1px; white-space:nowrap; text-align: center;">
+                            <i class="fa fa-reorder"></i>
+                        </td>
+
+                        <td>
+                            {{ $label }}
+
+                            <input type="hidden" name="categories[]" value="{{ $label }}">
+                            <input type="hidden" name="categoryid[]" value="{{ $key }}">
+                        </td>
+
+                        <td style="width:1px; white-space:nowrap; text-align: center;">
+                            <a href="#" title="Delete this field" class="delete-field">
+                                <i class="fa fa-trash-o"></i>
+                            </a>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 20px 0;">
+                            No categories have been defined
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <td colspan="5" style="text-align: center;">
+                        <a href="#" id="add-new-category">
+                            <i class="fa fa-plus"></i>
+                            Add a new category
+                        </a>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<div class="form-group">
     <label for="title" class="col-lg-2 control-label">Fields</label>
 
     <div class="col-lg-10">
@@ -89,7 +144,6 @@
 <div class="form-group">
     <div class="col-lg-10 col-lg-offset-2">
         <button type="submit" class="btn btn-primary">{{ isset($deviceSection) ? 'Save' : 'Add' }}</button>
-        <button type="reset" class="btn btn-default">Reset</button>
         <a href="{{ route('device-sections.index') }}" class="btn btn-default">Cancel</a>
     </div>
 </div>
@@ -154,6 +208,50 @@
 
                 refreshAllIndexes();
                 refreshTr($tr);
+            });
+
+            $('#add-new-category').click(function(e) {
+                e.preventDefault();
+
+                var $this = $(this),
+                    $tbody = $this.closest('table').find('tbody'),
+                    name = prompt('Enter category name'),
+                    chars = '0123456789abcdefghijklmnopqrstuvwxyz',
+                    key = '';
+
+                for (var i = 0; i < 8; i++) {
+                    key += chars[Math.floor(Math.random() * chars.length)];
+                }
+
+                if (name) {
+                    name = name.replace('"', '&quot;');
+
+                    var $tr = $tbody.find('tr'),
+                        html = '<tr>' +
+                        '<td style="width:1px; white-space:nowrap; text-align: center;">' +
+                            '<i class="fa fa-reorder"></i>' +
+                        '</td>' +
+
+                        '<td>' +
+                            name +
+
+                            '<input type="hidden" name="categories[]" value="' + name + '">' +
+                            '<input type="hidden" name="categoryid[]" value="' + key + '">' +
+                        '</td>' +
+
+                        '<td style="width:1px; white-space:nowrap; text-align: center;">' +
+                            '<a href="#" title="Delete this field" class="delete-field">' +
+                            '<i class="fa fa-trash-o"></i>' +
+                            '</a>' +
+                        '</td>' +
+                    '</tr>';
+
+                    if ($tr.length === 1 && $tr.find('td').length === 1) {
+                        $tbody.html(html);
+                    } else {
+                        $tbody.append(html);
+                    }
+                }
             });
 
             $('table.table-field-options').on('change', 'select.field-type', function() {
