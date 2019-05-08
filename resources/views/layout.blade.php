@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-    <title>HipoAdmin</title>
+    <title>Neutral Admin</title>
 
     <!-- bootstrap -->
     {!! HTML::style('css/bootstrap/bootstrap.min.css') !!}
@@ -266,7 +266,7 @@
 
                 <footer id="footer-bar" class="row">
                     <p id="footer-copyright" class="col-xs-12">
-                        &copy; {{ date('Y') }} WebHipo.
+                        &copy; {{ date('Y') }} DigitalWow.
                     </p>
                 </footer>
             </div>

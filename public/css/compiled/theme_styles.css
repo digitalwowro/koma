@@ -245,7 +245,7 @@ a {
   margin-top: 0;
   margin-bottom: 0;
   position: relative;
-  min-height: 1200px;
+  min-height: calc(100vh - 50px);
   padding: 15px 15px 35px 15px;
   margin-left: 220px; }
   @media (max-width: 991px) {
