@@ -135,7 +135,7 @@
                         &gt;
 
                         <a href="{{ route('devices.show', ['type' => $permission->resource->section_id, 'id' => $permission->resource->id]) }}" target="_blank">
-                            {{ @reset($permission->resource->data) }}
+                            {{ $permission->resource->present()->humanIdField }}
                         </a>
 
                         <input type="hidden" name="permissions[{{ $i }}][type]" value="device">

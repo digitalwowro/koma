@@ -140,5 +140,4 @@ class DeviceSection extends Model
 
         return $return;
     }
-
 }

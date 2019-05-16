@@ -109,7 +109,7 @@
                                         </a>
 
                                         @can('superadmin')
-                                        <a href="{{ route('devices.share', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link share-device" title="Share">
+                                        <a href="{{ route('devices.share', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link share-device" title="Share" data-human-id="{{ $device->present()->humanIdField($deviceSection) }}">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
                                                 <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
@@ -251,9 +251,9 @@
                 e.preventDefault();
 
                 url = $(this).attr('href');
-                devId = $.trim($(this).closest('tr').find('td:first').text());
+                devId = $(this).data('human-id');
 
-                $('#shareModal .modal-title').html('Share device ' + devId);
+                $('#shareModal .modal-title').html('Share device <u>' + devId + '</u>');
 
                 $('#shareModal').modal('show');
             });

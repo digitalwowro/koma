@@ -2,10 +2,19 @@
 
 namespace App;
 
+use App\Presenters\DevicePresenter;
 use Illuminate\Database\Eloquent\Model;
+use Laracasts\Presenter\PresentableTrait;
 
 class Device extends Model
 {
+    use PresentableTrait;
+
+    /**
+     * @var string
+     */
+    protected $presenter = DevicePresenter::class;
+
     /**
      * The attributes that are mass assignable.
      *
