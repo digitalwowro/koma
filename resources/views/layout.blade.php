@@ -326,6 +326,9 @@
         // show the notification
         notification.show();
     @endif
+
+    var xsrf_token = Cookies.get("XSRF-TOKEN");
+    $.ajaxSetup({ headers: { 'X-XSRF-TOKEN': xsrf_token } });
 </script>
 
 @yield('footer')

@@ -51,18 +51,31 @@ class Device extends Model
      */
     public function getDataAttribute($value)
     {
-        try
-        {
+        try {
             $return = @json_decode(dsDecrypt($value), true);
 
-            if ( ! is_array($return)) return [];
-
-            return $return;
-        }
-        catch (\Exception $e)
-        {
+            return is_array($return) ? $return : [];
+        } catch (\Exception $e) {
             return [];
         }
     }
 
+    public function sharedWith()
+    {
+        return Permission::with('user')
+            ->orWhere(function($query) {
+                $query
+                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_DEVICE)
+                    ->where('resource_id', $this->id);
+            })
+            ->orWhere(function($query) {
+                $query
+                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_SECTION)
+                    ->where('resource_id', $this->section_id);
+            })
+            ->orWhere(function($query) {
+                $query->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_FULL);
+            })
+            ->get();
+    }
 }

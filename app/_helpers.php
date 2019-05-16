@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Contracts\Encryption\DecryptException;
+
 /**
  * Check if a the current route is the one given
  *
@@ -109,7 +111,11 @@ function dsDecrypt($str, $key = null)
         $GLOBALS['encrypters'][$key] = new \Illuminate\Encryption\Encrypter($key, $cipher);
     }
 
-    return $GLOBALS['encrypters'][$key]->decrypt(base64_decode($str));
+    try {
+        return $GLOBALS['encrypters'][$key]->decrypt(base64_decode($str));
+    } catch (DecryptException $e) {
+        return '- invalid MAC -';
+    }
 }
 
 /**

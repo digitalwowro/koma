@@ -16,12 +16,12 @@
 
     <div class="row">
         <div class="col-lg-12">
-            <div class="main-box clearfix">
-                <header class="main-box-header clearfix">
+            <div class="main-box">
+                <header class="main-box-header">
                     <h2 class="pull-left">{{ str_singular($deviceSection->title) }} Details</h2>
                 </header>
 
-                <div class="main-box-body clearfix">
+                <div class="main-box-body">
                     @foreach ($device->section->fields as $field)
                         <div class="row">
                             <label for="title" class="col-lg-2 control-label">{{ $field->getName() }}</label>
@@ -41,12 +41,14 @@
                         </div>
                     @endforeach
                 </div>
+            </div>
 
-                <header class="main-box-header clearfix">
+            <div class="main-box">
+                <header class="main-box-header">
                     <h2 class="pull-left">Associated IP Addresses</h2>
                 </header>
 
-                <div class="main-box-body clearfix">
+                <div class="main-box-body">
                     <ul>
                         @forelse ($device->ips as $ip)
                             <li>{{ $ip->ip }}</li>
@@ -54,7 +56,31 @@
                             <li style="font-size:.9em; color:grey; font-style: italic;">there are no IP Addresses associated to this device</li>
                         @endforelse
                     </ul>
+                </div>
+            </div>
 
+            <div class="main-box">
+                <header class="main-box-header">
+                    <h2 class="pull-left">Shared with</h2>
+                </header>
+
+                <div class="main-box-body">
+                    <ul>
+                        @forelse ($device->sharedWith() as $share)
+                            <li>
+                                <a href="{{ route('users.edit', $share->user_id) }}">{{ $share->user->name }}</a>
+
+                                ({!! $share->present()->grantThrough !!})
+                            </li>
+                        @empty
+                            <li>Device is not shared</li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+
+            <div class="main-box">
+                <div class="main-box-body" style="padding-top: 20px;">
                     <a href="{{ route('devices.index', $deviceSection->id) }}" class="btn btn-default btn-xs">Go Back</a>
                 </div>
             </div>

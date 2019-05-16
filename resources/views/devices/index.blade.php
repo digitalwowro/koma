@@ -101,15 +101,24 @@
                                     @endforeach
 
                                     <td style="width: 1%; white-space: nowrap;">
-                                        <a href="{{ route('devices.show', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link">
+                                        <a href="{{ route('devices.show', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link" title="View">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
                                                 <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
                                             </span>
                                         </a>
 
+                                        @can('superadmin')
+                                        <a href="{{ route('devices.share', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link share-device" title="Share">
+                                            <span class="fa-stack">
+                                                <i class="fa fa-square fa-stack-2x"></i>
+                                                <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
+                                            </span>
+                                        </a>
+                                        @endcan
+
                                         @can('edit', $device)
-                                        <a href="{{ route('devices.edit', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link">
+                                        <a href="{{ route('devices.edit', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link" title="Edit">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
                                                 <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
@@ -119,7 +128,7 @@
 
                                         @can('delete', $device)
                                         {!! Form::open(['route' => ['devices.destroy', $device->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
-                                        <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this device?')) $(this).closest('form').submit();">
+                                        <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this device?')) $(this).closest('form').submit();" title="Delete">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
                                                 <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
@@ -152,6 +161,7 @@
             </div>
         </div>
     </div>
+
     <style type="text/css">
         @media (max-width: 760px) {
             <?php $i = 1; ?>
@@ -164,4 +174,132 @@
             table.table-responsive > tbody > tr > td:nth-of-type({{ $i++ }}):before { content: ""; }
         }
     </style>
+
+    <div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Share Device</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="user-select">User</label>
+                        <select id="user-select" style="width:100%;">
+                            @foreach(App\User::whereRole(App\User::ROLE_SYSADMIN)->orderBy('name')->get() as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Permission Level</label>
+
+                        <br>
+
+                        <div class="radio radio-inline" style="margin-top: 10px;">
+                            {!! Form::radio('permission', App\Permission::GRANT_TYPE_READ, null, [
+                                'id' => "grant-view",
+                                'class' => 'form-control',
+                                'required' => true,
+                            ]) !!}
+                            <label for="grant-view">
+                                View
+                            </label>
+                        </div>
+
+                        <div class="radio radio-inline" style="margin-top: 10px;">
+                            {!! Form::radio('permission', App\Permission::GRANT_TYPE_WRITE, null, [
+                                'id' => "grant-edit",
+                                'class' => 'form-control',
+                                'required' => true,
+                            ]) !!}
+                            <label for="grant-edit">
+                                View &amp; Edit
+                            </label>
+                        </div>
+
+                        <div class="radio radio-inline" style="margin-top: 10px;">
+                            {!! Form::radio('permission', App\Permission::GRANT_TYPE_FULL, null, [
+                                'id' => "grant-full",
+                                'class' => 'form-control',
+                                'required' => true,
+                            ]) !!}
+                            <label for="grant-full">
+                                View, Edit &amp; Delete
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="pull-left more-info hidden" style="margin-top: 5px;"></span>
+
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary do-share-device">Share</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @stop
+
+@section('footer')
+    <script>
+        $(document).ready(function() {
+            var url, devId;
+
+            $('a.share-device').click(function(e) {
+                e.preventDefault();
+
+                url = $(this).attr('href');
+                devId = $.trim($(this).closest('tr').find('td:first').text());
+
+                $('#shareModal .modal-title').html('Share device ' + devId);
+
+                $('#shareModal').modal('show');
+            });
+
+            $('.do-share-device').click(function(e) {
+                e.preventDefault();
+
+                var $modal = $('#shareModal'),
+                    $moreinfo = $modal.find('.modal-footer .more-info'),
+                    params = {
+                        user_id: $('#shareModal #user-select').val(),
+                        grant_type: $('#shareModal [name=permission]:checked').val(),
+                    };
+
+                $modal.find('button').attr('disabled', true);
+
+                $moreinfo.html('<i class="fa fa-spinner fa-spin"></i> Please Wait...')
+                    .removeClass('hidden');
+
+                $.post(url, params, function(r) {
+                    $modal.find('button').removeAttr('disabled');
+
+                    if (r.error) {
+                        $moreinfo.html('<span style="color:darkred;">' + r.error + '</span>');
+                    }
+
+                    if (r.success) {
+                        $moreinfo.addClass('hidden');
+                        $('#shareModal').modal('hide');
+
+                        var notification = new NotificationFx({
+                            message : '<span class="icon fa fa-bullhorn fa-2x"></span><p>Device has been shared</p>',
+                            layout : 'bar',
+                            effect : 'slidetop',
+                            type : 'success' // notice, warning or error
+                        });
+
+                        // show the notification
+                        notification.show();
+                    }
+                }).fail(function() {
+                    $modal.find('button').removeAttr('disabled');
+
+                    $moreinfo.html('<span style="color:darkred;">Could not share device</span>');
+                });
+            });
+        });
+    </script>
+@append

@@ -149,8 +149,8 @@ class User extends Model implements AuthenticatableContract,
             if (isset($resourceType, $resourceId, $grantType)) {
                 $this->permissions()->create([
                     'resource_type' => $resourceType,
-                    'resource_id'   => $resourceId ? $resourceId : null,
-                    'grant_type'    => $grantType,
+                    'resource_id' => $resourceId ? $resourceId : null,
+                    'grant_type' => $grantType,
                 ]);
             }
         }

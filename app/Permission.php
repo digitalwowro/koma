@@ -2,11 +2,15 @@
 
 namespace App;
 
+use App\Presenters\PermissionPresenter;
 use Illuminate\Database\Eloquent\Model;
 use Cache;
+use Laracasts\Presenter\PresentableTrait;
 
 class Permission extends Model
 {
+    use PresentableTrait;
+
     const GRANT_TYPE_NONE  = 0;
     const GRANT_TYPE_READ  = 1;
     const GRANT_TYPE_WRITE = 2;
@@ -17,6 +21,19 @@ class Permission extends Model
     const RESOURCE_TYPE_DEVICES_DEVICE  = 3;
 
     private static $cachedPermissions;
+
+    /**
+     * @var string
+     */
+    protected $presenter = PermissionPresenter::class;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['resource_type', 'resource_id', 'resource_type', 'grant_type'];
+
 
     private static $acl = [
         'view' => [

@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Device;
 use App\DeviceSection;
+use App\Exceptions\AlreadyHasPermissionException;
 use App\IpAddress;
+use App\Permission;
+use App\User;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -57,7 +61,7 @@ class DeviceController extends Controller
 
             try {
                 $filters = json_decode(request()->cookie('device-filters'), true);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $filters = [];
             }
 
@@ -76,7 +80,7 @@ class DeviceController extends Controller
             }
 
             return view('devices.index', compact('deviceSection', 'devices', 'colspan', 'filters', 'category', 'categoryLabel', 'type'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Could not find device section');
@@ -91,7 +95,7 @@ class DeviceController extends Controller
             $this->authorize('edit', $deviceSection);
 
             return view('devices.create', compact('deviceSection'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Could not find device section');
@@ -104,7 +108,7 @@ class DeviceController extends Controller
      *
      * @param array $ipArray
      * @param \App\Device $device
-     * @throws \Exception
+     * @throws Exception
      */
     private function assignIpsToDevice(array $ipArray, Device $device)
     {
@@ -131,7 +135,7 @@ class DeviceController extends Controller
             }
 
             if ($ip->assigned()) {
-                throw new \Exception("IP {$ip->ip} is already assigned!");
+                throw new Exception("IP {$ip->ip} is already assigned!");
             }
 
             $ip->device_id = $device->id;
@@ -141,7 +145,7 @@ class DeviceController extends Controller
         // custom IPs
         foreach ($ipArray as $customIp) {
             if ( ! filter_var($customIp, FILTER_VALIDATE_IP)) {
-                throw new \Exception("IP {$customIp} is not a valid IP address");
+                throw new Exception("IP {$customIp} is not a valid IP address");
             }
 
             $this->ipAddress->forceCreate([
@@ -203,7 +207,7 @@ class DeviceController extends Controller
             return redirect()
                 ->route('devices.index', $type)
                 ->withSuccess('Device has been added');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -220,7 +224,7 @@ class DeviceController extends Controller
             $this->authorize('edit', $device);
 
             return view('devices.edit', compact('deviceSection', 'device'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->route('devices.index', $type)
                 ->withError('Could not find device');
@@ -253,7 +257,7 @@ class DeviceController extends Controller
             return redirect()
                 ->route('devices.index', $device->section_id)
                 ->withSuccess('Device has been updated');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -273,7 +277,7 @@ class DeviceController extends Controller
             return redirect()
                 ->back()
                 ->withSuccess('Device has been deleted');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Error deleting device: ' . $e->getMessage());
@@ -289,10 +293,117 @@ class DeviceController extends Controller
             $this->authorize('view', $device);
 
             return view('devices.show', compact('device', 'deviceSection'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->route('devices.index', $type)
                 ->withError('Could not find device');
+        }
+    }
+
+    /**
+     * Check if user already has permissions
+     *
+     * @param int $grantType
+     * @param int $user
+     * @param int $id
+     * @param int $type
+     * @throws AlreadyHasPermissionException
+     */
+    protected function alreadyHasPermissions($grantType, $user, $id, $type)
+    {
+        if (in_array($user->role, [User::ROLE_ADMIN, User::ROLE_SUPERADMIN])) {
+            throw new AlreadyHasPermissionException;
+        }
+
+        if ($grantType === Permission::GRANT_TYPE_FULL) { // rwd
+            $greaterPermissions = [Permission::GRANT_TYPE_FULL];
+        } elseif ($grantType === Permission::GRANT_TYPE_WRITE) { // rw
+            $greaterPermissions = [Permission::GRANT_TYPE_FULL, Permission::GRANT_TYPE_WRITE];
+        } elseif ($grantType === Permission::GRANT_TYPE_READ) { // r
+            $greaterPermissions = [Permission::GRANT_TYPE_FULL, Permission::GRANT_TYPE_WRITE, Permission::GRANT_TYPE_READ];
+        } else {
+            throw new Exception('Invalid permission');
+        }
+
+        $exists = $user->permissions()->whereIn('grant_type', $greaterPermissions)
+            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_DEVICE)
+            ->where('resource_id', $id)
+            ->exists();
+
+        if ($exists) {
+            throw new AlreadyHasPermissionException;
+        }
+
+        $exists = $user->permissions()->whereIn('grant_type', $greaterPermissions)
+            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_SECTION)
+            ->where('resource_id', $type)
+            ->exists();
+
+        if ($exists) {
+            throw new AlreadyHasPermissionException;
+        }
+    }
+
+    protected function deleteInferiorPermissions($grantType, $user, $id, $type)
+    {
+        if ($grantType === Permission::GRANT_TYPE_FULL) { // rwd
+            $toDelete = [Permission::GRANT_TYPE_WRITE, Permission::GRANT_TYPE_READ];
+        } elseif ($grantType === Permission::GRANT_TYPE_WRITE) { // rw
+            $toDelete = [Permission::GRANT_TYPE_READ];
+        }
+
+        if (!empty($toDelete)) {
+            $user->permissions()->whereIn('grant_type', $toDelete)
+                ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_DEVICE)
+                ->where('resource_id', $id)
+                ->delete();
+        }
+    }
+
+    /**
+     * @param int     $type
+     * @param int     $id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function share($type, $id, Request $request)
+    {
+        try {
+            $this->authorize('superadmin');
+
+            $this->deviceSection->findOrFail($type);
+            $this->model->findOrFail($id);
+
+            $user = User::findOrFail($request->input('user_id'));
+            $grantType = intval($request->input('grant_type'));
+
+            $this->alreadyHasPermissions($grantType, $user, $id, $type);
+
+            $user->permissions()->create([
+                'resource_type' => Permission::RESOURCE_TYPE_DEVICES_DEVICE,
+                'resource_id' => $id,
+                'grant_type' => $grantType,
+            ]);
+
+            $this->deleteInferiorPermissions($grantType, $user, $id, $type);
+
+            Permission::flushCache();
+
+            return response()->json([
+                'success' => true,
+            ]);
+        } catch (AlreadyHasPermissionException $e) {
+            return response()->json([
+                'error' => 'User already has access to this device',
+            ]);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'error' => 'Could not share device',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 

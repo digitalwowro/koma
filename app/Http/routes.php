@@ -27,6 +27,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get   ('/devices/{type}/{id}',        ['as' => 'devices.show',      'uses' => 'DeviceController@show']);
     Route::post  ('/devices/{type}',             ['as' => 'devices.store',     'uses' => 'DeviceController@store']);
     Route::get   ('/devices/{type}/{id}/edit',   ['as' => 'devices.edit',      'uses' => 'DeviceController@edit']);
+    Route::post  ('/devices/{type}/{id}/share',  ['as' => 'devices.share',     'uses' => 'DeviceController@share']);
     Route::put   ('/devices/{id}',               ['as' => 'devices.update',    'uses' => 'DeviceController@update']);
     Route::delete('/devices/{id}',               ['as' => 'devices.destroy',   'uses' => 'DeviceController@destroy']);
 
