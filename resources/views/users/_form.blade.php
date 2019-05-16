@@ -388,7 +388,7 @@
                         '<div class="radio pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
                             '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-create" class="form-control" value="{{ \App\Permission::GRANT_TYPE_CREATE }}" required>' +
 
-                            '<label for="grant-' + nextId + '-full">' +
+                            '<label for="grant-' + nextId + '-create">' +
                                 'Create' +
                             '</label>' +
                         '</div>' +
