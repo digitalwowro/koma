@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Device;
-use Illuminate\Http\Request;
-
 use App\IpCategory;
 use App\IpAddress;
 use App\IpField;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Exception;
+use Illuminate\Http\Request;
 
 class IpController extends Controller
 {
@@ -30,22 +30,19 @@ class IpController extends Controller
 
     public function __construct(IpAddress $model, IpCategory $ipCategory, IpField $fields)
     {
-        $this->model      = $model;
+        $this->model = $model;
         $this->ipCategory = $ipCategory;
-        $this->fields     = $fields;
+        $this->fields = $fields;
     }
 
     public function index($category)
     {
-        try
-        {
+        try {
             $subnets = $this->model->getSubnetsFor($category);
             $ipCategory = $this->ipCategory->findOrFail($category);
 
             return view('ips.index', compact('ipCategory', 'subnets'));
-        }
-        catch (\Exception $e)
-        {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Could not find IP Address');
@@ -56,16 +53,13 @@ class IpController extends Controller
     {
         $this->authorize('admin');
 
-        try
-        {
+        try {
             $this->model->createSubnet($request->input('subnet'), $category);
 
             return redirect()
                 ->route('ip.index', $category)
                 ->withSuccess('IP Address has been added');
-        }
-        catch (\Exception $e)
-        {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -77,8 +71,7 @@ class IpController extends Controller
     {
         $this->authorize('admin');
 
-        try
-        {
+        try {
             $id = str_replace('-', '/', $id);
             $ip = $this->model->where('subnet', $id);
 
@@ -87,9 +80,7 @@ class IpController extends Controller
             return redirect()
                 ->back()
                 ->withSuccess('Subnet has been deleted');
-        }
-        catch (\Exception $e)
-        {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Could not find subnet');
@@ -98,15 +89,12 @@ class IpController extends Controller
 
     public function show($category, $id)
     {
-        try
-        {
+        try {
             $ipCategory = $this->ipCategory->findOrFail($category);
             $ip = $this->model->findOrFail($id);
 
             return view('ips.show', compact('ip', 'ipCategory'));
-        }
-        catch (\Exception $e)
-        {
+        } catch (Exception $e) {
             return redirect()
                 ->route('ip.index')
                 ->withError('Could not find IP Address');
@@ -115,32 +103,27 @@ class IpController extends Controller
 
     public function subnet($subnet, Device $deviceModel)
     {
-        try
-        {
+        try {
             $subnet = str_replace('-', '/', $subnet);
 
-            $ips   = $this->model->getIPsForSubnet($subnet);
+            $ips = $this->model->getIPsForSubnet($subnet);
             $first = $ips->first();
 
-            if ( ! $first)
-            {
-                throw new \Exception('No IPs found for given subnet');
+            if (!$first) {
+                throw new Exception('No IPs found for given subnet');
             }
 
             $ipCategory = $this->ipCategory->findOrFail($first->category_id);
-            $devices    = $deviceModel->orderBy('section_id')->get();
+            $devices = $deviceModel->orderBy('section_id')->get();
             $allDevices = [];
-            $ipFields   = $this->fields->orderBy('sort')->get();
+            $ipFields = $this->fields->orderBy('sort')->get();
 
-            foreach ($devices as $device)
-            {
+            foreach ($devices as $device) {
                 $allDevices[$device->section->title][] = $device->title;
             }
 
             return view('ips.subnet', compact('subnet', 'ips', 'ipCategory', 'allDevices', 'ipFields'));
-        }
-        catch (\Exception $e)
-        {
+        } catch (Exception $e) {
           return redirect()
               ->back()
               ->withError($e->getMessage());
@@ -149,8 +132,7 @@ class IpController extends Controller
 
     public function assign($id, Request $request)
     {
-        try
-        {
+        try {
             $deviceId = $request->input('device_id');
 
             $ip = $this->model->findOrFail($id);
@@ -162,9 +144,7 @@ class IpController extends Controller
             return redirect()
                 ->back()
                 ->withSuccess('IP has been assigned');
-        }
-        catch (\Exception $e)
-        {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Error assigning IP');
@@ -175,17 +155,16 @@ class IpController extends Controller
     {
         $subnet = str_replace('-', '/', $subnet);
         $return = [];
-        $rows   = $this->model
+        $rows = $this->model
             ->where('subnet', $subnet)
             ->whereNull('device_id')
             ->orderBy('id')
             ->get();
 
-        foreach ($rows as $row)
-        {
+        foreach ($rows as $row) {
             $return[] = [
-                'id'       => $row->id,
-                'ip'       => $row->ip,
+                'id' => $row->id,
+                'ip' => $row->ip,
                 'assigned' => $row->assigned(),
             ];
         }

@@ -1,7 +1,12 @@
 <?php
 
-Route::pattern('type', '[0-9]+');
+// temporary hack for eloquent error with php7.2 and laravel < 5.60
+// @todo remove after laravel 5.6 update
+if(version_compare(PHP_VERSION, '7.2.0', '>=')) {
+    error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
+}
 
+Route::pattern('type', '[0-9]+');
 
 Route::controller('auth', 'Auth\AuthController');
 

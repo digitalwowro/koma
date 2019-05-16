@@ -79,8 +79,8 @@ class IpAddress extends Model
 
         for ($pos = 0; $pos < pow(2, (32 - $mask)); ++$pos) {
             self::create([
-                'ip'          => long2ip($currentIp + $pos),
-                'subnet'      => $subnet,
+                'ip' => long2ip($currentIp + $pos),
+                'subnet' => $subnet,
                 'category_id' => $categoryId,
             ]);
         }

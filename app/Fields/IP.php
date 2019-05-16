@@ -61,8 +61,7 @@ class IP extends AbstractField
         $output .= '<select id="' . $rand . '" style="width:100%; max-width:300px;" name="' . $name . '"" multiple>';
         $value   = is_array($value) ? $value : (array)$value;
 
-        foreach ($subnets as $subnet)
-        {
+        foreach ($subnets as $subnet) {
             $selected = in_array($subnet->subnet, $value) ? ' selected' : '';
             $output .= '<option value="' . htmlentities($subnet->subnet) . '"'. $selected .'>' . htmlentities($subnet->category->title) . ':' . htmlentities($subnet->subnet) . '</option>';
         }
