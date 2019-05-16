@@ -146,7 +146,10 @@ class IpAddress extends Model
      */
     public function getIPsForSubnet($subnet)
     {
-        return self::where('subnet', $subnet)->orderBy('id')->get();
+        return self::with('device')
+            ->where('subnet', $subnet)
+            ->orderBy('id')
+            ->get();
     }
 
     /**

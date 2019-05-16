@@ -87,20 +87,6 @@ class IpController extends Controller
         }
     }
 
-    public function show($category, $id)
-    {
-        try {
-            $ipCategory = $this->ipCategory->findOrFail($category);
-            $ip = $this->model->findOrFail($id);
-
-            return view('ips.show', compact('ip', 'ipCategory'));
-        } catch (Exception $e) {
-            return redirect()
-                ->route('ip.index')
-                ->withError('Could not find IP Address');
-        }
-    }
-
     public function subnet($subnet, Device $deviceModel)
     {
         try {

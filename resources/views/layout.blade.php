@@ -74,12 +74,14 @@
                             </a>
                             <ul class="dropdown-menu">
                                 @foreach ($deviceSections as $deviceSection)
+                                    @can('list-section', $deviceSection)
                                     <li class="item">
                                         <a href="{{ route('devices.create', $deviceSection->id) }}">
                                             {!! $deviceSection->present()->icon !!}
                                             Create {{ str_singular($deviceSection->title) }}
                                         </a>
                                     </li>
+                                    @endcan
                                 @endforeach
                             </ul>
                         </li>
@@ -197,6 +199,7 @@
                                         @endforeach
                                     </ul>
                                 </li>
+
                                 @can('admin')
                                 <li {!! is_route('ip.*') !!}>
                                     <a href="#" class="dropdown-toggle">
