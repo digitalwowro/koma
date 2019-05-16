@@ -11,10 +11,12 @@ class Permission extends Model
 {
     use PresentableTrait;
 
-    const GRANT_TYPE_NONE  = 0;
-    const GRANT_TYPE_READ  = 1;
-    const GRANT_TYPE_WRITE = 2;
-    const GRANT_TYPE_FULL  = 3;
+    const GRANT_TYPE_NONE        = 0;
+    const GRANT_TYPE_READ        = 1;
+    const GRANT_TYPE_WRITE       = 2;
+    const GRANT_TYPE_FULL        = 3;
+    const GRANT_TYPE_CREATE      = 4; // only for device sections
+    const GRANT_TYPE_READ_CREATE = 5; // only for device sections
 
     const RESOURCE_TYPE_DEVICES_FULL    = 1;
     const RESOURCE_TYPE_DEVICES_SECTION = 2;
@@ -40,6 +42,7 @@ class Permission extends Model
             self::GRANT_TYPE_READ,
             self::GRANT_TYPE_WRITE,
             self::GRANT_TYPE_FULL,
+            self::GRANT_TYPE_READ_CREATE,
         ],
 
         'edit' => [
@@ -50,7 +53,18 @@ class Permission extends Model
         'delete' => [
             self::GRANT_TYPE_FULL,
         ],
+
+        'create' => [
+            self::GRANT_TYPE_WRITE,
+            self::GRANT_TYPE_FULL,
+            self::GRANT_TYPE_CREATE,
+            self::GRANT_TYPE_READ_CREATE,
+        ],
     ];
+
+    public static function getAcl($action) {
+        return self::$acl[$action] ?? [];
+    }
 
     /**
      * Relationship with User
@@ -113,7 +127,7 @@ class Permission extends Model
     /**
      * Check given permission for given user
      *
-     * @param string $action: view, edit
+     * @param string $action: view, edit, delete, create
      * @param mixed $resource
      * @param int|null $userId
      * @return bool

@@ -74,7 +74,7 @@
                             </a>
                             <ul class="dropdown-menu">
                                 @foreach ($deviceSections as $deviceSection)
-                                    @can('list-section', $deviceSection)
+                                    @can('list', $deviceSection)
                                     <li class="item">
                                         <a href="{{ route('devices.create', $deviceSection->id) }}">
                                             {!! $deviceSection->present()->icon !!}
@@ -167,7 +167,7 @@
                                     </a>
                                     <ul class="submenu">
                                         @foreach ($deviceSections as $deviceSection)
-                                        @can('list-section', $deviceSection)
+                                        @can('list', $deviceSection)
                                         <li class="{{ is_route_bool('devices.*', ['type' => $deviceSection->id]) ? 'open' : '' }}">
                                             <a
                                                 href="{{ route('devices.index', $deviceSection->id) }}"

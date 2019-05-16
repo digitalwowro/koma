@@ -92,7 +92,7 @@ class DeviceController extends Controller
         try {
             $deviceSection = $this->deviceSection->findOrFail($type);
 
-            $this->authorize('edit', $deviceSection);
+            $this->authorize('create', $deviceSection);
 
             return view('devices.create', compact('deviceSection'));
         } catch (Exception $e) {
@@ -186,7 +186,7 @@ class DeviceController extends Controller
         try {
             $section = $this->deviceSection->findOrFail($type);
 
-            $this->authorize('edit', $section);
+            $this->authorize('create', $section);
 
             $data = $request->input();
 
@@ -202,6 +202,17 @@ class DeviceController extends Controller
 
             if (isset($data['ips']) && is_array($data['ips'])) {
                 $this->assignIpsToDevice($data['ips'], $device);
+            }
+
+            if ($request->user()->cannot('edit', $section)) {
+                // if user has permission to create entries but not edit entries, he will no longer be
+                // able to access his device, so we'll assign rwd permission for the newly created device
+
+                $request->user()->permissions()->create([
+                    'resource_type' => Permission::RESOURCE_TYPE_DEVICES_DEVICE,
+                    'resource_id' => $device->id,
+                    'grant_type' => Permission::GRANT_TYPE_FULL,
+                ]);
             }
 
             return redirect()
@@ -316,11 +327,11 @@ class DeviceController extends Controller
         }
 
         if ($grantType === Permission::GRANT_TYPE_FULL) { // rwd
-            $greaterPermissions = [Permission::GRANT_TYPE_FULL];
+            $greaterPermissions = Permission::getAcl('delete');
         } elseif ($grantType === Permission::GRANT_TYPE_WRITE) { // rw
-            $greaterPermissions = [Permission::GRANT_TYPE_FULL, Permission::GRANT_TYPE_WRITE];
+            $greaterPermissions = Permission::getAcl('edit');
         } elseif ($grantType === Permission::GRANT_TYPE_READ) { // r
-            $greaterPermissions = [Permission::GRANT_TYPE_FULL, Permission::GRANT_TYPE_WRITE, Permission::GRANT_TYPE_READ];
+            $greaterPermissions = Permission::getAcl('view');
         } else {
             throw new Exception('Invalid permission');
         }
@@ -344,7 +355,7 @@ class DeviceController extends Controller
         }
     }
 
-    protected function deleteInferiorPermissions($grantType, $user, $id, $type)
+    protected function deleteInferiorPermissions($grantType, $user, $id)
     {
         if ($grantType === Permission::GRANT_TYPE_FULL) { // rwd
             $toDelete = [Permission::GRANT_TYPE_WRITE, Permission::GRANT_TYPE_READ];
@@ -385,7 +396,7 @@ class DeviceController extends Controller
                 'grant_type' => $grantType,
             ]);
 
-            $this->deleteInferiorPermissions($grantType, $user, $id, $type);
+            $this->deleteInferiorPermissions($grantType, $user, $id);
 
             Permission::flushCache();
 

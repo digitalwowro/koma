@@ -104,7 +104,7 @@
                 @foreach ($user->permissions as $i => $permission)
                 @if ($permission->preloadResource())
                 <tr>
-                    @if ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_FULL)
+                    @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_FULL)
                     <td>
                         <i class="fa fa-star"></i>
 
@@ -113,7 +113,7 @@
                         <input type="hidden" name="permissions[{{ $i }}][type]" value="global">
                         <input type="hidden" name="permissions[{{ $i }}][id]" value="">
                     </td>
-                    @elseif ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_SECTION)
+                    @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION)
                     <td>
                         <i class="fa fa-server"></i>
 
@@ -124,7 +124,7 @@
                         <input type="hidden" name="permissions[{{ $i }}][type]" value="section">
                         <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
                     </td>
-                    @elseif ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_DEVICE)
+                    @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_DEVICE)
                     <td>
                         <i class="fa fa-server"></i>
 
@@ -146,35 +146,69 @@
 
                     <td>
                         <div class="radio pull-left" style="margin-right: 10px;">
-                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ, $permission->grant_type == $permission::GRANT_TYPE_READ, [
+                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ, $permission->grant_type === $permission::GRANT_TYPE_READ, [
                                 'id' => "grant-{$i}-view",
                                 'class' => 'form-control',
                                 'required' => true,
                             ]) !!}
                             <label for="grant-{{ $i }}-view">
-                                View
+                                @if ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_DEVICE)
+                                    View
+                                @else
+                                    View all
+                                @endif
                             </label>
                         </div>
 
                         <div class="radio pull-left" style="margin-right: 10px;">
-                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_WRITE, $permission->grant_type == $permission::GRANT_TYPE_WRITE, [
+                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_WRITE, $permission->grant_type === $permission::GRANT_TYPE_WRITE, [
                                 'id' => "grant-{$i}-edit",
                                 'class' => 'form-control',
                                 'required' => true,
                             ]) !!}
                             <label for="grant-{{ $i }}-edit">
-                                View &amp; Edit
+                                @if ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_DEVICE)
+                                    View &amp; Edit
+                                @else
+                                    View all &amp; Edit all
+                                @endif
                             </label>
                         </div>
 
                         <div class="radio pull-left" style="margin-right: 10px;">
-                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_FULL, $permission->grant_type == $permission::GRANT_TYPE_FULL, [
+                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_FULL, $permission->grant_type === $permission::GRANT_TYPE_FULL, [
                                 'id' => "grant-{$i}-full",
                                 'class' => 'form-control',
                                 'required' => true,
                             ]) !!}
                             <label for="grant-{{ $i }}-full">
-                                View, Edit &amp; Delete
+                                @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_DEVICE)
+                                    View, Edit &amp; Delete
+                                @else
+                                    View all, Edit all &amp; Delete all
+                                @endif
+                            </label>
+                        </div>
+
+                        <div class="radio pull-left{{ $permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION ? '' : ' hidden' }}" style="margin-right: 10px;">
+                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_CREATE, $permission->grant_type === $permission::GRANT_TYPE_CREATE, [
+                                'id' => "grant-{$i}-create",
+                                'class' => 'form-control',
+                                'required' => true,
+                            ]) !!}
+                            <label for="grant-{{ $i }}-create">
+                                Create
+                            </label>
+                        </div>
+
+                        <div class="radio pull-left{{ $permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION ? '' : ' hidden' }}" style="margin-right: 10px;">
+                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ_CREATE, $permission->grant_type === $permission::GRANT_TYPE_READ_CREATE, [
+                                'id' => "grant-{$i}-viewcreate",
+                                'class' => 'form-control',
+                                'required' => true,
+                            ]) !!}
+                            <label for="grant-{{ $i }}-viewcreate">
+                                View all &amp; Create
                             </label>
                         </div>
                     </td>
@@ -331,7 +365,7 @@
                             '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-view" class="form-control" value="{{ \App\Permission::GRANT_TYPE_READ }}" required checked>' +
 
                             '<label for="grant-' + nextId + '-view">' +
-                                'View' +
+                                (type === 'device' ? 'View' : 'View all') +
                             '</label>' +
                         '</div>' +
 
@@ -339,7 +373,7 @@
                             '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-edit" class="form-control" value="{{ \App\Permission::GRANT_TYPE_WRITE }}" required>' +
 
                             '<label for="grant-' + nextId + '-edit">' +
-                                'View &amp; Edit' +
+                                (type === 'device' ? 'View &amp; Edit' : 'View all &amp; Edit all') +
                             '</label>' +
                         '</div>' +
 
@@ -347,7 +381,23 @@
                             '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-full" class="form-control" value="{{ \App\Permission::GRANT_TYPE_FULL }}" required>' +
 
                             '<label for="grant-' + nextId + '-full">' +
-                                'View, Edit &amp; Delete' +
+                                (type === 'device' ? 'View, Edit &amp; Delete' : 'View all, Edit all &amp; Delete all') +
+                            '</label>' +
+                        '</div>' +
+
+                        '<div class="radio pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-create" class="form-control" value="{{ \App\Permission::GRANT_TYPE_CREATE }}" required>' +
+
+                            '<label for="grant-' + nextId + '-full">' +
+                                'Create' +
+                            '</label>' +
+                        '</div>' +
+
+                        '<div class="radio pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-viewcreate" class="form-control" value="{{ \App\Permission::GRANT_TYPE_READ_CREATE }}" required>' +
+
+                            '<label for="grant-' + nextId + '-viewcreate">' +
+                                'View all &amp; Create' +
                             '</label>' +
                         '</div>' +
                     '</td>' +

@@ -52,7 +52,7 @@
                             @endif
                         @endforeach
 
-                        @can('edit', $deviceSection)
+                        @can('create', $deviceSection)
                             @if (empty($categoryLabel))
                                 <a href="{{ route('devices.create', $deviceSection->id) }}" class="btn btn-primary pull-left">
                             @else

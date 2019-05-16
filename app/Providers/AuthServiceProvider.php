@@ -36,7 +36,7 @@ class AuthServiceProvider extends ServiceProvider
             return $user->isAdmin();
         });
 
-        $gate->define('list-section', function($user, DeviceSection $section) {
+        $gate->define('list', function($user, DeviceSection $section) {
             return $user->isAdmin() || Permission::canList($section);
         });
 
@@ -50,6 +50,10 @@ class AuthServiceProvider extends ServiceProvider
 
         $gate->define('delete', function($user, $resource) {
             return $user->isAdmin() || Permission::can('delete', $resource);
+        });
+
+        $gate->define('create', function($user, DeviceSection $resource) {
+            return $user->isAdmin() || Permission::can('create', $resource);
         });
     }
 }

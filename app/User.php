@@ -142,7 +142,20 @@ class User extends Model implements AuthenticatableContract,
                 $resourceId = $permission['id'];
             }
 
-            if (isset($permission['level']) && in_array($permission['level'], [Permission::GRANT_TYPE_READ, Permission::GRANT_TYPE_WRITE, Permission::GRANT_TYPE_FULL])) {
+            $allowed = $permission['type'] === 'section'
+                ? [
+                    Permission::GRANT_TYPE_READ,
+                    Permission::GRANT_TYPE_WRITE,
+                    Permission::GRANT_TYPE_FULL,
+                    Permission::GRANT_TYPE_CREATE,
+                    Permission::GRANT_TYPE_READ_CREATE,
+                ] : [
+                    Permission::GRANT_TYPE_READ,
+                    Permission::GRANT_TYPE_WRITE,
+                    Permission::GRANT_TYPE_FULL,
+                ];
+
+            if (isset($permission['level']) && in_array($permission['level'], $allowed)) {
                 $grantType = $permission['level'];
             }
 
