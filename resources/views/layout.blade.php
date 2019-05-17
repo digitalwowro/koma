@@ -67,20 +67,24 @@
                                 <i class="fa fa-bars"></i>
                             </a>
                         </li>
+
                         <li class="dropdown hidden-xs">
                             <a class="btn dropdown-toggle" data-toggle="dropdown">
-                                Create Item
+                                <i class="fa fa-plus"></i>
+                                New Device
                                 <i class="fa fa-caret-down"></i>
                             </a>
                             <ul class="dropdown-menu">
                                 @foreach ($deviceSections as $deviceSection)
                                     @can('create', $deviceSection)
-                                    <li class="item">
-                                        <a href="{{ route('devices.create', $deviceSection->id) }}">
-                                            {!! $deviceSection->present()->icon !!}
-                                            Create {{ str_singular($deviceSection->title) }}
-                                        </a>
-                                    </li>
+                                        @if (auth()->user()->deviceSectionVisible($deviceSection->id))
+                                        <li class="item">
+                                            <a href="{{ route('devices.create', $deviceSection->id) }}">
+                                                {!! $deviceSection->present()->icon !!}
+                                                Add {{ str_singular($deviceSection->title) }}
+                                            </a>
+                                        </li>
+                                        @endif
                                     @endcan
                                 @endforeach
                             </ul>
