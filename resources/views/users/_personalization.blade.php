@@ -27,6 +27,7 @@
             <p>Select device sections you want to see in sidebar</p>
 
             @foreach ($deviceSections as $deviceSection)
+                @can('list', $deviceSection)
                 <div class="checkbox-nice">
                     {!! Form::checkbox("device_sections[]", $deviceSection->id, auth()->user()->deviceSectionVisible($deviceSection->id), [
                         'id' => "device_section_{$deviceSection->id}",
@@ -36,6 +37,7 @@
                         {{ $deviceSection->title }}
                     </label>
                 </div>
+                @endcan
             @endforeach
         </div>
     </div>
