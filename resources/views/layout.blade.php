@@ -106,14 +106,10 @@
 
                         </li>-->
                         <li class="dropdown profile-dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <a href="{{ route('profile') }}">
                                 <img src="{{ gravatar(auth()->user()->email, 159) }}" alt=""/>
-                                <span class="hidden-xs">{{ auth()->user()->name }}</span> <b class="caret"></b>
+                                <span class="hidden-xs">{{ auth()->user()->name }}</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-right">
-                                <li><a href="{{ route('profile') }}"><i class="fa fa-user"></i>Profile</a></li>
-                                <li><a href="/auth/logout"><i class="fa fa-power-off"></i>Logout</a></li>
-                            </ul>
                         </li>
                         <li class="hidden-xxs">
                             <a class="btn" href="/auth/logout">
@@ -167,35 +163,37 @@
                                     </a>
                                     <ul class="submenu">
                                         @foreach ($deviceSections as $deviceSection)
-                                        @can('list', $deviceSection)
-                                        <li class="{{ is_route_bool('devices.*', ['type' => $deviceSection->id]) ? 'open' : '' }}">
-                                            <a
-                                                href="{{ route('devices.index', $deviceSection->id) }}"
-                                                style="padding-left:44px;"
-                                                class="{!! is_route('devices.index', false, ['type' => $deviceSection->id]) !!} {{ count($deviceSection->categories) ? 'dropdown-toggle dropdown-nocaret' : '' }}"
-                                            >
-                                                {!! $deviceSection->present()->icon !!}
-                                                &nbsp;
-                                                {{ $deviceSection->title }}
-                                                @if (count($deviceSection->categories))
-                                                <i class="fa fa-angle-right drop-icon"></i>
-                                                @endif
-                                            </a>
+                                            @can('list', $deviceSection)
+                                                @if (auth()->user()->deviceSectionVisible($deviceSection->id))
+                                                    <li class="{{ is_route_bool('devices.*', ['type' => $deviceSection->id]) ? 'open' : '' }}">
+                                                        <a
+                                                            href="{{ route('devices.index', $deviceSection->id) }}"
+                                                            style="padding-left:44px;"
+                                                            class="{!! is_route('devices.index', false, ['type' => $deviceSection->id]) !!} {{ count($deviceSection->categories) ? 'dropdown-toggle dropdown-nocaret' : '' }}"
+                                                        >
+                                                            {!! $deviceSection->present()->icon !!}
+                                                            &nbsp;
+                                                            {{ $deviceSection->title }}
+                                                            @if (count($deviceSection->categories))
+                                                            <i class="fa fa-angle-right drop-icon"></i>
+                                                            @endif
+                                                        </a>
 
-                                            @if (count($deviceSection->categories))
-                                            <ul class="submenu" style="{{ is_route_bool('devices.*', ['type' => $deviceSection->id]) ? 'display:block' : '' }}">
-                                                @foreach ($deviceSection->categories as $categoryId => $categoryName)
-                                                <li>
-                                                    <a href="{{ route('devices.index', [$deviceSection->id, $categoryId]) }}">{{ $categoryName }}</a>
-                                                </li>
-                                                @endforeach
-                                                <li>
-                                                    <a href="{{ route('devices.index', $deviceSection->id) }}">show all</a>
-                                                </li>
-                                            </ul>
-                                            @endif
-                                        </li>
-                                        @endcan
+                                                        @if (count($deviceSection->categories))
+                                                        <ul class="submenu" style="{{ is_route_bool('devices.*', ['type' => $deviceSection->id]) ? 'display:block' : '' }}">
+                                                            @foreach ($deviceSection->categories as $categoryId => $categoryName)
+                                                            <li>
+                                                                <a href="{{ route('devices.index', [$deviceSection->id, $categoryId]) }}">{{ $categoryName }}</a>
+                                                            </li>
+                                                            @endforeach
+                                                            <li>
+                                                                <a href="{{ route('devices.index', $deviceSection->id) }}">show all</a>
+                                                            </li>
+                                                        </ul>
+                                                        @endif
+                                                    </li>
+                                                @endif
+                                            @endcan
                                         @endforeach
                                     </ul>
                                 </li>

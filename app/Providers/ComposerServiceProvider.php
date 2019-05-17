@@ -20,6 +20,7 @@ class ComposerServiceProvider extends ServiceProvider
             [
                 'layout',
                 'ip-fields._form',
+                'users._personalization',
             ],
             'App\Composers\DeviceSectionComposer@all'
         );

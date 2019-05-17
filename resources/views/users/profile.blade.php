@@ -14,19 +14,39 @@
 
     <div class="row">
         <div class="col-lg-12">
-            <div class="main-box clearfix">
-                <header class="main-box-header clearfix">
-                    <h2 class="pull-left">Enter Your Profile Details</h2>
+            {!! Form::model($user, ['route' => 'profile.update', 'method' => 'POST', 'class' => 'form-horizontal', 'role' => 'form']) !!}
+            <div class="main-box">
+                <header class="main-box-header">
+                    <h2 class="pull-left">Account Details</h2>
                 </header>
 
-                <div class="main-box-body clearfix">
-                    <div class="main-box-body clearfix">
-                        {!! Form::model($user, ['route' => 'profile.update', 'method' => 'POST', 'class' => 'form-horizontal', 'role' => 'form']) !!}
+                <div class="main-box-body">
+                    <div class="main-box-body">
                         @include('users._form')
-                        {!! Form::close() !!}
                     </div>
                 </div>
             </div>
+
+            <div class="main-box">
+                <header class="main-box-header">
+                    <h2 class="pull-left">Personalization</h2>
+                </header>
+
+                <div class="main-box-body">
+                    <div class="main-box-body">
+                        @include('users._personalization')
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-box">
+                <div class="main-box-body" style="padding: 20px 20px 0 20px;">
+                    <div class="main-box-body" style="padding: 0;">
+                        @include('users._save')
+                    </div>
+                </div>
+            </div>
+            {!! Form::close() !!}
         </div>
     </div>
 @stop

@@ -33,16 +33,6 @@
     </div>
 </div>
 
-<div class="form-group">
-    <label for="devices_per_page" class="col-xs-2 control-label">Default devices per page</label>
-    <div class="col-xs-10">
-        {!! Form::select('devices_per_page', [10 => 10, 25 => 25, 50 => 50, 100 => 100], $user->profile['devices_per_page'] ?? null, [
-            'id' => 'devices_per_page',
-            'class' => 'form-control',
-        ]) !!}
-    </div>
-</div>
-
 @if (!isset($user) || auth()->id() != $user->id)
     <div class="col-xs-12">
         <div class="form-group">
@@ -257,13 +247,6 @@
                 </tr>
             </tfoot>
         </table>
-    </div>
-</div>
-
-<div class="form-group">
-    <div class="col-lg-offset-2 col-xs-10">
-        <button type="submit" class="btn btn-success">{{ isset($user) ? 'Save' : 'Add' }}</button>
-        <button class="btn btn-default" onclick="window.history.back(); return false;">Cancel</button>
     </div>
 </div>
 

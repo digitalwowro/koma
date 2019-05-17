@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Traits\ManagesUserProfiles;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
@@ -11,6 +12,8 @@ use App\Http\Controllers\Controller;
 
 class ProfileController extends Controller
 {
+    use ManagesUserProfiles;
+
     public function index()
     {
         $user = auth()->user();
@@ -18,31 +21,30 @@ class ProfileController extends Controller
         return view('users.profile', compact('user'));
     }
 
-    public function update()
+    public function update(Request $request)
     {
-        try
-        {
+        try {
             $row = auth()->user();
 
-            $data = Input::except(['_method', '_token', 'role']);
+            $data = $request->input();
 
-            if (isset($data['password']) && empty($data['password']))
-            {
+            unset($data['role']);
+
+            if (isset($data['password']) && empty($data['password'])) {
                 unset($data['password']);
             }
+
+            $data['profile'] = $this->profileSettings($request, $row->profile);
 
             $row->update($data);
 
             return redirect()
                 ->back()
                 ->withSuccess('Your profile has been updated');
-        }
-        catch (QueryException $e)
-        {
+        } catch (QueryException $e) {
             $error = $e->getMessage();
 
-            if (strpos($error, 'users_email_unique') !== false)
-            {
+            if (strpos($error, 'users_email_unique') !== false) {
                 $error = 'Email address already exists';
             }
 

@@ -17,13 +17,15 @@
         <div class="col-lg-12">
             <div class="main-box clearfix">
                 <header class="main-box-header clearfix">
-                    <h2 class="pull-left">Enter User Details</h2>
+                    <h2 class="pull-left">Account Details</h2>
                 </header>
 
                 <div class="main-box-body clearfix">
                     <div class="main-box-body clearfix">
                         {!! Form::open(['route' => 'users.store', 'method' => 'POST', 'class' => 'form-horizontal', 'role' => 'form']) !!}
                         @include('users._form')
+
+                        @include('users._save')
                         {!! Form::close() !!}
                     </div>
                 </div>

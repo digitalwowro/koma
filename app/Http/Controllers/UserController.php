@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Traits\ManagesUserProfiles;
 use Input, Validator;
 use App\User;
 use Illuminate\Database\QueryException;
@@ -12,6 +13,8 @@ use App\Http\Controllers\Controller;
 
 class UserController extends Controller
 {
+    use ManagesUserProfiles;
+
     /**
      * @var \App\User
      */
@@ -66,15 +69,6 @@ class UserController extends Controller
         ]);
     }
 
-    protected function profileSettings(Request $request, array $current = [])
-    {
-        if (in_array($request->input('devices_per_page'), [10, 25, 50, 100])) {
-            $current['devices_per_page'] = $request->input('devices_per_page');
-        }
-
-        return $current;
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -96,11 +90,7 @@ class UserController extends Controller
                 ->withError($validator->errors()->first());
         }
 
-        $data['profile'] = $this->profileSettings($request);
-
-        User::unguard();
         $row = User::create($data);
-        User::reguard();
 
         if (!is_array($permissions)) {
             $permissions = [];
@@ -135,10 +125,10 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  int  $id
+     * @param  int    $id
      * @return \Illuminate\Http\Response
      */
-    public function update($id, Request $request)
+    public function update($id)
     {
         try {
             $row = User::findOrFail($id);
@@ -161,10 +151,6 @@ class UserController extends Controller
             if ($id == auth()->id()) {
                 unset($data['role']);
             }
-
-            $row->unguard();
-
-            $data['profile'] = $this->profileSettings($request, $row->profile);
 
             $row->update($data);
 

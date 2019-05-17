@@ -33,7 +33,7 @@ class User extends Model implements AuthenticatableContract,
      *
      * @var array
      */
-    protected $fillable = ['name', 'email', 'password', 'role'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'profile'];
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -62,6 +62,15 @@ class User extends Model implements AuthenticatableContract,
     public function setProfileAttribute($value)
     {
         $this->attributes['profile'] = json_encode($value);
+    }
+
+    public function deviceSectionVisible($sectionId)
+    {
+        if (!isset($this->profile['device_sections']) || !is_array($this->profile['device_sections'])) {
+            return true;
+        }
+
+        return in_array($sectionId, $this->profile['device_sections']);
     }
 
     /**
