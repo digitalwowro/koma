@@ -43,7 +43,7 @@
     </div>
 </div>
 
-@if ( ! isset($user) || auth()->id() != $user->id)
+@if (!isset($user) || auth()->id() != $user->id)
     <div class="col-xs-12">
         <div class="form-group">
             <label class="col-xs-2 control-label">Role</label>
@@ -85,7 +85,7 @@
     </div>
 @endif
 
-<div class="form-group" id="permissions-section" style="display:{{ isset($user) && auth()->id() != $user->id && ! $user->isAdmin() && ! $user->isSuperAdmin() ? '' : 'none' }};">
+<div class="form-group" id="permissions-section" style="display:{{ isset($user) && auth()->id() != $user->id && !$user->isAdmin() && !$user->isSuperAdmin() ? '' : 'none' }};">
     <label for="input1" class="col-xs-2 control-label">Permissions</label>
     <div class="col-xs-10">
         <table class="table table-condensed table-permissions">
@@ -170,7 +170,7 @@
                                 @if ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_DEVICE)
                                     View &amp; Edit
                                 @else
-                                    View all &amp; Edit all
+                                    View &amp; Edit all
                                 @endif
                             </label>
                         </div>
@@ -185,12 +185,13 @@
                                 @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_DEVICE)
                                     View, Edit &amp; Delete
                                 @else
-                                    View all, Edit all &amp; Delete all
+                                    View, Edit &amp; Delete all
                                 @endif
                             </label>
                         </div>
 
-                        <div class="radio pull-left{{ $permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION ? '' : ' hidden' }}" style="margin-right: 10px;">
+                        @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION)
+                        <div class="radio pull-left" style="margin-right: 10px;">
                             {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_CREATE, $permission->grant_type === $permission::GRANT_TYPE_CREATE, [
                                 'id' => "grant-{$i}-create",
                                 'class' => 'form-control',
@@ -201,7 +202,7 @@
                             </label>
                         </div>
 
-                        <div class="radio pull-left{{ $permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION ? '' : ' hidden' }}" style="margin-right: 10px;">
+                        <div class="radio pull-left" style="margin-right: 10px;">
                             {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ_CREATE, $permission->grant_type === $permission::GRANT_TYPE_READ_CREATE, [
                                 'id' => "grant-{$i}-viewcreate",
                                 'class' => 'form-control',
@@ -211,6 +212,18 @@
                                 View all &amp; Create
                             </label>
                         </div>
+
+                        <div class="radio pull-left" style="margin-right: 10px;">
+                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_OWNER, $permission->grant_type === $permission::GRANT_TYPE_OWNER, [
+                                'id' => "grant-{$i}-owner",
+                                'class' => 'form-control',
+                                'required' => true,
+                            ]) !!}
+                            <label for="grant-{{ $i }}-owner">
+                                Owner
+                            </label>
+                        </div>
+                        @endif
                     </td>
 
                     <td>
@@ -373,7 +386,7 @@
                             '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-edit" class="form-control" value="{{ \App\Permission::GRANT_TYPE_WRITE }}" required>' +
 
                             '<label for="grant-' + nextId + '-edit">' +
-                                (type === 'device' ? 'View &amp; Edit' : 'View all &amp; Edit all') +
+                                (type === 'device' ? 'View &amp; Edit' : 'View &amp; Edit all') +
                             '</label>' +
                         '</div>' +
 
@@ -381,7 +394,7 @@
                             '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-full" class="form-control" value="{{ \App\Permission::GRANT_TYPE_FULL }}" required>' +
 
                             '<label for="grant-' + nextId + '-full">' +
-                                (type === 'device' ? 'View, Edit &amp; Delete' : 'View all, Edit all &amp; Delete all') +
+                                (type === 'device' ? 'View, Edit &amp; Delete' : 'View, Edit &amp; Delete all') +
                             '</label>' +
                         '</div>' +
 
@@ -398,6 +411,14 @@
 
                             '<label for="grant-' + nextId + '-viewcreate">' +
                                 'View all &amp; Create' +
+                            '</label>' +
+                        '</div>' +
+
+                        '<div class="radio pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-owner" class="form-control" value="{{ \App\Permission::GRANT_TYPE_OWNER }}" required>' +
+
+                            '<label for="grant-' + nextId + '-owner">' +
+                                'Owner' +
                             '</label>' +
                         '</div>' +
                     '</td>' +

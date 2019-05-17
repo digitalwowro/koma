@@ -45,6 +45,8 @@
 
 table.table-field-options .fa-reorder { cursor: move; }
 table.table-field-options .fa-trash-o { color: red; }
+table.table-categories .fa-reorder { cursor: move; }
+table.table-categories .fa-trash-o { color: red; }
 
 /**
  * Multi-select dropdowns

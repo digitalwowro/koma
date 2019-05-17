@@ -2,6 +2,7 @@
 
 namespace App\Composers;
 
+use App\Permission;
 use Illuminate\Contracts\View\View;
 use App\DeviceSection;
 
@@ -31,7 +32,11 @@ class DeviceSectionComposer
      */
     public function admin(View $view)
     {
-        $view->with('deviceSections', $this->deviceSection->pagedForAdmin());
+        $manageableSections = Permission::manageableSections();
+
+        $deviceSections = $this->deviceSection->pagedForAdmin($manageableSections);
+
+        $view->with('deviceSections', $deviceSections);
     }
 
     /**
@@ -41,7 +46,11 @@ class DeviceSectionComposer
      */
     public function all(View $view)
     {
-        $view->with('deviceSections', $this->deviceSection->getAll());
+        $manageableSections = Permission::manageableSections();
+
+        $this->deviceSection->pagedForAdmin($manageableSections);
+
+        $view->with('deviceSections', $this->deviceSection->getAll($manageableSections));
     }
 
 }

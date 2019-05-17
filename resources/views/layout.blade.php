@@ -74,7 +74,7 @@
                             </a>
                             <ul class="dropdown-menu">
                                 @foreach ($deviceSections as $deviceSection)
-                                    @can('list', $deviceSection)
+                                    @can('create', $deviceSection)
                                     <li class="item">
                                         <a href="{{ route('devices.create', $deviceSection->id) }}">
                                             {!! $deviceSection->present()->icon !!}
@@ -219,7 +219,7 @@
                                 </li>
                                 @endcan
 
-                                @can('admin')
+                                @can('section_ownership')
                                 <li class="nav-header hidden-sm hidden-xs">
                                     Administration
                                 </li>
@@ -230,7 +230,9 @@
                                         <span>Device Sections</span>
                                     </a>
                                 </li>
+                                @endcan
 
+                                @can('admin')
                                 <li {!! is_route('ip-categories.*') !!}>
                                     <a href="{{ route('ip-categories.index') }}">
                                         <i class="fa fa-ellipsis-h"></i>
@@ -244,6 +246,7 @@
                                         <span>IP Fields</span>
                                     </a>
                                 </li>
+                                @endcan
 
                                 @can('superadmin')
                                 <li {!! is_route('users.*') !!}>
@@ -252,7 +255,6 @@
                                         <span>User Management</span>
                                     </a>
                                 </li>
-                                @endcan
                                 @endcan
                             </ul>
                         </div>

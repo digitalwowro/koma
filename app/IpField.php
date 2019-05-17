@@ -33,9 +33,7 @@ class IpField extends Model
     {
         $return = @json_decode($value, true);
 
-        if ( ! is_array($return)) return [];
-
-        return $return;
+        return is_array($return) ? $return : [];
     }
 
 }

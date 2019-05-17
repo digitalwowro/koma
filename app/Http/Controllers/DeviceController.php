@@ -144,7 +144,7 @@ class DeviceController extends Controller
 
         // custom IPs
         foreach ($ipArray as $customIp) {
-            if ( ! filter_var($customIp, FILTER_VALIDATE_IP)) {
+            if (!filter_var($customIp, FILTER_VALIDATE_IP)) {
                 throw new Exception("IP {$customIp} is not a valid IP address");
             }
 

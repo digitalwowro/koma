@@ -31,7 +31,7 @@
     <label for="title" class="col-lg-2 control-label">Categories</label>
 
     <div class="col-lg-10">
-        <table class="table table-striped table-hover table-bordered table-field-options">
+        <table class="table table-striped table-hover table-bordered table-categories">
             <thead>
             <tr>
                 <th style="text-align: center;">#</th>
@@ -40,32 +40,34 @@
             </tr>
             </thead>
             <tbody>
-                @forelse ($deviceSection->categories as $key => $label)
-                    <tr>
-                        <td style="width:1px; white-space:nowrap; text-align: center;">
-                            <i class="fa fa-reorder"></i>
-                        </td>
+                @if (isset($deviceSection) && !empty($deviceSection->categories))
+                    @foreach ($deviceSection->categories as $key => $label)
+                        <tr>
+                            <td style="width:1px; white-space:nowrap; text-align: center;">
+                                <i class="fa fa-reorder"></i>
+                            </td>
 
-                        <td>
-                            {{ $label }}
+                            <td>
+                                {{ $label }}
 
-                            <input type="hidden" name="categories[]" value="{{ $label }}">
-                            <input type="hidden" name="categoryid[]" value="{{ $key }}">
-                        </td>
+                                <input type="hidden" name="categories[]" value="{{ $label }}">
+                                <input type="hidden" name="categoryid[]" value="{{ $key }}">
+                            </td>
 
-                        <td style="width:1px; white-space:nowrap; text-align: center;">
-                            <a href="#" title="Delete this field" class="delete-field">
-                                <i class="fa fa-trash-o"></i>
-                            </a>
-                        </td>
-                    </tr>
-                @empty
+                            <td style="width:1px; white-space:nowrap; text-align: center;">
+                                <a href="#" title="Delete this field" class="delete-field">
+                                    <i class="fa fa-trash-o"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                @else
                     <tr>
                         <td colspan="3" style="text-align: center; padding: 20px 0;">
                             No categories have been defined
                         </td>
                     </tr>
-                @endforelse
+                @endif
             </tbody>
 
             <tfoot>
@@ -179,6 +181,7 @@
                     var $this = $(this),
                         $key = $this.find('.field-key');
 
+                    console.log('i is ' + i, $this);
                     if ($key.val() == '') {
                         $key.val(makeid());
                     }
@@ -269,6 +272,17 @@
                 },
                 stop: function() {
                     refreshAllIndexes();
+                }
+            });
+
+            $('table.table-categories tbody').sortable({
+                handle: '.fa-reorder',
+                distance: 15,
+                items: 'tr',
+                forcePlaceholderSize: true,
+                placeholder: 'ui-state-highlight',
+                start: function(event, ui) {
+                    ui.placeholder.html('<td style="height:30px; background-color:#d1eeff;" colspan="5">&nbsp;</td>');
                 }
             });
 

@@ -102,7 +102,7 @@ class UserController extends Controller
         $row = User::create($data);
         User::reguard();
 
-        if ( ! is_array($permissions)) {
+        if (!is_array($permissions)) {
             $permissions = [];
         }
 
@@ -111,7 +111,6 @@ class UserController extends Controller
         return redirect()
             ->route('users.index')
             ->withSuccess('User has been added');
-
     }
 
     /**

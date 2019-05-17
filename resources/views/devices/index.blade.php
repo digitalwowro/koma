@@ -39,7 +39,7 @@
                                 <div class="multi-choices" data-auto-close="{{ $field->getInputName() }}">
                                     @foreach ($field->getNiceOptions() as $choice)
                                         <label>
-                                            <input type="checkbox" value="{{ $choice['label'] }}"{{ ! isset($filters[$field->getInputName()]) || in_array($choice['label'], $filters[$field->getInputName()]) ? ' checked' : '' }}>
+                                            <input type="checkbox" value="{{ $choice['label'] }}"{{ !isset($filters[$field->getInputName()]) || in_array($choice['label'], $filters[$field->getInputName()]) ? ' checked' : '' }}>
                                             <span class="label label-{{ $choice['type'] }}">
                                                 {{ $choice['label'] }}
                                             </span>

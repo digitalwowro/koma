@@ -4,7 +4,7 @@ namespace App;
 
 use App\Presenters\PermissionPresenter;
 use Illuminate\Database\Eloquent\Model;
-use Cache;
+use Cache, Exception;
 use Laracasts\Presenter\PresentableTrait;
 
 class Permission extends Model
@@ -17,6 +17,7 @@ class Permission extends Model
     const GRANT_TYPE_FULL        = 3;
     const GRANT_TYPE_CREATE      = 4; // only for device sections
     const GRANT_TYPE_READ_CREATE = 5; // only for device sections
+    const GRANT_TYPE_OWNER       = 6; // only for device sections
 
     const RESOURCE_TYPE_DEVICES_FULL    = 1;
     const RESOURCE_TYPE_DEVICES_SECTION = 2;
@@ -43,15 +44,18 @@ class Permission extends Model
             self::GRANT_TYPE_WRITE,
             self::GRANT_TYPE_FULL,
             self::GRANT_TYPE_READ_CREATE,
+            self::GRANT_TYPE_OWNER,
         ],
 
         'edit' => [
             self::GRANT_TYPE_WRITE,
             self::GRANT_TYPE_FULL,
+            self::GRANT_TYPE_OWNER,
         ],
 
         'delete' => [
             self::GRANT_TYPE_FULL,
+            self::GRANT_TYPE_OWNER,
         ],
 
         'create' => [
@@ -59,6 +63,11 @@ class Permission extends Model
             self::GRANT_TYPE_FULL,
             self::GRANT_TYPE_CREATE,
             self::GRANT_TYPE_READ_CREATE,
+            self::GRANT_TYPE_OWNER,
+        ],
+
+        'manage' => [
+            self::GRANT_TYPE_OWNER,
         ],
     ];
 
@@ -96,7 +105,7 @@ class Permission extends Model
             }
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->delete();
 
             $this->flushCache();
@@ -113,9 +122,13 @@ class Permission extends Model
 
     public static function getCached()
     {
+        if (self::$cachedPermissions) {
+            return self::$cachedPermissions;
+        }
+
         self::$cachedPermissions = Cache::get('permissions');
 
-        if ( ! self::$cachedPermissions) {
+        if (!self::$cachedPermissions) {
             self::$cachedPermissions = self::all()->toArray();
 
             Cache::put('permissions', self::$cachedPermissions, 30);
@@ -142,11 +155,7 @@ class Permission extends Model
             $userId = auth()->id();
         }
 
-        if ( ! self::$cachedPermissions) {
-            self::getCached();
-        }
-
-        foreach (self::$cachedPermissions as $permission) {
+        foreach (self::getCached() as $permission) {
             if ($permission['user_id'] !== $userId) {
                 continue;
             }
@@ -184,17 +193,10 @@ class Permission extends Model
      */
     public static function canList(DeviceSection $section, $userId = null)
     {
-        if (is_null($userId)) {
-            $userId = auth()->id();
-        }
-
-        if ( ! self::$cachedPermissions) {
-            self::getCached();
-        }
-
+        $userId = is_null($userId) ? auth()->id() : $userId;
         $devices = Device::where('section_id', $section->id)->lists('id')->toArray();
 
-        foreach (self::$cachedPermissions as $permission) {
+        foreach (self::getCached() as $permission) {
             if ($permission['user_id'] == $userId) {
                 switch($permission['resource_type']) {
                     case self::RESOURCE_TYPE_DEVICES_FULL:
@@ -214,5 +216,41 @@ class Permission extends Model
         }
 
         return false;
+    }
+
+    public static function sectionOwnership($userId = null)
+    {
+        $userId = is_null($userId) ? auth()->id() : $userId;
+
+        foreach (self::getCached() as $permission) {
+            if ($permission['user_id'] == $userId
+                && $permission['resource_type'] === self::RESOURCE_TYPE_DEVICES_SECTION
+                && $permission['grant_type'] === self::GRANT_TYPE_OWNER) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function manageableSections(User $user = null)
+    {
+        $user = $user instanceof User ? $user : auth()->user();
+
+        if ($user->isAdmin()) {
+            return false;
+        }
+
+        $results = [];
+
+        foreach (self::getCached() as $permission) {
+            if ($permission['user_id'] == $user->id
+                && $permission['resource_type'] === self::RESOURCE_TYPE_DEVICES_SECTION
+                && $permission['grant_type'] === self::GRANT_TYPE_OWNER) {
+                $results[] = $permission['resource_id'];
+            }
+        }
+
+        return $results;
     }
 }

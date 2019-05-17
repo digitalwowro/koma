@@ -20,8 +20,6 @@ class DeviceSectionController extends Controller
     public function __construct(DeviceSection $model)
     {
         $this->model = $model;
-
-        $this->authorize('admin');
     }
 
     protected function getCategories(Request $request)
@@ -54,17 +52,23 @@ class DeviceSectionController extends Controller
 
     public function index()
     {
+        $this->authorize('section_ownership');
+
         return view('device-sections.index');
     }
 
     public function create()
     {
+        $this->authorize('admin');
+
         return view('device-sections.create');
     }
 
     public function store(Request $request)
     {
         try {
+            $this->authorize('admin');
+
             $this->model->create($this->getFields($request));
 
             return redirect()
@@ -83,6 +87,8 @@ class DeviceSectionController extends Controller
         try {
             $deviceSection = $this->model->findOrFail($id);
 
+            $this->authorize('manage', $deviceSection);
+
             return view('device-sections.edit', compact('deviceSection'));
         } catch (\Exception $e) {
             return redirect()
@@ -95,6 +101,8 @@ class DeviceSectionController extends Controller
     {
         try {
             $deviceSection = $this->model->findOrFail($id);
+
+            $this->authorize('manage', $deviceSection);
 
             $deviceSection->update($this->getFields($request));
 
@@ -130,6 +138,8 @@ class DeviceSectionController extends Controller
         try {
             $deviceSection = $this->model->findOrFail($id);
 
+            $this->authorize('manage', $deviceSection);
+
             $deviceSection->delete();
 
             return redirect()
@@ -145,6 +155,8 @@ class DeviceSectionController extends Controller
     public function getOptions(Request $request)
     {
         try {
+            $this->authorize('section_ownership');
+
             $type = $request->input('type');
             $index = $request->input('index');
             $field = Factory::generate('', 'tmp', $type);

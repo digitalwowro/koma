@@ -54,7 +54,7 @@ class IpAddress extends Model
         try {
             $return = @json_decode(dsDecrypt($value), true);
 
-            if ( ! is_array($return)) return [];
+            if (!is_array($return)) return [];
 
             return $return;
         } catch (\Exception $e) {

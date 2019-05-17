@@ -63,7 +63,7 @@ class DeviceSection extends Model
      */
     public function setFieldsAttribute($value)
     {
-        if ( ! is_array($value)) $value = [];
+        if (!is_array($value)) $value = [];
 
         $value = array_merge($value, []); // reset array keys
 
@@ -84,7 +84,7 @@ class DeviceSection extends Model
 
         $items = @json_decode($value, true);
 
-        if ( ! is_array($items)) return [];
+        if (!is_array($items)) return [];
 
         $return = [];
 
@@ -108,21 +108,35 @@ class DeviceSection extends Model
     /**
      * Get all device sections paged for admin
      *
+     * @param false|array $ids
      * @return mixed
      */
-    public static function pagedForAdmin()
+    public static function pagedForAdmin($ids)
     {
-        return self::orderBy('sort')->orderBy('title')->paginate(30);
+        $query = self::orderBy('sort')->orderBy('title');
+
+        if (is_array($ids)) {
+            $query->whereIn('id', $ids);
+        }
+
+        return $query->paginate(30);
     }
 
     /**
      * Get all device sections ordered
      *
+     * @param $ids
      * @return mixed
      */
-    public static function getAll()
+    public static function getAll($ids)
     {
-        return self::orderBy('sort')->orderBy('title')->get();
+        $query = self::orderBy('sort')->orderBy('title');
+
+        if (is_array($ids)) {
+            $query->whereIn('id', $ids);
+        }
+
+        return $query->get();
     }
 
     /**

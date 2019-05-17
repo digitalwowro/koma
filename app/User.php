@@ -149,6 +149,7 @@ class User extends Model implements AuthenticatableContract,
                     Permission::GRANT_TYPE_FULL,
                     Permission::GRANT_TYPE_CREATE,
                     Permission::GRANT_TYPE_READ_CREATE,
+                    Permission::GRANT_TYPE_OWNER,
                 ] : [
                     Permission::GRANT_TYPE_READ,
                     Permission::GRANT_TYPE_WRITE,
