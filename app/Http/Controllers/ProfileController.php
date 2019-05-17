@@ -6,7 +6,6 @@ use App\Http\Controllers\Traits\ManagesUserProfiles;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
-use Input;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 

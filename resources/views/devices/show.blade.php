@@ -59,6 +59,7 @@
                 </div>
             </div>
 
+            @can('admin')
             <div class="main-box">
                 <header class="main-box-header">
                     <h2 class="pull-left">Shared with</h2>
@@ -78,6 +79,7 @@
                     </ul>
                 </div>
             </div>
+            @endcan
 
             <div class="main-box">
                 <div class="main-box-body" style="padding-top: 20px;">

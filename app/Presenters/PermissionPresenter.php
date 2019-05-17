@@ -21,6 +21,12 @@ class PermissionPresenter extends Presenter
                 return 'view & edit';
             case $this->entity::GRANT_TYPE_FULL:
                 return 'view, edit & delete';
+            case $this->entity::GRANT_TYPE_CREATE:
+                return 'create';
+            case $this->entity::GRANT_TYPE_READ_CREATE:
+                return 'view & create';
+            case $this->entity::GRANT_TYPE_OWNER:
+                return 'owner';
         }
     }
 
