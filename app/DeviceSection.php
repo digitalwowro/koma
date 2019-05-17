@@ -16,7 +16,7 @@ class DeviceSection extends Model
      *
      * @var array
      */
-    protected $fillable = ['title', 'icon', 'sort', 'fields', 'categories'];
+    protected $fillable = ['title', 'icon', 'sort', 'fields', 'categories', 'created_by'];
 
     /**
      * @var string
@@ -54,6 +54,16 @@ class DeviceSection extends Model
     public function devices()
     {
         return $this->hasMany('App\Device', 'section_id');
+    }
+
+    /**
+     * Relationship with User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function creator()
+    {
+        return $this->belongsTo('App\User', 'created_by');
     }
 
     /**
@@ -111,7 +121,7 @@ class DeviceSection extends Model
      * @param false|array $ids
      * @return mixed
      */
-    public static function pagedForAdmin($ids)
+    public static function pagedForAdmin($ids = false)
     {
         $query = self::orderBy('sort')->orderBy('title');
 
@@ -125,18 +135,11 @@ class DeviceSection extends Model
     /**
      * Get all device sections ordered
      *
-     * @param $ids
      * @return mixed
      */
-    public static function getAll($ids)
+    public static function getAll()
     {
-        $query = self::orderBy('sort')->orderBy('title');
-
-        if (is_array($ids)) {
-            $query->whereIn('id', $ids);
-        }
-
-        return $query->get();
+        return self::orderBy('sort')->orderBy('title')->get();
     }
 
     /**

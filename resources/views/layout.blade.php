@@ -219,7 +219,6 @@
                                 </li>
                                 @endcan
 
-                                @can('section_ownership')
                                 <li class="nav-header hidden-sm hidden-xs">
                                     Administration
                                 </li>
@@ -230,7 +229,6 @@
                                         <span>Device Sections</span>
                                     </a>
                                 </li>
-                                @endcan
 
                                 @can('admin')
                                 <li {!! is_route('ip-categories.*') !!}>

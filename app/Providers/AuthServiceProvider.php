@@ -59,9 +59,5 @@ class AuthServiceProvider extends ServiceProvider
         $gate->define('manage', function($user, DeviceSection $resource) {
             return $user->isAdmin() || Permission::can('manage', $resource);
         });
-
-        $gate->define('section_ownership', function($user) {
-            return $user->isAdmin() || Permission::sectionOwnership($user->id);
-        });
     }
 }

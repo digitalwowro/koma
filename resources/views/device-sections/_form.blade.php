@@ -55,7 +55,7 @@
                             </td>
 
                             <td style="width:1px; white-space:nowrap; text-align: center;">
-                                <a href="#" title="Delete this field" class="delete-field">
+                                <a href="#" title="Delete this category" class="delete-category">
                                     <i class="fa fa-trash-o"></i>
                                 </a>
                             </td>
@@ -153,6 +153,86 @@
 @section('footer')
     <script>
         $(document).ready(function() {
+            {{------------------
+            --   CATEGORIES   --
+            ------------------}}
+            $('table.table-categories tbody').sortable({
+                handle: '.fa-reorder',
+                distance: 15,
+                items: 'tr',
+                forcePlaceholderSize: true,
+                placeholder: 'ui-state-highlight',
+                start: function(event, ui) {
+                    ui.placeholder.html('<td style="height:30px; background-color:#d1eeff;" colspan="5">&nbsp;</td>');
+                }
+            });
+
+            $('#add-new-category').click(function(e) {
+                e.preventDefault();
+
+                var $this = $(this),
+                    $tbody = $this.closest('table').find('tbody'),
+                    name = prompt('Enter category name'),
+                    chars = '0123456789abcdefghijklmnopqrstuvwxyz',
+                    key = '';
+
+                for (var i = 0; i < 8; i++) {
+                    key += chars[Math.floor(Math.random() * chars.length)];
+                }
+
+                if (name) {
+                    name = name.replace('"', '&quot;');
+
+                    var $tr = $tbody.find('tr'),
+                        html = '<tr>' +
+                        '<td style="width:1px; white-space:nowrap; text-align: center;">' +
+                            '<i class="fa fa-reorder"></i>' +
+                        '</td>' +
+
+                        '<td>' +
+                            name +
+
+                            '<input type="hidden" name="categories[]" value="' + name + '">' +
+                            '<input type="hidden" name="categoryid[]" value="' + key + '">' +
+                        '</td>' +
+
+                        '<td style="width:1px; white-space:nowrap; text-align: center;">' +
+                            '<a href="#" title="Delete this category" class="delete-category">' +
+                            '<i class="fa fa-trash-o"></i>' +
+                            '</a>' +
+                        '</td>' +
+                    '</tr>';
+
+                    if ($tr.length === 1 && $tr.find('td').length === 1) {
+                        $tbody.html(html);
+                    } else {
+                        $tbody.append(html);
+                    }
+                }
+            });
+
+            $('table.table-categories').on('click', '.delete-category', function(e) {
+                var $this = $(this),
+                    $tbody = $this.closest('tbody');
+
+                $this.closest('tr').remove();
+
+                if (!$tbody.find('tr').length) {
+                    $tbody.html('' +
+                        '<tr>' +
+                            '<td colspan="3" style="text-align: center; padding: 20px 0;">' +
+                                'No categories have been defined' +
+                            '</td>' +
+                        '</tr>'
+                    );
+                }
+
+                e.preventDefault();
+            });
+
+            {{--------------
+            --   FIELDS   --
+            --------------}}
             function refreshTr($tr) {
                 var params = {
                     type: $tr.find('select.field-type').val(),
@@ -213,50 +293,6 @@
                 refreshTr($tr);
             });
 
-            $('#add-new-category').click(function(e) {
-                e.preventDefault();
-
-                var $this = $(this),
-                    $tbody = $this.closest('table').find('tbody'),
-                    name = prompt('Enter category name'),
-                    chars = '0123456789abcdefghijklmnopqrstuvwxyz',
-                    key = '';
-
-                for (var i = 0; i < 8; i++) {
-                    key += chars[Math.floor(Math.random() * chars.length)];
-                }
-
-                if (name) {
-                    name = name.replace('"', '&quot;');
-
-                    var $tr = $tbody.find('tr'),
-                        html = '<tr>' +
-                        '<td style="width:1px; white-space:nowrap; text-align: center;">' +
-                            '<i class="fa fa-reorder"></i>' +
-                        '</td>' +
-
-                        '<td>' +
-                            name +
-
-                            '<input type="hidden" name="categories[]" value="' + name + '">' +
-                            '<input type="hidden" name="categoryid[]" value="' + key + '">' +
-                        '</td>' +
-
-                        '<td style="width:1px; white-space:nowrap; text-align: center;">' +
-                            '<a href="#" title="Delete this field" class="delete-field">' +
-                            '<i class="fa fa-trash-o"></i>' +
-                            '</a>' +
-                        '</td>' +
-                    '</tr>';
-
-                    if ($tr.length === 1 && $tr.find('td').length === 1) {
-                        $tbody.html(html);
-                    } else {
-                        $tbody.append(html);
-                    }
-                }
-            });
-
             $('table.table-field-options').on('change', 'select.field-type', function() {
                 refreshTr($(this).closest('tr'));
             });
@@ -272,17 +308,6 @@
                 },
                 stop: function() {
                     refreshAllIndexes();
-                }
-            });
-
-            $('table.table-categories tbody').sortable({
-                handle: '.fa-reorder',
-                distance: 15,
-                items: 'tr',
-                forcePlaceholderSize: true,
-                placeholder: 'ui-state-highlight',
-                start: function(event, ui) {
-                    ui.placeholder.html('<td style="height:30px; background-color:#d1eeff;" colspan="5">&nbsp;</td>');
                 }
             });
 

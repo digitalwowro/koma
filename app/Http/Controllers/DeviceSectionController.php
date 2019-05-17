@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Device;
 use App\DeviceSection;
 use App\Fields\Factory;
+use App\Permission;
+use Exception;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -12,16 +14,6 @@ use App\Http\Controllers\Controller;
 
 class DeviceSectionController extends Controller
 {
-    /**
-     * @var \App\DeviceSection
-     */
-    private $model;
-
-    public function __construct(DeviceSection $model)
-    {
-        $this->model = $model;
-    }
-
     protected function getCategories(Request $request)
     {
         $categories = $request->input('categories');
@@ -46,35 +38,38 @@ class DeviceSectionController extends Controller
         $data = $request->only('title', 'icon', 'fields');
 
         $data['categories'] = $this->getCategories($request);
+        $data['created_by'] = $request->user()->id;
 
         return $data;
     }
 
     public function index()
     {
-        $this->authorize('section_ownership');
-
         return view('device-sections.index');
     }
 
     public function create()
     {
-        $this->authorize('admin');
-
         return view('device-sections.create');
     }
 
     public function store(Request $request)
     {
         try {
-            $this->authorize('admin');
+            $deviceSection = DeviceSection::create($this->getFields($request));
 
-            $this->model->create($this->getFields($request));
+            if (!$request->user()->isAdmin()) {
+                $request->user()->permissions()->create([
+                    'resource_type' => Permission::RESOURCE_TYPE_DEVICES_SECTION,
+                    'resource_id' => $deviceSection->id,
+                    'grant_type' => Permission::GRANT_TYPE_OWNER,
+                ]);
+            }
 
             return redirect()
                 ->route('device-sections.index')
                 ->withSuccess('Device section has been added');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -85,12 +80,12 @@ class DeviceSectionController extends Controller
     public function edit($id)
     {
         try {
-            $deviceSection = $this->model->findOrFail($id);
+            $deviceSection = DeviceSection::findOrFail($id);
 
             $this->authorize('manage', $deviceSection);
 
             return view('device-sections.edit', compact('deviceSection'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Could not find device section');
@@ -100,7 +95,7 @@ class DeviceSectionController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $deviceSection = $this->model->findOrFail($id);
+            $deviceSection = DeviceSection::findOrFail($id);
 
             $this->authorize('manage', $deviceSection);
 
@@ -125,7 +120,7 @@ class DeviceSectionController extends Controller
             return redirect()
                 ->route('device-sections.index')
                 ->withSuccess('Device section has been updated');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -136,7 +131,7 @@ class DeviceSectionController extends Controller
     public function destroy($id)
     {
         try {
-            $deviceSection = $this->model->findOrFail($id);
+            $deviceSection = DeviceSection::findOrFail($id);
 
             $this->authorize('manage', $deviceSection);
 
@@ -145,7 +140,7 @@ class DeviceSectionController extends Controller
             return redirect()
                 ->route('device-sections.index')
                 ->withSuccess('Device section has been deleted');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Could not find device section');
@@ -155,14 +150,12 @@ class DeviceSectionController extends Controller
     public function getOptions(Request $request)
     {
         try {
-            $this->authorize('section_ownership');
-
             $type = $request->input('type');
             $index = $request->input('index');
             $field = Factory::generate('', 'tmp', $type);
 
             return $field->renderOptions($index);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             //
         }
     }

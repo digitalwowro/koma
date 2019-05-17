@@ -37,7 +37,6 @@ class Permission extends Model
      */
     protected $fillable = ['resource_type', 'resource_id', 'resource_type', 'grant_type'];
 
-
     private static $acl = [
         'view' => [
             self::GRANT_TYPE_READ,
@@ -86,6 +85,26 @@ class Permission extends Model
     }
 
     public $resource;
+
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public static function boot()
+    {
+        Permission::created(function() {
+            Permission::flushCache();
+        });
+
+        Permission::updated(function() {
+            Permission::flushCache();
+        });
+
+        Permission::deleted(function() {
+            Permission::flushCache();
+        });
+    }
 
     /**
      * @return bool
@@ -194,10 +213,11 @@ class Permission extends Model
     public static function canList(DeviceSection $section, $userId = null)
     {
         $userId = is_null($userId) ? auth()->id() : $userId;
-        $devices = Device::where('section_id', $section->id)->lists('id')->toArray();
+        $devices = Device::where('section_id', $section->id)->pluck('id')->toArray();
+        $permissions = self::getCached();
 
-        foreach (self::getCached() as $permission) {
-            if ($permission['user_id'] == $userId) {
+        foreach ($permissions as $permission) {
+            if ($permission['user_id'] === $userId) {
                 switch($permission['resource_type']) {
                     case self::RESOURCE_TYPE_DEVICES_FULL:
                         return true;
@@ -212,21 +232,6 @@ class Permission extends Model
                         }
                         break;
                 }
-            }
-        }
-
-        return false;
-    }
-
-    public static function sectionOwnership($userId = null)
-    {
-        $userId = is_null($userId) ? auth()->id() : $userId;
-
-        foreach (self::getCached() as $permission) {
-            if ($permission['user_id'] == $userId
-                && $permission['resource_type'] === self::RESOURCE_TYPE_DEVICES_SECTION
-                && $permission['grant_type'] === self::GRANT_TYPE_OWNER) {
-                return true;
             }
         }
 

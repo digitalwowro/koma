@@ -30,8 +30,11 @@
                         <table class="table table-hover table-striped">
                             <thead>
                             <tr>
-                                <th><span>Title</span></th>
-                                <th><span>Number of fields</span></th>
+                                <th>Title</th>
+                                <th>Number of fields</th>
+                                @can('admin')
+                                <th>Created By</th>
+                                @endcan
                                 <th>&nbsp;</th>
                             </tr>
                             </thead>
@@ -42,9 +45,23 @@
                                         {!! $deviceSection->present()->icon !!}
                                         <a href="{{ route('devices.index', $deviceSection->id) }}">{{ $deviceSection->title }}</a>
                                     </td>
+
                                     <td>
                                         {{ count($deviceSection->fields) }}
                                     </td>
+
+                                    @can('admin')
+                                    <td>
+                                        @if ($deviceSection->creator)
+                                            <a href="{{ route('users.edit', $deviceSection->creator->id) }}">
+                                                {{ $deviceSection->creator->name }}
+                                            </a>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    @endcan
+
                                     <td style="width: 1%; white-space: nowrap;">
                                         <a href="{{ route('device-sections.edit', $deviceSection->id) }}" class="table-link">
                                             <span class="fa-stack">
@@ -64,7 +81,7 @@
                                 </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" style="text-align:center;">
+                                        <td colspan="{{ auth()->user()->can('admin') ? 4 : 3 }}" style="text-align:center;">
                                             There are currently no device sections added. How about <a href="{{ route('device-sections.create') }}">creating one</a> now?
                                         </td>
                                     </tr>

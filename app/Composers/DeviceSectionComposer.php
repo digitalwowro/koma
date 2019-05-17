@@ -46,11 +46,7 @@ class DeviceSectionComposer
      */
     public function all(View $view)
     {
-        $manageableSections = Permission::manageableSections();
-
-        $this->deviceSection->pagedForAdmin($manageableSections);
-
-        $view->with('deviceSections', $this->deviceSection->getAll($manageableSections));
+        $view->with('deviceSections', $this->deviceSection->getAll());
     }
 
 }

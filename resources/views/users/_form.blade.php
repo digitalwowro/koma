@@ -97,7 +97,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr class="empty">
+                <tr class="empty{{ isset($user) && count($user->permissions) ? ' hidden' : '' }}">
                     <td colspan="3" style="text-align: center;">This user currently has no permissions granted.</td>
                 </tr>
                 @if (isset($user))
@@ -430,14 +430,14 @@
                 '</tr>';
 
             $table.find('tbody').append(to_add);
-            $table.find('tr.empty').hide();
+            $table.find('tr.empty').addClass('hidden');
         }
 
         $table.on('click', '.delete-this-permission', function(e) {
             $(this).closest('tr').remove();
 
             if (!$table.find('tbody tr:not(.empty)').length) {
-                $table.find('tr.empty').show();
+                $table.find('tr.empty').removeClass('hidden');
             }
 
             e.preventDefault();
