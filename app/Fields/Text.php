@@ -49,18 +49,15 @@ class Text extends AbstractField
     public function renderOptions($index)
     {
         $checked = $this->copyPaste();
-        $rand = $this->getTotallyRandomString();
         $name = 'fields[' . $index . '][options][copypaste]';
 
         return
             parent::renderOptions($index) .
-            '<div class="checkbox-nice">' .
-                Form::checkbox($name, 1, $checked, [
-                    'id' => $rand,
-                ]) .
-            '<label for="' . $rand . '">' .
-            'Show copy text button for this field' .
-            '</label>' .
+            '<div class="checkbox icheck">' .
+                '<label>' .
+                    Form::checkbox($name, 1, $checked) .
+                    ' Show copy text button for this field' .
+                '</label>' .
             '</div>';
     }
 

@@ -34,42 +34,34 @@
 </div>
 
 @if (!isset($user) || auth()->id() != $user->id)
-    <div class="col-xs-12">
-        <div class="form-group">
-            <label class="col-xs-2 control-label">Role</label>
-            <div class="col-xs-10">
-                <div class="radio">
+    <div class="form-group">
+        <label class="col-xs-2 control-label">Role</label>
+        <div class="col-xs-10">
+            <div class="radio icheck">
+                <label>
                     {!! Form::radio('role', App\User::ROLE_SYSADMIN, null, [
-                        'id' => 'role-sysadmin',
-                        'class' => 'form-control',
                         'required' => true,
                     ]) !!}
-                    <label for="role-sysadmin">
-                        Sysadmin
-                    </label>
-                </div>
+                    Sysadmin
+                </label>
+            </div>
 
-                <div class="radio">
+            <div class="radio icheck">
+                <label>
                     {!! Form::radio('role', App\User::ROLE_ADMIN, null, [
-                        'id' => 'role-admin',
-                        'class' => 'form-control',
                         'required' => true,
                     ]) !!}
-                    <label for="role-admin">
-                        Admin
-                    </label>
-                </div>
+                    Admin
+                </label>
+            </div>
 
-                <div class="radio">
+            <div class="radio icheck">
+                <label>
                     {!! Form::radio('role', App\User::ROLE_SUPERADMIN, null, [
-                        'id' => 'role-superadmin',
-                        'class' => 'form-control',
                         'required' => true,
                     ]) !!}
-                    <label for="role-superadmin">
-                        Superadmin
-                    </label>
-                </div>
+                    Superadmin
+                </label>
             </div>
         </div>
     </div>
@@ -135,13 +127,12 @@
                     @endif
 
                     <td>
-                        <div class="radio pull-left" style="margin-right: 10px;">
-                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ, $permission->grant_type === $permission::GRANT_TYPE_READ, [
-                                'id' => "grant-{$i}-view",
-                                'class' => 'form-control',
-                                'required' => true,
-                            ]) !!}
-                            <label for="grant-{{ $i }}-view">
+                        <div class="radio icheck pull-left" style="margin-right: 10px;">
+                            <label>
+                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ, $permission->grant_type === $permission::GRANT_TYPE_READ, [
+                                    'required' => true,
+                                ]) !!}
+
                                 @if ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_DEVICE)
                                     View
                                 @else
@@ -150,10 +141,9 @@
                             </label>
                         </div>
 
-                        <div class="radio pull-left" style="margin-right: 10px;">
+                        <div class="radio icheck pull-left" style="margin-right: 10px;">
                             {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_WRITE, $permission->grant_type === $permission::GRANT_TYPE_WRITE, [
                                 'id' => "grant-{$i}-edit",
-                                'class' => 'form-control',
                                 'required' => true,
                             ]) !!}
                             <label for="grant-{{ $i }}-edit">
@@ -165,13 +155,11 @@
                             </label>
                         </div>
 
-                        <div class="radio pull-left" style="margin-right: 10px;">
-                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_FULL, $permission->grant_type === $permission::GRANT_TYPE_FULL, [
-                                'id' => "grant-{$i}-full",
-                                'class' => 'form-control',
-                                'required' => true,
-                            ]) !!}
-                            <label for="grant-{{ $i }}-full">
+                        <div class="radio icheck pull-left" style="margin-right: 10px;">
+                            <label>
+                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_FULL, $permission->grant_type === $permission::GRANT_TYPE_FULL, [
+                                    'required' => true,
+                                ]) !!}
                                 @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_DEVICE)
                                     View, Edit &amp; Delete
                                 @else
@@ -181,35 +169,29 @@
                         </div>
 
                         @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION)
-                        <div class="radio pull-left" style="margin-right: 10px;">
-                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_CREATE, $permission->grant_type === $permission::GRANT_TYPE_CREATE, [
-                                'id' => "grant-{$i}-create",
-                                'class' => 'form-control',
-                                'required' => true,
-                            ]) !!}
-                            <label for="grant-{{ $i }}-create">
+                        <div class="radio icheck pull-left" style="margin-right: 10px;">
+                            <label>
+                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_CREATE, $permission->grant_type === $permission::GRANT_TYPE_CREATE, [
+                                    'required' => true,
+                                ]) !!}
                                 Create
                             </label>
                         </div>
 
-                        <div class="radio pull-left" style="margin-right: 10px;">
-                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ_CREATE, $permission->grant_type === $permission::GRANT_TYPE_READ_CREATE, [
-                                'id' => "grant-{$i}-viewcreate",
-                                'class' => 'form-control',
-                                'required' => true,
-                            ]) !!}
-                            <label for="grant-{{ $i }}-viewcreate">
+                        <div class="radio icheck pull-left" style="margin-right: 10px;">
+                            <label>
+                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ_CREATE, $permission->grant_type === $permission::GRANT_TYPE_READ_CREATE, [
+                                    'required' => true,
+                                ]) !!}
                                 View all &amp; Create
                             </label>
                         </div>
 
-                        <div class="radio pull-left" style="margin-right: 10px;">
-                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_OWNER, $permission->grant_type === $permission::GRANT_TYPE_OWNER, [
-                                'id' => "grant-{$i}-owner",
-                                'class' => 'form-control',
-                                'required' => true,
-                            ]) !!}
-                            <label for="grant-{{ $i }}-owner">
+                        <div class="radio icheck pull-left" style="margin-right: 10px;">
+                            <label>
+                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_OWNER, $permission->grant_type === $permission::GRANT_TYPE_OWNER, [
+                                    'required' => true,
+                                ]) !!}
                                 Owner
                             </label>
                         </div>
@@ -229,17 +211,17 @@
             <tfoot>
                 <tr>
                     <td colspan="3" style="text-align:right;">
-                        <a class="btn btn-primary btn-xs add-global-access">
+                        <a class="btn btn-primary add-global-access">
                             <i class="fa fa-star"></i>
                             Add Global Access
                         </a>
 
-                        <a class="btn btn-primary btn-xs" href="#addSectionModal" data-toggle="modal">
+                        <a class="btn btn-primary" href="#addSectionModal" data-toggle="modal">
                             <i class="fa fa-server"></i>
                             Add Device Section
                         </a>
 
-                        <a class="btn btn-primary btn-xs" href="#addDeviceModal" data-toggle="modal">
+                        <a class="btn btn-primary" href="#addDeviceModal" data-toggle="modal">
                             <i class="fa fa-server"></i>
                             Add Device
                         </a>
@@ -258,15 +240,16 @@
                 <h4 class="modal-title">Add Permission for Device</h4>
             </div>
             <div class="modal-body">
-                <label for="device-section-select">Section</label>
-                <select id="device-section-select" style="width:100%;">
+                <h4>Section</h4>
+
+                <select id="device-section-select" class="form-control">
                     @foreach(App\DeviceSection::orderBy('title')->get() as $section)
                         <option value="{{ $section->id }}">{{ $section->title }}</option>
                     @endforeach
                 </select>
 
-                <label for="device-select">Device</label>
-                <select id="device-select" style="width:100%;">
+                <h4>Device</h4>
+                <select id="device-select" class="form-control">
                 </select>
             </div>
             <div class="modal-footer">
@@ -285,8 +268,8 @@
                 <h4 class="modal-title">Add Permission for Section</h4>
             </div>
             <div class="modal-body">
-                <label for="section-select">Section</label>
-                <select id="section-select" style="width:100%;">
+                <h4>Section</h4>
+                <select id="section-select" class="form-control">
                     @foreach(App\DeviceSection::orderBy('title')->get() as $section)
                         <option value="{{ $section->id }}">{{ $section->title }}</option>
                     @endforeach
@@ -357,50 +340,44 @@
 
             to_add = to_add +
                     '</td><td>' +
-                        '<div class="radio pull-left" style="margin-right: 10px;">' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-view" class="form-control" value="{{ \App\Permission::GRANT_TYPE_READ }}" required checked>' +
-
-                            '<label for="grant-' + nextId + '-view">' +
+                        '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
+                            '<label>' +
+                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_READ }}" required checked> ' +
                                 (type === 'device' ? 'View' : 'View all') +
                             '</label>' +
                         '</div>' +
 
-                        '<div class="radio pull-left" style="margin-right: 10px;">' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-edit" class="form-control" value="{{ \App\Permission::GRANT_TYPE_WRITE }}" required>' +
-
-                            '<label for="grant-' + nextId + '-edit">' +
+                        '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
+                            '<label>' +
+                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_WRITE }}" required> ' +
                                 (type === 'device' ? 'View &amp; Edit' : 'View &amp; Edit all') +
                             '</label>' +
                         '</div>' +
 
-                        '<div class="radio pull-left" style="margin-right: 10px;">' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-full" class="form-control" value="{{ \App\Permission::GRANT_TYPE_FULL }}" required>' +
-
-                            '<label for="grant-' + nextId + '-full">' +
+                        '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
+                            '<label>' +
+                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_FULL }}" required> ' +
                                 (type === 'device' ? 'View, Edit &amp; Delete' : 'View, Edit &amp; Delete all') +
                             '</label>' +
                         '</div>' +
 
-                        '<div class="radio pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-create" class="form-control" value="{{ \App\Permission::GRANT_TYPE_CREATE }}" required>' +
-
-                            '<label for="grant-' + nextId + '-create">' +
+                        '<div class="radio icheck pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                            '<label>' +
+                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_CREATE }}" required> ' +
                                 'Create' +
                             '</label>' +
                         '</div>' +
 
-                        '<div class="radio pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-viewcreate" class="form-control" value="{{ \App\Permission::GRANT_TYPE_READ_CREATE }}" required>' +
-
-                            '<label for="grant-' + nextId + '-viewcreate">' +
+                        '<div class="radio icheck pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                            '<label>' +
+                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_READ_CREATE }}" required> ' +
                                 'View all &amp; Create' +
                             '</label>' +
                         '</div>' +
 
-                        '<div class="radio pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" id="grant-' + nextId + '-owner" class="form-control" value="{{ \App\Permission::GRANT_TYPE_OWNER }}" required>' +
-
-                            '<label for="grant-' + nextId + '-owner">' +
+                        '<div class="radio icheck pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                            '<label>' +
+                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_OWNER }}" required> ' +
                                 'Owner' +
                             '</label>' +
                         '</div>' +
@@ -414,6 +391,8 @@
 
             $table.find('tbody').append(to_add);
             $table.find('tr.empty').addClass('hidden');
+
+            bindIcheck();
         }
 
         $table.on('click', '.delete-this-permission', function(e) {

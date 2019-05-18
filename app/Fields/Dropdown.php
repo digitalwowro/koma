@@ -41,7 +41,7 @@ class Dropdown extends AbstractField
                 'class'       => 'form-control',
                 'placeholder' => 'e.g: Ubuntu,Debian,CentOS',
             ]) .
-            '<hr>' .
+            '<br>' .
             parent::renderOptions($index);
     }
 

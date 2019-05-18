@@ -1,17 +1,13 @@
 @if (count($deviceSection->categories))
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="main-box clearfix">
-                <header class="main-box-header clearfix">
-                    <h2 class="pull-left">Category</h2>
-                </header>
+    <div class="box box-warning">
+        <div class="box-header with-border">
+            <h3 class="box-title">Category</h3>
+        </div>
 
-                <div class="main-box-body clearfix">
-                    {!! Form::select('category_id', ['' => '- uncategorized -'] + $deviceSection->categories, request()->input('category'), [
-                        'class' => 'form-control',
-                    ]) !!}
-                </div>
-            </div>
+        <div class="box-body">
+            {!! Form::select('category_id', ['' => '- uncategorized -'] + $deviceSection->categories, request()->input('category'), [
+                'class' => 'form-control',
+            ]) !!}
         </div>
     </div>
 @endif

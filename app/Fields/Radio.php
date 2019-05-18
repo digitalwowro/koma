@@ -17,18 +17,13 @@ class Radio extends AbstractField
         $return = $this->prerender();
 
         foreach ($options as $option) {
-            $rand = md5(time() . mt_rand(0, 999999) . rand(0, 999999));
             $checked = $contents == $option;
 
             $return .=
-                '<div class="radio">' .
-                    Form::radio($this->getInputName(), $option, $checked, [
-                        'id' => $rand,
-                    ]) .
-                    '<label for="' . $rand . '">' .
+                '<label>' .
+                    Form::radio($this->getInputName(), $option, $checked) .
                     htmlentities($option) .
-                    '</label>' .
-                '</div>';
+                '</label>';
         }
 
         return $return . $this->postrender();
@@ -48,7 +43,7 @@ class Radio extends AbstractField
                 'class' => 'form-control',
                 'placeholder' => 'e.g: Ubuntu,Debian,CentOS',
             ]) .
-            '<hr>' .
+            '<br>' .
             parent::renderOptions($index);
     }
 

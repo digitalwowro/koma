@@ -64,16 +64,13 @@ class Status extends AbstractField
         $return = $this->prerender();
 
         foreach ($options as $option) {
-            $rand = md5(time() . mt_rand(0, 999999) . rand(0, 999999));
             $checked = $contents == $option['label'];
 
             $return .=
-                '<div class="radio">' .
-                    Form::radio($this->getInputName(), $option['label'], $checked, [
-                        'id' => $rand,
-                    ]) .
-                    '<label for="' . $rand . '">' .
-                    '<span class="label label-' . $option['type'] . '">' . htmlentities($option['label']) . '</span>' .
+                '<div class="radio icheck">' .
+                    '<label>' .
+                        Form::radio($this->getInputName(), $option['label'], $checked) .
+                        '<span class="label label-' . $option['type'] . '" style="margin-left: 10px;">' . htmlentities($option['label']) . '</span>' .
                     '</label>' .
                 '</div>';
         }
@@ -100,25 +97,21 @@ class Status extends AbstractField
                 ]);
         }
 
-        $return .= '<hr><label>Default preselected status(optional, must match one of the statuses above)</label>' .
+        $return .= '<br><label>Default preselected status(optional, must match one of the statuses above)</label>' .
             Form::text('fields[' . $index . '][options][preselected]', $this->getOption('preselected'), [
                 'class' => 'form-control',
                 'placeholder' => 'Active',
             ]);
 
-        $rand = $this->getTotallyRandomString();
-
         $showFilter =
-            '<div class="checkbox-nice">' .
-            Form::checkbox($name('show_filter'), 1, $this->showFilter(), [
-                'id' => $rand,
-            ]) .
-            '<label for="' . $rand . '">' .
-            'Enable filter for this field in the device listing' .
-            '</label>' .
+            '<div class="radio icheck">' .
+                '<label>' .
+                    Form::checkbox($name('show_filter'), 1, $this->showFilter()) .
+                    ' Enable filter for this field in the device listing' .
+                '</label>' .
             '</div>';
 
-        return $return . '<hr>' . parent::renderOptions($index) . $showFilter;
+        return $return . '<br>' . parent::renderOptions($index) . $showFilter;
     }
 
 }

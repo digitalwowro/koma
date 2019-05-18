@@ -243,6 +243,7 @@
 
                 $.post('{{ route('device-sections.get-options') }}', params, function(r) {
                     $tr.find('td.field-options').html(r);
+                    bindIcheck();
                 });
             }
 
@@ -261,7 +262,6 @@
                     var $this = $(this),
                         $key = $this.find('.field-key');
 
-                    console.log('i is ' + i, $this);
                     if ($key.val() == '') {
                         $key.val(makeid());
                     }

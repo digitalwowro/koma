@@ -50,17 +50,14 @@ class Password extends Text
     public function renderOptions($index)
     {
         $name = 'fields[' . $index . '][options][mask]';
-        $rand = $this->getTotallyRandomString();
         $checked = $this->mask();
 
         return
-            '<div class="checkbox-nice">' .
-            Form::checkbox($name, 1, $checked, [
-                'id' => $rand,
-            ]) .
-            '<label for="' . $rand . '">' .
-            'Mask password (********)' .
-            '</label>' .
+            '<div class="checkbox icheck">' .
+                '<label>' .
+                    Form::checkbox($name, 1, $checked) .
+                    ' Mask password (********)' .
+                '</label>' .
             '</div>' .
             parent::renderOptions($index);
     }

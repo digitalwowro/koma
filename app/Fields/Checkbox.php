@@ -17,17 +17,14 @@ class Checkbox extends AbstractField
         $return = $this->prerender();
 
         foreach ($options as $option) {
-            $rand    = $this->getTotallyRandomString();
             $checked = is_array($contents) && in_array($option, $contents);
 
             $return .=
-                '<div class="checkbox-nice">' .
-                Form::checkbox($this->getInputName() . '[]', $option, $checked, [
-                    'id' => $rand,
-                ]) .
-                '<label for="' . $rand . '">' .
-                htmlentities($option) .
-                '</label>' .
+                '<div class="checkbox icheck">' .
+                    '<label>' .
+                        Form::checkbox($this->getInputName() . '[]', $option, $checked) .
+                        ' ' . htmlentities($option) .
+                    '</label>' .
                 '</div>';
         }
 
@@ -39,8 +36,8 @@ class Checkbox extends AbstractField
      */
     public function renderOptions($index)
     {
-        $value  = $this->getOption('options', '');
-        $name   = 'fields[' . $index . '][options][options]';
+        $value = $this->getOption('options', '');
+        $name = 'fields[' . $index . '][options][options]';
 
         return
             '<label>Comma separated options</label>' .
@@ -48,7 +45,7 @@ class Checkbox extends AbstractField
                 'class'       => 'form-control',
                 'placeholder' => 'e.g: Ubuntu,Debian,CentOS',
             ]) .
-            '<hr>' .
+            '<br>' .
             parent::renderOptions($index);
     }
 

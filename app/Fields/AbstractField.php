@@ -126,16 +126,13 @@ abstract class AbstractField
     public function renderOptions($index)
     {
         $name = 'fields[' . $index . '][options][showlist]';
-        $rand = $this->getTotallyRandomString();
         $checked = $this->showInDeviceList();
 
         return
-            '<div class="checkbox-nice">' .
-                Form::checkbox($name, 1, $checked, [
-                    'id' => $rand,
-                ]) .
-                '<label for="' . $rand . '">' .
-                    'Show this field in the device listing' .
+            '<div class="checkbox icheck">' .
+                '<label>' .
+                    Form::checkbox($name, 1, $checked) .
+                    ' Show this field in the device listing' .
                 '</label>' .
             '</div>';
     }

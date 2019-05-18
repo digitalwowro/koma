@@ -70,19 +70,16 @@ class IP extends AbstractField
         $output .= '<option value="c"' . $custom . '>Custom IPs</option>';
         $output .= '</select>';
         $output .= "<script>setTimeout(function(){ $('#{$rand}').select2(); }, 200)</script>";
-        $output .= '<hr>';
+        $output .= '<br>';
 
         $checked = filter_var($this->getOption('copypaste', ''), FILTER_VALIDATE_BOOLEAN);
-        $rand    = $this->getTotallyRandomString();
-        $name    = 'fields[' . $index . '][options][copypaste]';
+        $name = 'fields[' . $index . '][options][copypaste]';
 
-        $output .= '<div class="checkbox-nice">' .
-            Form::checkbox($name, 1, $checked, [
-                'id' => $rand,
-            ]) .
-        '<label for="' . $rand . '">' .
-        'Show copy text button for this field' .
-        '</label>' .
+        $output .= '<div class="checkbox icheck">' .
+            '<label>' .
+                Form::checkbox($name, 1, $checked) .
+                ' Show copy text button for this field' .
+            '</label>' .
         '</div>';
 
         return $output;
