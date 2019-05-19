@@ -29,16 +29,23 @@ class ComposerServiceProvider extends ServiceProvider
             'device-sections.index', 'App\Composers\DeviceSectionComposer@admin'
         );
 
+        view()->composer('users._form', 'App\Composers\DeviceSectionComposer@getForPermission');
+
         /**
          * IP Categories
          */
         view()->composer(
-            'layout', 'App\Composers\IpCategoryComposer@all'
+            [
+                'layout',
+                'users._personalization',
+            ], 'App\Composers\IpCategoryComposer@all'
         );
 
         view()->composer(
             'ip-categories.index', 'App\Composers\IpCategoryComposer@admin'
         );
+
+        view()->composer('users._form', 'App\Composers\IpCategoryComposer@getForPermission');
 
         /**
          * Users

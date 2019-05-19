@@ -104,11 +104,12 @@ table.table-categories .fa-trash-o { color: red; }
     font-size: 14px;
 }
 
-// admin lte overrides
+/* admin lte overrides */
 div.well.well-inline {
     display: inline-block;
 }
 
+.iradio_square-blue,
 .icheckbox_square-blue {
     background-color: white;
 }

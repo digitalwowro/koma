@@ -20,7 +20,7 @@
                     <div class="form-inline">
                         <div class="form-group">
                             <label for="passLength">Length</label>
-                            <input id="passLength" type="number" min="8" max="32" value="12" class="form-control">
+                            <input id="passLength" type="number" min="8" max="32" value="12" class="form-control" style="width: 64px;">
                             <label>characters (8-32)</label>
                         </div>
                     </div>
@@ -28,32 +28,44 @@
                     <div class="row">
                         <div class="col-md-6">
                             <label>Alpha Characters</label>
-                            <div class="radio">
-                                <input id="a1" type="radio" name="alphaCharacters" value="both" checked>
-                                <label for="a1">Both (aBcD)</label>
+                            <div class="radio icheck">
+                                <label>
+                                    <input type="radio" name="alphaCharacters" value="both" checked>
+                                    Both (aBcD)
+                                </label>
                             </div>
-                            <div class="radio">
-                                <input id="a2" type="radio" name="alphaCharacters" value="lowercase">
-                                <label for="a2">Lowercase (abc)</label>
+                            <div class="radio icheck">
+                                <label>
+                                    <input type="radio" name="alphaCharacters" value="lowercase">
+                                    Lowercase (abc)
+                                </label>
                             </div>
-                            <div class="radio">
-                                <input id="a3" type="radio" name="alphaCharacters" value="uppercase">
-                                <label for="a3">Uppercase (ABC)</label>
+                            <div class="radio icheck">
+                                <label>
+                                    <input type="radio" name="alphaCharacters" value="uppercase">
+                                    Uppercase (ABC)
+                                </label>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <label>Non Alpha Characters</label>
-                            <div class="radio">
-                                <input id="na1" type="radio" name="nonAlphaCharacters" value="both">
-                                <label for="na1">Both (1@3$)</label>
+                            <div class="radio icheck">
+                                <label>
+                                    <input type="radio" name="nonAlphaCharacters" value="both">
+                                    Both (1@3$)
+                                </label>
                             </div>
-                            <div class="radio">
-                                <input id="na2" type="radio" name="nonAlphaCharacters" value="numbers" checked>
-                                <label for="na2">Numbers (123)</label>
+                            <div class="radio icheck">
+                                <label>
+                                    <input type="radio" name="nonAlphaCharacters" value="numbers" checked>
+                                    Numbers (123)
+                                </label>
                             </div>
-                            <div class="radio">
-                                <input id="na3" type="radio" name="nonAlphaCharacters" value="symbols">
-                                <label for="na3">Symbols (@#$)</label>
+                            <div class="radio icheck">
+                                <label>
+                                    <input type="radio" name="nonAlphaCharacters" value="symbols">
+                                    Symbols (@#$)
+                                </label>
                             </div>
                         </div>
                     </div>

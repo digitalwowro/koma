@@ -122,6 +122,35 @@
 
                         <input type="hidden" name="permissions[{{ $i }}][type]" value="device">
                         <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
+                    </td>
+                    @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_IP_CATEGORY)
+                    <td>
+                        <i class="fa fa-ellipsis-h"></i>
+
+                        <a href="{{ route('ip.index', $permission->resource->id) }}" target="_blank">
+                            {{ $permission->resource->title }}
+                        </a>
+
+                        <input type="hidden" name="permissions[{{ $i }}][type]" value="ip_category">
+                        <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
+                    </td>
+                    @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_IP_SUBNET)
+                    <td>
+                        <i class="fa fa-ellipsis-h"></i>
+
+                        <a href="{{ route('ip.index', $permission->resource->category_id) }}" target="_blank">
+                            {{ $permission->resource->category->title }}
+                        </a>
+
+                        &gt;
+
+                        <a href="{{ route('ip.subnet', str_replace('/', '-', $permission->resource->subnet)) }}" target="_blank">
+                            {{ $permission->resource->subnet }}
+                        </a>
+
+                        <input type="hidden" name="permissions[{{ $i }}][type]" value="ip_subnet">
+                        <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
+                    </td>
                     @else
                     <td></td>
                     @endif
@@ -168,7 +197,7 @@
                             </label>
                         </div>
 
-                        @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION)
+                        @if (in_array($permission->resource_type, [$permission::RESOURCE_TYPE_DEVICES_SECTION, $permission::RESOURCE_TYPE_IP_CATEGORY]))
                         <div class="radio icheck pull-left" style="margin-right: 10px;">
                             <label>
                                 {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_CREATE, $permission->grant_type === $permission::GRANT_TYPE_CREATE, [
@@ -221,9 +250,19 @@
                             Add Device Section
                         </a>
 
+                        <a class="btn btn-primary" href="#addIpSectionModal" data-toggle="modal">
+                            <i class="fa fa-ellipsis-h"></i>
+                            Add IP Category
+                        </a>
+
                         <a class="btn btn-primary" href="#addDeviceModal" data-toggle="modal">
                             <i class="fa fa-server"></i>
                             Add Device
+                        </a>
+
+                        <a class="btn btn-primary" href="#addIpSubnetModal" data-toggle="modal">
+                           <i class="fa fa-ellipsis-h"></i>
+                            Add IP Subnet
                         </a>
                     </td>
                 </tr>
@@ -243,14 +282,14 @@
                 <h4>Section</h4>
 
                 <select id="device-section-select" class="form-control">
-                    @foreach(App\DeviceSection::orderBy('title')->get() as $section)
+                    @foreach($deviceSections as $section)
                         <option value="{{ $section->id }}">{{ $section->title }}</option>
                     @endforeach
                 </select>
 
                 <h4>Device</h4>
-                <select id="device-select" class="form-control">
-                </select>
+
+                <select id="device-select" class="form-control"></select>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -270,7 +309,7 @@
             <div class="modal-body">
                 <h4>Section</h4>
                 <select id="section-select" class="form-control">
-                    @foreach(App\DeviceSection::orderBy('title')->get() as $section)
+                    @foreach($deviceSections as $section)
                         <option value="{{ $section->id }}">{{ $section->title }}</option>
                     @endforeach
                 </select>
@@ -283,20 +322,99 @@
     </div>
 </div>
 
+<div class="modal fade" id="addIpSubnetModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Add Permission for IP Subnet</h4>
+            </div>
+            <div class="modal-body">
+                <h4>IP Category</h4>
+
+                <select id="ip-subnet-select" class="form-control">
+                    @foreach($ipCategories as $category)
+                        <option value="{{ $category->id }}">{{ $category->title }}</option>
+                    @endforeach
+                </select>
+
+                <h4>Subnet</h4>
+
+                <select id="subnet-select" class="form-control"></select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary do-add-subnet">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addIpSectionModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Add Permission for IP Category</h4>
+            </div>
+            <div class="modal-body">
+                <h4>Category</h4>
+                <select id="category-select" class="form-control">
+                    @foreach($ipCategories as $category)
+                        <option value="{{ $category->id }}">{{ $category->title }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary do-add-ip-category">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section('footer')
 <script>
     $(document).ready(function() {
         var $table = $('table.table-permissions');
-        var deviceSections = {!! App\Device::all()->map(function($item) { $item->title = @reset($item->data); return $item; })->keyBy('id')->groupBy('section_id')->map(function($item) { return $item->pluck('title', 'id'); })->toJson() !!};
+        var deviceSections = {!! App\Device::with('section')->get()->map(function($item) { $item->title = $item->present()->humanIdField; return $item; })->keyBy('id')->groupBy('section_id')->map(function($item) { return $item->pluck('title', 'id'); })->toJson() !!};
+        var subnets = {!! App\IpAddress::allSubnets()->toJson() !!};
 
         function getSectionTitle(section_id) {
-            var sections = {!! App\DeviceSection::all()->pluck('title', 'id')->toJson() !!};
+            var sections = {!! App\DeviceSection::all()
+                ->pluck('title', 'id')
+                ->toJson() !!};
+
             return sections[section_id];
         }
 
         function getDeviceTitle(device_id) {
-            var devices = {!! App\Device::all()->keyBy('id')->map(function($item) { return @reset($item->data); })->toJson() !!};
+            var devices = {!! App\Device::with('section')
+                ->get()
+                ->keyBy('id')
+                ->map(function($item) {
+                    return $item->present()->humanIdField;
+                })
+                ->toJson() !!};
+
             return devices[device_id];
+        }
+
+        function getIpCategoryTitle(category_id) {
+            var categories = {!! App\IpCategory::all()
+                ->pluck('title', 'id')
+                ->toJson() !!};
+
+            return categories[category_id];
+        }
+
+        function getIpSubnetTitle(subnet_id) {
+            var subnets = {!! App\IpAddress::selectRaw('min(id) as id, subnet')
+                ->groupBy('subnet')
+                ->pluck('subnet', 'id')
+                ->toJson() !!};
+
+            return subnets[subnet_id];
         }
 
         function addPerm(type, section_id, device_id) {
@@ -306,15 +424,14 @@
                     : 0;
 
             if (type === 'global') {
-                to_add = to_add + '<i class="fa fa-star"></i>' +
+                to_add = to_add + '<i class="fa fa-star"></i> ' +
                     '' +
                     'Global' +
                     '' +
                     '<input type="hidden" name="permissions[' + nextId + '][type]" value="global">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="">';
             } else if (type === 'section') {
-                to_add = to_add + '<i class="fa fa-server"></i>' +
-                    '' +
+                to_add = to_add + '<i class="fa fa-server"></i> ' +
                     '<a href="' + '{{ route('devices.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
                         getSectionTitle(section_id) +
                     '</a>' +
@@ -322,72 +439,86 @@
                     '<input type="hidden" name="permissions[' + nextId + '][type]" value="section">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + section_id + '">';
             } else if (type === 'device') {
-                to_add = to_add + '<i class="fa fa-server"></i>' +
-                    '' +
+                to_add = to_add + '<i class="fa fa-server"></i> ' +
                     '<a href="' + '{{ route('devices.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
                         getSectionTitle(section_id) +
                     '</a>' +
-                    ' ' +
-                    '&gt;' +
-                    ' ' +
+                    ' &gt; ' +
                     '<a href="' + '{{ route('devices.show', ['type' => '_SID_', 'id' => '_DID_']) }}'.replace('_SID_', section_id).replace('_DID_', device_id) + '" target="_blank"> ' +
                         getDeviceTitle(device_id) +
                     '</a>' +
-                    '' +
                     '<input type="hidden" name="permissions[' + nextId + '][type]" value="device">' +
+                    '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + device_id + '">';
+            } else if (type === 'ip_category') {
+                to_add = to_add + '<i class="fa fa-ellipsis-h"></i> ' +
+                    '<a href="' + '{{ route('ip.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank">' +
+                        getIpCategoryTitle(section_id) +
+                    '</a>' +
+                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="ip_category">' +
+                    '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + section_id + '">';
+            } else if (type === 'ip_subnet') {
+                to_add = to_add + '<i class="fa fa-ellipsis-h"></i> ' +
+                    '<a href="' + '{{ route('ip.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank">' +
+                        getIpCategoryTitle(section_id) +
+                    '</a>' +
+                    ' &gt; ' +
+                    '<a href="' + '{{ route('ip.subnet', '_SID_') }}'.replace('_SID_', getIpSubnetTitle(device_id).replace('/', '-'))  + '" target="_blank">' +
+                        getIpSubnetTitle(device_id) +
+                    '</a>' +
+                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="ip_subnet">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + device_id + '">';
             }
 
             to_add = to_add +
-                    '</td><td>' +
-                        '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
-                            '<label>' +
-                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_READ }}" required checked> ' +
-                                (type === 'device' ? 'View' : 'View all') +
-                            '</label>' +
-                        '</div>' +
+                '</td><td>' +
+                    '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
+                        '<label>' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_READ }}" required checked> ' +
+                            (type === 'device' ? 'View' : 'View all') +
+                        '</label>' +
+                    '</div>' +
 
-                        '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
-                            '<label>' +
-                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_WRITE }}" required> ' +
-                                (type === 'device' ? 'View &amp; Edit' : 'View &amp; Edit all') +
-                            '</label>' +
-                        '</div>' +
+                    '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
+                        '<label>' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_WRITE }}" required> ' +
+                            (type === 'device' ? 'View &amp; Edit' : 'View &amp; Edit all') +
+                        '</label>' +
+                    '</div>' +
 
-                        '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
-                            '<label>' +
-                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_FULL }}" required> ' +
-                                (type === 'device' ? 'View, Edit &amp; Delete' : 'View, Edit &amp; Delete all') +
-                            '</label>' +
-                        '</div>' +
+                    '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
+                        '<label>' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_FULL }}" required> ' +
+                            (type === 'device' ? 'View, Edit &amp; Delete' : 'View, Edit &amp; Delete all') +
+                        '</label>' +
+                    '</div>' +
 
-                        '<div class="radio icheck pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
-                            '<label>' +
-                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_CREATE }}" required> ' +
-                                'Create' +
-                            '</label>' +
-                        '</div>' +
+                    '<div class="radio icheck pull-left' + (['section', 'ip_category'].includes(type) ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                        '<label>' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_CREATE }}" required> ' +
+                            'Create' +
+                        '</label>' +
+                    '</div>' +
 
-                        '<div class="radio icheck pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
-                            '<label>' +
-                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_READ_CREATE }}" required> ' +
-                                'View all &amp; Create' +
-                            '</label>' +
-                        '</div>' +
+                    '<div class="radio icheck pull-left' + (['section', 'ip_category'].includes(type) ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                        '<label>' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_READ_CREATE }}" required> ' +
+                            'View all &amp; Create' +
+                        '</label>' +
+                    '</div>' +
 
-                        '<div class="radio icheck pull-left' + (type === 'section' ? '' : ' hidden') + '" style="margin-right: 10px;">' +
-                            '<label>' +
-                                '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_OWNER }}" required> ' +
-                                'Owner' +
-                            '</label>' +
-                        '</div>' +
-                    '</td>' +
-                    '<td>' +
-                        '<a href="#" style="color:red;" class="delete-this-permission" title="Delete">' +
-                            '<i class="fa fa-trash-o"></i>' +
-                        '</a>' +
-                    '</td>' +
-                '</tr>';
+                    '<div class="radio icheck pull-left' + (['section', 'ip_category'].includes(type) ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                        '<label>' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_OWNER }}" required> ' +
+                            'Owner' +
+                        '</label>' +
+                    '</div>' +
+                '</td>' +
+                '<td>' +
+                    '<a href="#" style="color:red;" class="delete-this-permission" title="Delete">' +
+                        '<i class="fa fa-trash-o"></i>' +
+                    '</a>' +
+                '</td>' +
+            '</tr>';
 
             $table.find('tbody').append(to_add);
             $table.find('tr.empty').addClass('hidden');
@@ -411,9 +542,7 @@
             e.preventDefault();
         });
 
-        /**
-         * Add section
-         */
+        /** Add section **/
         $('.do-add-section').click(function(e) {
             addPerm('section', $('#section-select').val());
 
@@ -422,13 +551,29 @@
             e.preventDefault();
         });
 
-        /**
-         * Add device
-         */
+        /** Add device **/
         $('.do-add-device').click(function(e) {
             addPerm('device', $('#device-section-select').val(), $('#device-select').val());
 
             $('#addDeviceModal').modal('hide');
+
+            e.preventDefault();
+        });
+
+        /** Add IP Category **/
+        $('.do-add-ip-category').click(function(e) {
+            addPerm('ip_category', $('#category-select').val());
+
+            $('#addIpSectionModal').modal('hide');
+
+            e.preventDefault();
+        });
+
+        /** Add IP Subnet **/
+        $('.do-add-subnet').click(function(e) {
+            addPerm('ip_subnet', $('#ip-subnet-select').val(), $('#subnet-select').val());
+
+            $('#addIpSubnetModal').modal('hide');
 
             e.preventDefault();
         });
@@ -442,6 +587,31 @@
             }
 
             $('#device-select').html(html);
+
+            if (html) {
+                $('#addDeviceModal .do-add-device').removeAttr('disabled');
+            } else {
+                $('#addDeviceModal .do-add-device').attr('disabled', true);
+            }
+        }).change();
+
+        $('#ip-subnet-select').change(function() {
+            var html = '',
+                category = $(this).val();
+
+            $.each(subnets, function(i, subnet) {
+                if (parseInt(subnet.category_id) === parseInt(category)) {
+                    html += '<option value="' + subnet.id + '">' + subnet.subnet + '</option>';
+                }
+            });
+
+            $('#subnet-select').html(html);
+
+            if (html) {
+                $('#addIpSubnetModal .do-add-subnet').removeAttr('disabled');
+            } else {
+                $('#addIpSubnetModal .do-add-subnet').attr('disabled', true);
+            }
         }).change();
 
         $('input[type=radio][name=role]').click(function() {

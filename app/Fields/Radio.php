@@ -20,10 +20,12 @@ class Radio extends AbstractField
             $checked = $contents == $option;
 
             $return .=
+            '<div class="radio icheck">' .
                 '<label>' .
-                    Form::radio($this->getInputName(), $option, $checked) .
+                    Form::radio($this->getInputName(), $option, $checked) . ' ' .
                     htmlentities($option) .
-                '</label>';
+                '</label>' .
+            '</div>';
         }
 
         return $return . $this->postrender();

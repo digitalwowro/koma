@@ -20,6 +20,7 @@ elixir(function(mix) {
         'dist/css/AdminLTE.css',
         'dist/css/skins/skin-blue.css',
         'bower_components/select2/dist/css/select2.css',
+        '../../resources/assets/css/jquery.growl.css',
         'dist/css/alt/AdminLTE-select2.css',
         'plugins/iCheck/square/blue.css',
         '../../resources/assets/css/custom.css',
@@ -36,6 +37,7 @@ elixir(function(mix) {
         '../../resources/assets/js/jquery.dataTables.js',
         '../../resources/assets/js/dataTables.fixedHeader.js',
         '../../resources/assets/js/jquery.dataTables.bootstrap.js',
+        '../../resources/assets/js/jquery.growl.js',
 
         'plugins/iCheck/icheck.js',
         'bower_components/fastclick/lib/fastclick.js',

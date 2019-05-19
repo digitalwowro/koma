@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\IpCategory;
+use App\Permission;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -10,18 +11,6 @@ use App\Http\Controllers\Controller;
 
 class IpCategoryController extends Controller
 {
-    /**
-     * @var \App\IpCategory
-     */
-    private $model;
-
-    public function __construct(IpCategory $model)
-    {
-        $this->model = $model;
-
-        $this->authorize('admin');
-    }
-
     public function index()
     {
         return view('ip-categories.index');
@@ -34,16 +23,21 @@ class IpCategoryController extends Controller
 
     public function store(Request $request)
     {
-        try
-        {
-            $this->model->create($request->input());
+        try {
+            $ipCategory = IpCategory::create($request->input());
+
+            if (!$request->user()->isAdmin()) {
+                $request->user()->permissions()->create([
+                    'resource_type' => Permission::RESOURCE_TYPE_IP_CATEGORY,
+                    'resource_id' => $ipCategory->id,
+                    'grant_type' => Permission::GRANT_TYPE_OWNER,
+                ]);
+            }
 
             return redirect()
                 ->route('ip-categories.index')
                 ->withSuccess('IP category has been added');
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -53,14 +47,13 @@ class IpCategoryController extends Controller
 
     public function edit($id)
     {
-        try
-        {
-            $ipCategory = $this->model->findOrFail($id);
+        try {
+            $ipCategory = IpCategory::findOrFail($id);
+
+            $this->authorize('manage', $ipCategory);
 
             return view('ip-categories.edit', compact('ipCategory'));
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Could not find IP Category');
@@ -69,18 +62,17 @@ class IpCategoryController extends Controller
 
     public function update(Request $request, $id)
     {
-        try
-        {
-            $ipCategory = $this->model->findOrFail($id);
+        try {
+            $ipCategory = IpCategory::findOrFail($id);
+
+            $this->authorize('manage', $ipCategory);
 
             $ipCategory->update($request->input());
 
             return redirect()
                 ->route('ip-categories.index')
                 ->withSuccess('IP category has been updated');
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -90,18 +82,17 @@ class IpCategoryController extends Controller
 
     public function destroy($id)
     {
-        try
-        {
-            $ipCategory = $this->model->findOrFail($id);
+        try {
+            $ipCategory = IpCategory::findOrFail($id);
+
+            $this->authorize('manage', $ipCategory);
 
             $ipCategory->delete();
 
             return redirect()
                 ->route('ip-categories.index')
                 ->withSuccess('IP category has been deleted');
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Could not find IP Category');

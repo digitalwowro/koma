@@ -73,6 +73,15 @@ class User extends Model implements AuthenticatableContract,
         return in_array($sectionId, $this->profile['device_sections']);
     }
 
+    public function ipCategoryVisible($categoryId)
+    {
+        if (!isset($this->profile['ip_categories']) || !is_array($this->profile['ip_categories'])) {
+            return true;
+        }
+
+        return in_array($categoryId, $this->profile['ip_categories']);
+    }
+
     /**
      * Decode the data field
      *
@@ -126,7 +135,7 @@ class User extends Model implements AuthenticatableContract,
      */
     public function syncPermissions(array $permissions)
     {
-        $this->permissions()->delete();
+        $toCreate = [];
 
         foreach ($permissions as $permission) {
             unset($resourceType);
@@ -144,6 +153,12 @@ class User extends Model implements AuthenticatableContract,
                     case 'device':
                         $resourceType = Permission::RESOURCE_TYPE_DEVICES_DEVICE;
                         break;
+                    case 'ip_category':
+                        $resourceType = Permission::RESOURCE_TYPE_IP_CATEGORY;
+                        break;
+                    case 'ip_subnet':
+                        $resourceType = Permission::RESOURCE_TYPE_IP_SUBNET;
+                        break;
                 }
             }
 
@@ -151,7 +166,7 @@ class User extends Model implements AuthenticatableContract,
                 $resourceId = $permission['id'];
             }
 
-            $allowed = $permission['type'] === 'section'
+            $allowed = in_array($permission['type'], ['section', 'ip_category'])
                 ? [
                     Permission::GRANT_TYPE_READ,
                     Permission::GRANT_TYPE_WRITE,
@@ -170,13 +185,16 @@ class User extends Model implements AuthenticatableContract,
             }
 
             if (isset($resourceType, $resourceId, $grantType)) {
-                $this->permissions()->create([
+                $toCreate[] = [
                     'resource_type' => $resourceType,
                     'resource_id' => $resourceId ? $resourceId : null,
                     'grant_type' => $grantType,
-                ]);
+                ];
             }
         }
+
+        $this->permissions()->delete();
+        $this->permissions()->createMany($toCreate);
 
         Permission::flushCache();
     }

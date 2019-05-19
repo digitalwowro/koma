@@ -1,25 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
     <title>Neutral Admin</title>
 
     <link rel="stylesheet" href="{{ elixir('css/all.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 
-    <!-- data tables -->
-    {!! HTML::style('css/libs/dataTables.fixedHeader.css') !!}
-    {!! HTML::style('css/libs/dataTables.tableTools.css') !!}
-
-    <!-- Favicon -->
-    <link type="image/x-icon" href="{{ asset('favicon.png') }}" rel="shortcut icon"/>
-
-    {!! HTML::style('css/libs/datepicker.css') !!}
-
-{{--    {!! HTML::style('css/custom.css') !!}--}}
+    <link type="image/x-icon" href="{{ asset('favicon.png') }}" rel="shortcut icon">
 
     @yield('head')
 </head>
@@ -162,29 +153,31 @@
                     </ul>
                 </li>
 
-                @can('admin')
-                    @php
-                        $isActive = !!is_route('ip.*');
-                    @endphp
-                    <li class="treeview{{ $isActive ? ' active' : '' }}">
-                        <a href="#">
-                            <i class="fa fa-ellipsis-h"></i>
-                            <span>IP Addresses</span>
-                            <span class="pull-right-container">
-                                <i class="fa fa-angle-left pull-right"></i>
-                            </span>
-                        </a>
-                        <ul class="treeview-menu">
-                            @foreach ($ipCategories as $ipCategory)
-                                <li class="{{ $isActive && request()->route()->getParameter('category') == $ipCategory->id ? 'active' : '' }}">
-                                    <a href="{{ route('ip.index', $ipCategory->id) }}" {!! is_route('ip.index', true, ['category' => $ipCategory->id]) !!}>
-                                        {{ $ipCategory->title }}
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </li>
-                @endcan
+                @php
+                    $isActive = !!is_route('ip.*');
+                @endphp
+                <li class="treeview{{ $isActive ? ' active' : '' }}">
+                    <a href="#">
+                        <i class="fa fa-ellipsis-h"></i>
+                        <span>IP Addresses</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        @foreach ($ipCategories as $ipCategory)
+                            @can('list', $ipCategory)
+                                @if (auth()->user()->ipCategoryVisible($ipCategory->id))
+                                    <li class="{{ $isActive && request()->route()->getParameter('category') == $ipCategory->id ? 'active' : '' }}">
+                                        <a href="{{ route('ip.index', $ipCategory->id) }}" {!! is_route('ip.index', true, ['category' => $ipCategory->id]) !!}>
+                                            {{ $ipCategory->title }}
+                                        </a>
+                                    </li>
+                                @endif
+                            @endcan
+                        @endforeach
+                    </ul>
+                </li>
 
                 <li class="header">
                     Administration
@@ -197,21 +190,19 @@
                     </a>
                 </li>
 
-                @can('admin')
-                    <li {!! is_route('ip-categories.*') !!}>
-                        <a href="{{ route('ip-categories.index') }}">
-                            <i class="fa fa-ellipsis-h"></i>
-                            <span>IP Categories</span>
-                        </a>
-                    </li>
+                <li {!! is_route('ip-categories.*') !!}>
+                    <a href="{{ route('ip-categories.index') }}">
+                        <i class="fa fa-ellipsis-h"></i>
+                        <span>IP Categories</span>
+                    </a>
+                </li>
 
-                    <li {!! is_route('ip-fields.*') !!}>
-                        <a href="{{ route('ip-fields.index') }}">
-                            <i class="fa fa-ellipsis-h"></i>
-                            <span>IP Fields</span>
-                        </a>
-                    </li>
-                @endcan
+                <li {!! is_route('ip-fields.*') !!}>
+                    <a href="{{ route('ip-fields.index') }}">
+                        <i class="fa fa-ellipsis-h"></i>
+                        <span>IP Fields</span>
+                    </a>
+                </li>
 
                 @can('superadmin')
                     <li {!! is_route('users.*') !!}>
@@ -240,15 +231,9 @@
     <script>
         @foreach (['success', 'notice', 'warning', 'error'] as $type)
             @if (Session::has($type) && is_string(Session::get($type)))
-            var notification = new NotificationFx({
-                message : '<span class="icon fa fa-bullhorn fa-2x"></span><p>{{ addslashes(Session::get($type)) }}</p>',
-                layout : 'bar',
-                effect : 'slidetop',
-                type : '{{ $type }}' // notice, warning or error
+            $.growl.{{ $type === 'success' ? 'notice' : $type }}({
+                message: '{{ addslashes(Session::get($type)) }}'
             });
-
-            // show the notification
-            notification.show();
             @endif
          @endforeach
 

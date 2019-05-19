@@ -156,19 +156,6 @@
         </div>
     </section>
 
-    <style type="text/css">
-        @media (max-width: 760px) {
-            <?php $i = 1; ?>
-            @foreach ($deviceSection->fields as $field)
-                @if ($field->showInDeviceList())
-                    table.table-responsive > tbody > tr > td:nth-of-type({{ $i++ }}):before { content: "{{ $field->getName() }}"; }
-                @endif
-            @endforeach
-
-            table.table-responsive > tbody > tr > td:nth-of-type({{ $i++ }}):before { content: ""; }
-        }
-    </style>
-
     <div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">

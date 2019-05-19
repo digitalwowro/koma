@@ -35,53 +35,64 @@
                     </tr>
                     </thead>
                     <tbody>
-                        @forelse ($deviceSections as $deviceSection)
-                        <tr>
-                            <td>
-                                {!! $deviceSection->present()->icon !!}
-                                <a href="{{ route('devices.index', $deviceSection->id) }}">{{ $deviceSection->title }}</a>
-                            </td>
+                        @php $visible = 0; @endphp
+                        @foreach ($deviceSections as $deviceSection)
+                            @can('list', $deviceSection)
+                                @php $visible++; @endphp
+                                <tr>
+                                    <td>
+                                        {!! $deviceSection->present()->icon !!}
+                                        <a href="{{ route('devices.index', $deviceSection->id) }}">{{ $deviceSection->title }}</a>
+                                    </td>
 
-                            <td>
-                                {{ count($deviceSection->fields) }}
-                            </td>
+                                    <td>
+                                        {{ count($deviceSection->fields) }}
+                                    </td>
 
-                            @can('admin')
-                            <td>
-                                @if ($deviceSection->creator)
-                                    <a href="{{ route('users.edit', $deviceSection->creator->id) }}">
-                                        {{ $deviceSection->creator->name }}
-                                    </a>
-                                @else
-                                    -
-                                @endif
-                            </td>
+                                    @can('admin')
+                                    <td>
+                                        @if ($deviceSection->creator)
+                                            <a href="{{ route('users.edit', $deviceSection->creator->id) }}">
+                                                {{ $deviceSection->creator->name }}
+                                            </a>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    @endcan
+
+                                    <td style="width: 1%; white-space: nowrap;">
+                                        @can('edit', $deviceSection)
+                                        <a href="{{ route('device-sections.edit', $deviceSection->id) }}" class="table-link">
+                                            <span class="fa-stack">
+                                                <i class="fa fa-square fa-stack-2x"></i>
+                                                <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
+                                            </span>
+                                        </a>
+                                        @endcan
+
+                                        @can('delete', $deviceSection)
+                                        {!! Form::open(['route' => ['device-sections.destroy', $deviceSection->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
+                                        <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this device section?')) $(this).closest('form').submit();">
+                                            <span class="fa-stack">
+                                                <i class="fa fa-square fa-stack-2x"></i>
+                                                <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
+                                            </span>
+                                        </a>
+                                        {!! Form::close() !!}
+                                        @endcan
+                                    </td>
+                                </tr>
                             @endcan
+                        @endforeach
 
-                            <td style="width: 1%; white-space: nowrap;">
-                                <a href="{{ route('device-sections.edit', $deviceSection->id) }}" class="table-link">
-                                    <span class="fa-stack">
-                                        <i class="fa fa-square fa-stack-2x"></i>
-                                        <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
-                                    </span>
-                                </a>
-                                {!! Form::open(['route' => ['device-sections.destroy', $deviceSection->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
-                                <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this device section?')) $(this).closest('form').submit();">
-                                    <span class="fa-stack">
-                                        <i class="fa fa-square fa-stack-2x"></i>
-                                        <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
-                                    </span>
-                                </a>
-                                {!! Form::close() !!}
-                            </td>
-                        </tr>
-                        @empty
+                        @if (empty($visible))
                             <tr>
                                 <td colspan="{{ auth()->user()->can('admin') ? 4 : 3 }}" style="text-align:center;">
                                     There are currently no device sections added. How about <a href="{{ route('device-sections.create') }}">creating one</a> now?
                                 </td>
                             </tr>
-                        @endforelse
+                        @endif
                     </tbody>
                 </table>
 

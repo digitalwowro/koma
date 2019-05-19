@@ -35,25 +35,34 @@ class IpController extends Controller
         $this->fields = $fields;
     }
 
-    public function index($category)
+    public function index($category, Request $request)
     {
         try {
-            $subnets = $this->model->getSubnetsFor($category);
             $ipCategory = $this->ipCategory->findOrFail($category);
+
+            $this->authorize('list', $ipCategory);
+
+            $subnets = $this->model
+                ->getSubnetsFor($category)
+                ->filter(function ($subnet) use ($request) {
+                    return $request->user()->can('view', $subnet);
+                });
 
             return view('ips.index', compact('ipCategory', 'subnets'));
         } catch (Exception $e) {
             return redirect()
-                ->back()
+                ->home()
                 ->withError('Could not find IP Address');
         }
     }
 
     public function store($category, Request $request)
     {
-        $this->authorize('admin');
-
         try {
+            $ipCategory = $this->ipCategory->findOrFail($category);
+
+            $this->authorize('create', $ipCategory);
+
             $this->model->createSubnet($request->input('subnet'), $category);
 
             return redirect()
@@ -69,13 +78,15 @@ class IpController extends Controller
 
     public function destroy($id)
     {
-        $this->authorize('admin');
-
         try {
-            $id = str_replace('-', '/', $id);
-            $ip = $this->model->where('subnet', $id);
+            $subnet = $this->model->findOrFail($id);
 
-            $ip->delete();
+            $this->authorize('delete', $subnet);
+
+            $this->model->where([
+                'subnet' => $subnet->subnet,
+                'category_id' => $subnet->category_id,
+            ])->delete();
 
             return redirect()
                 ->back()

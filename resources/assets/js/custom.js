@@ -224,8 +224,6 @@ $(document).ready(function() {
                 targets: -1
             }]
         });
-
-        new $.fn.dataTable.FixedHeader($.tableFixed);
     }
 
     // auto-close popover elements

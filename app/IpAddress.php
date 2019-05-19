@@ -113,7 +113,7 @@ class IpAddress extends Model
      */
     public static function getSubnetsFor($categoryId = null)
     {
-        $query = self::selectRaw('count(*) as count, subnet, category_id');
+        $query = self::selectRaw('min(id) as id, count(*) as count, subnet, category_id');
 
         if ($categoryId) {
             $query->where('category_id', $categoryId);
@@ -124,6 +124,14 @@ class IpAddress extends Model
             ->groupBy('subnet')
             ->orderBy('category_id')
             ->orderBy('subnet')
+            ->get();
+    }
+
+    public static function allSubnets()
+    {
+        return self::selectRaw('min(id) as id, subnet, category_id')
+            ->hasSubnet()
+            ->groupBy('subnet')
             ->get();
     }
 

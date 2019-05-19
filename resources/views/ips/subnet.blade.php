@@ -64,10 +64,4 @@
     </section>
 
     @include('ips._add-subnet-modal')
-
-    <style type="text/css">
-        @media (max-width: 760px) {
-            table.table-responsive > tbody > tr > td:nth-of-type(1):before { content: ""; }
-        }
-    </style>
 @stop
