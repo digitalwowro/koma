@@ -217,11 +217,13 @@ class Permission extends Model
                     return true;
                 }
             } elseif ($resource instanceof IpAddress) {
-                if ($permission['resource_type'] === self::RESOURCE_TYPE_IP_CATEGORY && $permission['resource_id'] == $resource->category_id) {
+                $firstInSubnet = $resource->firstInSubnet();
+
+                if ($permission['resource_type'] === self::RESOURCE_TYPE_IP_CATEGORY && $permission['resource_id'] == $firstInSubnet->category_id) {
                     return true;
                 }
 
-                if ($permission['resource_type'] === self::RESOURCE_TYPE_IP_SUBNET && $permission['resource_id'] === $resource->id) {
+                if ($permission['resource_type'] === self::RESOURCE_TYPE_IP_SUBNET && $permission['resource_id'] === $firstInSubnet->id) {
                     return true;
                 }
             }

@@ -197,12 +197,14 @@
                     </a>
                 </li>
 
+                @can('admin')
                 <li {!! is_route('ip-fields.*') !!}>
                     <a href="{{ route('ip-fields.index') }}">
                         <i class="fa fa-ellipsis-h"></i>
                         <span>IP Fields</span>
                     </a>
                 </li>
+                @endcan
 
                 @can('superadmin')
                     <li {!! is_route('users.*') !!}>

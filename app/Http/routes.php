@@ -33,7 +33,6 @@ Route::group(['middleware' => 'auth'], function() {
 
     Route::get   ('/ip/subnet/{subnet}/list', ['as' => 'ip.subnet-list', 'uses' => 'IpController@subnetList']);
     Route::get   ('/ip/subnet/{subnet}',      ['as' => 'ip.subnet',      'uses' => 'IpController@subnet']);
-    //Route::post('/ip/assign/{id}',          ['as' => 'ip.assign',      'uses' => 'IpController@assign']);
     Route::get   ('/ip/{category}/create',    ['as' => 'ip.create',      'uses' => 'IpController@create']);
     Route::get   ('/ip/{category}/{id}',      ['as' => 'ip.show',        'uses' => 'IpController@show']);
     Route::get   ('/ip/{category}',           ['as' => 'ip.index',       'uses' => 'IpController@index']);

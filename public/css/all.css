@@ -16843,4 +16843,16 @@ div.icheck > label {
     padding-top: 0;
 }
 
+#dashboard-splash {
+    height: calc(100vh - 101px);
+    overflow: hidden;
+    background-image: url(/img/microsoft-datacenter-100058814-orig.jpg);
+    background-size: cover;
+    background-position: center center;
+}
+
+span.select2 {
+    min-width: 200px;
+}
+
 /*# sourceMappingURL=all.css.map */

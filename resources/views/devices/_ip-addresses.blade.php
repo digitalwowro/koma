@@ -11,7 +11,9 @@
                 @foreach ($device->ips as $ip)
                 <li>
                     {{ $ip->ip }}
+                    @can('edit', $ip)
                     <a href="#" data-action="unassign-ip" data-unassign-id="{{ $ip->id }}"><i class="fa fa-trash-o"></i></a>
+                    @endcan
                     <input type="hidden" name="ips[]" value="{{ $ip->isCustom() ? $ip->ip : $ip->id }}">
                 </li>
                 @endforeach
@@ -34,15 +36,16 @@
                                 <h4>Search By Subnet</h4>
                                 <select id="subnet-select" class="form-control">
                                 @foreach(App\IpAddress::getSubnetsFor() as $subnet)
-                                    <option value="{{ $subnet->subnet }}">{{ $subnet->category->title }}: {{ $subnet->subnet }}</option>
+                                    @can('edit', $subnet)
+                                        <option value="{{ $subnet->subnet }}">{{ $subnet->category->title }}: {{ $subnet->subnet }}</option>
+                                    @endcan
                                 @endforeach
                                 </select>
                             </div>
                             <div class="col-xs-6">
                                 <h4>IP Addresses To Assign</h4>
 
-                                <select id="ip-select" multiple class="form-control">
-                                </select>
+                                <select id="ip-select" multiple class="form-control"></select>
                             </div>
                         </div>
 
@@ -87,8 +90,8 @@
             $('#ip-select').select2();
 
             $('#subnet-select').select2().change(function() {
-                var val     = $(this).val() ? $(this).val().replace('/', '-') : $(this).val(),
-                    url     = '{{ route('ip.subnet-list', '_SUB_') }}'.replace('_SUB_', val),
+                var val = $(this).val() ? $(this).val().replace('/', '-') : $(this).val(),
+                    url = '{{ route('ip.subnet-list', '_SUB_') }}'.replace('_SUB_', val),
                     $select = $('#ip-select');
 
                 $select.find('option').remove();
@@ -107,7 +110,7 @@
                 var $list = $('#ip-list');
 
                 $('#ip-select option:selected').each(function() {
-                    var val  = $(this).val(),
+                    var val = $(this).val(),
                         text = $(this).text();
 
                     $list.append(

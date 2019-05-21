@@ -86,74 +86,52 @@
                 @foreach ($user->permissions as $i => $permission)
                 @if ($permission->preloadResource())
                 <tr>
-                    @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_FULL)
                     <td>
-                        <i class="fa fa-star"></i>
+                        @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_FULL)
+                            <i class="fa fa-star"></i>
 
-                        Global
+                            Global
+                        @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION)
+                            <i class="fa fa-server"></i>
 
-                        <input type="hidden" name="permissions[{{ $i }}][type]" value="global">
-                        <input type="hidden" name="permissions[{{ $i }}][id]" value="">
-                    </td>
-                    @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION)
-                    <td>
-                        <i class="fa fa-server"></i>
+                            <a href="{{ route('devices.index', $permission->resource->id) }}" target="_blank">
+                                {{ $permission->resource->title }}
+                            </a>
+                        @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_DEVICE)
+                            <i class="fa fa-server"></i>
 
-                        <a href="{{ route('devices.index', $permission->resource->id) }}" target="_blank">
-                            {{ $permission->resource->title }}
-                        </a>
+                            <a href="{{ route('devices.index', $permission->resource->section_id) }}" target="_blank">
+                                {{ $permission->resource->section->title }}
+                            </a>
 
-                        <input type="hidden" name="permissions[{{ $i }}][type]" value="section">
+                            &gt;
+
+                            <a href="{{ route('devices.show', ['type' => $permission->resource->section_id, 'id' => $permission->resource->id]) }}" target="_blank">
+                                {{ $permission->resource->present()->humanIdField }}
+                            </a>
+                        @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_IP_CATEGORY)
+                            <i class="fa fa-ellipsis-h"></i>
+
+                            <a href="{{ route('ip.index', $permission->resource->id) }}" target="_blank">
+                                {{ $permission->resource->title }}
+                            </a>
+                        @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_IP_SUBNET)
+                            <i class="fa fa-ellipsis-h"></i>
+
+                            <a href="{{ route('ip.index', $permission->resource->category_id) }}" target="_blank">
+                                {{ $permission->resource->category->title }}
+                            </a>
+
+                            &gt;
+
+                            <a href="{{ route('ip.subnet', str_replace('/', '-', $permission->resource->subnet)) }}" target="_blank">
+                                {{ $permission->resource->subnet }}
+                            </a>
+                        @endif
+
+                        <input type="hidden" name="permissions[{{ $i }}][type]" value="{{ $permission->resource_type }}">
                         <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
                     </td>
-                    @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_DEVICE)
-                    <td>
-                        <i class="fa fa-server"></i>
-
-                        <a href="{{ route('devices.index', $permission->resource->section_id) }}" target="_blank">
-                            {{ $permission->resource->section->title }}
-                        </a>
-
-                        &gt;
-
-                        <a href="{{ route('devices.show', ['type' => $permission->resource->section_id, 'id' => $permission->resource->id]) }}" target="_blank">
-                            {{ $permission->resource->present()->humanIdField }}
-                        </a>
-
-                        <input type="hidden" name="permissions[{{ $i }}][type]" value="device">
-                        <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
-                    </td>
-                    @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_IP_CATEGORY)
-                    <td>
-                        <i class="fa fa-ellipsis-h"></i>
-
-                        <a href="{{ route('ip.index', $permission->resource->id) }}" target="_blank">
-                            {{ $permission->resource->title }}
-                        </a>
-
-                        <input type="hidden" name="permissions[{{ $i }}][type]" value="ip_category">
-                        <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
-                    </td>
-                    @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_IP_SUBNET)
-                    <td>
-                        <i class="fa fa-ellipsis-h"></i>
-
-                        <a href="{{ route('ip.index', $permission->resource->category_id) }}" target="_blank">
-                            {{ $permission->resource->category->title }}
-                        </a>
-
-                        &gt;
-
-                        <a href="{{ route('ip.subnet', str_replace('/', '-', $permission->resource->subnet)) }}" target="_blank">
-                            {{ $permission->resource->subnet }}
-                        </a>
-
-                        <input type="hidden" name="permissions[{{ $i }}][type]" value="ip_subnet">
-                        <input type="hidden" name="permissions[{{ $i }}][id]" value="{{ $permission->resource_id }}">
-                    </td>
-                    @else
-                    <td></td>
-                    @endif
 
                     <td>
                         <div class="radio icheck pull-left" style="margin-right: 10px;">
@@ -162,25 +140,17 @@
                                     'required' => true,
                                 ]) !!}
 
-                                @if ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_DEVICE)
-                                    View
-                                @else
-                                    View all
-                                @endif
+                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_READ) }}
                             </label>
                         </div>
 
                         <div class="radio icheck pull-left" style="margin-right: 10px;">
-                            {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_WRITE, $permission->grant_type === $permission::GRANT_TYPE_WRITE, [
-                                'id' => "grant-{$i}-edit",
-                                'required' => true,
-                            ]) !!}
-                            <label for="grant-{{ $i }}-edit">
-                                @if ($permission->resource_type == $permission::RESOURCE_TYPE_DEVICES_DEVICE)
-                                    View &amp; Edit
-                                @else
-                                    View &amp; Edit all
-                                @endif
+                            <label>
+                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_WRITE, $permission->grant_type === $permission::GRANT_TYPE_WRITE, [
+                                    'required' => true,
+                                ]) !!}
+
+                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_WRITE) }}
                             </label>
                         </div>
 
@@ -189,11 +159,8 @@
                                 {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_FULL, $permission->grant_type === $permission::GRANT_TYPE_FULL, [
                                     'required' => true,
                                 ]) !!}
-                                @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_DEVICE)
-                                    View, Edit &amp; Delete
-                                @else
-                                    View, Edit &amp; Delete all
-                                @endif
+
+                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_FULL) }}
                             </label>
                         </div>
 
@@ -203,7 +170,8 @@
                                 {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_CREATE, $permission->grant_type === $permission::GRANT_TYPE_CREATE, [
                                     'required' => true,
                                 ]) !!}
-                                Create
+
+                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_CREATE) }}
                             </label>
                         </div>
 
@@ -212,7 +180,8 @@
                                 {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ_CREATE, $permission->grant_type === $permission::GRANT_TYPE_READ_CREATE, [
                                     'required' => true,
                                 ]) !!}
-                                View all &amp; Create
+
+                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_READ_CREATE) }}
                             </label>
                         </div>
 
@@ -221,7 +190,8 @@
                                 {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_OWNER, $permission->grant_type === $permission::GRANT_TYPE_OWNER, [
                                     'required' => true,
                                 ]) !!}
-                                Owner
+
+                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_OWNER) }}
                             </label>
                         </div>
                         @endif
@@ -417,28 +387,40 @@
             return subnets[subnet_id];
         }
 
+        function actionVerb(action, resource_type) {
+            var verbs = {!! json_encode((new \App\Permission)->present()->verbs) !!};
+
+            if (verbs[action] && verbs[action][resource_type]) {
+                return verbs[action][resource_type];
+            } else if (verbs[action] && verbs[action].default) {
+                return verbs[action].default;
+            }
+
+            return '';
+        }
+
         function addPerm(type, section_id, device_id) {
             var to_add = '<tr><td>',
                 nextId = $table.find('tbody tr:not(.empty)').length
                     ? (parseInt($table.find('tbody tr:last [name^=permissions]').first().attr('name').split('[')[1].replace(/[^0-9]/g, '')) + 1)
                     : 0;
 
-            if (type === 'global') {
+            if (type === {{ App\Permission::RESOURCE_TYPE_DEVICES_FULL }}) {
                 to_add = to_add + '<i class="fa fa-star"></i> ' +
                     '' +
                     'Global' +
                     '' +
-                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="global">' +
+                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="{{ App\Permission::RESOURCE_TYPE_DEVICES_FULL }}">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="">';
-            } else if (type === 'section') {
+            } else if (type === {{ App\Permission::RESOURCE_TYPE_DEVICES_SECTION }}) {
                 to_add = to_add + '<i class="fa fa-server"></i> ' +
                     '<a href="' + '{{ route('devices.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
                         getSectionTitle(section_id) +
                     '</a>' +
 
-                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="section">' +
+                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="{{ App\Permission::RESOURCE_TYPE_DEVICES_SECTION }}">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + section_id + '">';
-            } else if (type === 'device') {
+            } else if (type === {{ App\Permission::RESOURCE_TYPE_DEVICES_DEVICE }}) {
                 to_add = to_add + '<i class="fa fa-server"></i> ' +
                     '<a href="' + '{{ route('devices.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
                         getSectionTitle(section_id) +
@@ -447,16 +429,16 @@
                     '<a href="' + '{{ route('devices.show', ['type' => '_SID_', 'id' => '_DID_']) }}'.replace('_SID_', section_id).replace('_DID_', device_id) + '" target="_blank"> ' +
                         getDeviceTitle(device_id) +
                     '</a>' +
-                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="device">' +
+                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="{{ App\Permission::RESOURCE_TYPE_DEVICES_DEVICE }}">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + device_id + '">';
-            } else if (type === 'ip_category') {
+            } else if (type === {{ App\Permission::RESOURCE_TYPE_IP_CATEGORY }}) {
                 to_add = to_add + '<i class="fa fa-ellipsis-h"></i> ' +
                     '<a href="' + '{{ route('ip.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank">' +
                         getIpCategoryTitle(section_id) +
                     '</a>' +
-                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="ip_category">' +
+                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="{{ App\Permission::RESOURCE_TYPE_IP_CATEGORY }}">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + section_id + '">';
-            } else if (type === 'ip_subnet') {
+            } else if (type === {{ App\Permission::RESOURCE_TYPE_IP_SUBNET }}) {
                 to_add = to_add + '<i class="fa fa-ellipsis-h"></i> ' +
                     '<a href="' + '{{ route('ip.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank">' +
                         getIpCategoryTitle(section_id) +
@@ -465,51 +447,53 @@
                     '<a href="' + '{{ route('ip.subnet', '_SID_') }}'.replace('_SID_', getIpSubnetTitle(device_id).replace('/', '-'))  + '" target="_blank">' +
                         getIpSubnetTitle(device_id) +
                     '</a>' +
-                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="ip_subnet">' +
+                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="{{ App\Permission::RESOURCE_TYPE_IP_SUBNET }}">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + device_id + '">';
             }
+
+            var hasCreate = [{{ App\Permission::RESOURCE_TYPE_DEVICES_SECTION }}, {{ App\Permission::RESOURCE_TYPE_IP_CATEGORY }}].includes(parseInt(type));
 
             to_add = to_add +
                 '</td><td>' +
                     '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
                         '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_READ }}" required checked> ' +
-                            (type === 'device' ? 'View' : 'View all') +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_READ }}" required checked> ' +
+                            actionVerb({{ App\Permission::GRANT_TYPE_READ }}, type) +
                         '</label>' +
                     '</div>' +
 
                     '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
                         '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_WRITE }}" required> ' +
-                            (type === 'device' ? 'View &amp; Edit' : 'View &amp; Edit all') +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_WRITE }}" required> ' +
+                            actionVerb({{ App\Permission::GRANT_TYPE_WRITE }}, type) +
                         '</label>' +
                     '</div>' +
 
                     '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
                         '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_FULL }}" required> ' +
-                            (type === 'device' ? 'View, Edit &amp; Delete' : 'View, Edit &amp; Delete all') +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_FULL }}" required> ' +
+                            actionVerb({{ App\Permission::GRANT_TYPE_FULL }}, type) +
                         '</label>' +
                     '</div>' +
 
-                    '<div class="radio icheck pull-left' + (['section', 'ip_category'].includes(type) ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                    '<div class="radio icheck pull-left' + (hasCreate ? '' : ' hidden') + '" style="margin-right: 10px;">' +
                         '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_CREATE }}" required> ' +
-                            'Create' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_CREATE }}" required> ' +
+                            actionVerb({{ App\Permission::GRANT_TYPE_CREATE }}, type) +
                         '</label>' +
                     '</div>' +
 
-                    '<div class="radio icheck pull-left' + (['section', 'ip_category'].includes(type) ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                    '<div class="radio icheck pull-left' + (hasCreate ? '' : ' hidden') + '" style="margin-right: 10px;">' +
                         '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_READ_CREATE }}" required> ' +
-                            'View all &amp; Create' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_READ_CREATE }}" required> ' +
+                            actionVerb({{ App\Permission::GRANT_TYPE_READ_CREATE }}, type) +
                         '</label>' +
                     '</div>' +
 
-                    '<div class="radio icheck pull-left' + (['section', 'ip_category'].includes(type) ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                    '<div class="radio icheck pull-left' + (hasCreate ? '' : ' hidden') + '" style="margin-right: 10px;">' +
                         '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ \App\Permission::GRANT_TYPE_OWNER }}" required> ' +
-                            'Owner' +
+                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_OWNER }}" required> ' +
+                            actionVerb({{ App\Permission::GRANT_TYPE_OWNER }}, type) +
                         '</label>' +
                     '</div>' +
                 '</td>' +
@@ -537,14 +521,14 @@
         });
 
         $('.add-global-access').click(function(e) {
-            addPerm('global');
+            addPerm({{ App\Permission::RESOURCE_TYPE_DEVICES_FULL }});
 
             e.preventDefault();
         });
 
         /** Add section **/
         $('.do-add-section').click(function(e) {
-            addPerm('section', $('#section-select').val());
+            addPerm({{ App\Permission::RESOURCE_TYPE_DEVICES_SECTION }}, $('#section-select').val());
 
             $('#addSectionModal').modal('hide');
 
@@ -553,7 +537,7 @@
 
         /** Add device **/
         $('.do-add-device').click(function(e) {
-            addPerm('device', $('#device-section-select').val(), $('#device-select').val());
+            addPerm({{ App\Permission::RESOURCE_TYPE_DEVICES_DEVICE }}, $('#device-section-select').val(), $('#device-select').val());
 
             $('#addDeviceModal').modal('hide');
 
@@ -562,7 +546,7 @@
 
         /** Add IP Category **/
         $('.do-add-ip-category').click(function(e) {
-            addPerm('ip_category', $('#category-select').val());
+            addPerm({{ App\Permission::RESOURCE_TYPE_IP_CATEGORY }}, $('#category-select').val());
 
             $('#addIpSectionModal').modal('hide');
 
@@ -571,7 +555,7 @@
 
         /** Add IP Subnet **/
         $('.do-add-subnet').click(function(e) {
-            addPerm('ip_subnet', $('#ip-subnet-select').val(), $('#subnet-select').val());
+            addPerm({{ App\Permission::RESOURCE_TYPE_IP_SUBNET }}, $('#ip-subnet-select').val(), $('#subnet-select').val());
 
             $('#addIpSubnetModal').modal('hide');
 

@@ -110,6 +110,8 @@ class IpController extends Controller
                 throw new Exception('No IPs found for given subnet');
             }
 
+            $this->authorize('view', $first);
+
             $ipCategory = $this->ipCategory->findOrFail($first->category_id);
             $devices = $deviceModel->orderBy('section_id')->get();
             $allDevices = [];
@@ -122,29 +124,8 @@ class IpController extends Controller
             return view('ips.subnet', compact('subnet', 'ips', 'ipCategory', 'allDevices', 'ipFields'));
         } catch (Exception $e) {
           return redirect()
-              ->back()
+              ->home()
               ->withError($e->getMessage());
-        }
-    }
-
-    public function assign($id, Request $request)
-    {
-        try {
-            $deviceId = $request->input('device_id');
-
-            $ip = $this->model->findOrFail($id);
-
-            $ip->device_id = $deviceId;
-
-            $ip->save();
-
-            return redirect()
-                ->back()
-                ->withSuccess('IP has been assigned');
-        } catch (Exception $e) {
-            return redirect()
-                ->back()
-                ->withError('Error assigning IP');
         }
     }
 
@@ -157,6 +138,14 @@ class IpController extends Controller
             ->whereNull('device_id')
             ->orderBy('id')
             ->get();
+
+        $first = $rows->first();
+
+        if (!$first) {
+            app()->abort(404);
+        }
+
+        $this->authorize('view', $first);
 
         foreach ($rows as $row) {
             $return[] = [

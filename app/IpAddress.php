@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 
 class IpAddress extends Model
@@ -158,6 +159,31 @@ class IpAddress extends Model
             ->where('subnet', $subnet)
             ->orderBy('id')
             ->get();
+    }
+
+    /**
+     * Return first IP in subnet
+     *
+     * @return $this
+     */
+    public function firstInSubnet()
+    {
+        try {
+            $subnetParts = explode('/', $this->subnet);
+
+            if (array_shift($subnetParts) === $this->ip) {
+                return $this;
+            }
+
+            return IpAddress::where([
+                'category_id' => $this->category_id,
+                'subnet' => $this->subnet,
+            ])->orderBy('id')->first();
+        } catch (Exception $e) {
+            // return self
+        }
+
+        return $this;
     }
 
     /**

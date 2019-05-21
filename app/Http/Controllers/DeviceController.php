@@ -106,11 +106,12 @@ class DeviceController extends Controller
      * Assign list of IPs to given device
      * Also creates single IPs as needed
      *
-     * @param array $ipArray
+     * @param array       $ipArray
      * @param \App\Device $device
+     * @param Uesr|null   $assignedBy
      * @throws Exception
      */
-    private function assignIpsToDevice(array $ipArray, Device $device)
+    private function assignIpsToDevice(array $ipArray, Device $device, User $assignedBy = null)
     {
         $idArray = [];
 
@@ -130,12 +131,12 @@ class DeviceController extends Controller
 
         // preset IPs
         foreach ($ips as $ip) {
-            if ($ip->device_id == $device->id) {
+            if ($ip->assigned()) {
                 continue;
             }
 
-            if ($ip->assigned()) {
-                throw new Exception("IP {$ip->ip} is already assigned!");
+            if ($assignedBy && $assignedBy->cannot('edit', $ip)) {
+                continue;
             }
 
             $ip->device_id = $device->id;
@@ -201,7 +202,8 @@ class DeviceController extends Controller
             $this->setCategory($device, $request);
 
             if (isset($data['ips']) && is_array($data['ips'])) {
-                $this->assignIpsToDevice($data['ips'], $device);
+                $assignedBy = $request->user()->isAdmin() ? null : $request->user();
+                $this->assignIpsToDevice($data['ips'], $device, $assignedBy);
             }
 
             if ($request->user()->cannot('edit', $section)) {
@@ -254,15 +256,23 @@ class DeviceController extends Controller
 
             $this->authorize('edit', $device);
 
+
             $device->data = $data;
 
             $this->setCategory($device, $request);
 
-            $device->ips()->update(['device_id' => null]);
+            $device->ips->each(function ($ip) use ($request) {
+                if ($request->user()->can('edit', $ip)) {
+                    $ip->device_id = null;
+                    $ip->save();
+                }
+            });
+
             $this->ipAddress->whereNull('device_id')->whereNull('subnet')->delete();
 
             if (isset($data['ips']) && is_array($data['ips'])) {
-                $this->assignIpsToDevice($data['ips'], $device);
+                $assignedBy = $request->user()->isAdmin() ? null : $request->user();
+                $this->assignIpsToDevice($data['ips'], $device, $assignedBy);
             }
 
             return redirect()

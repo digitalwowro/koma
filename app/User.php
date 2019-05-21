@@ -138,35 +138,11 @@ class User extends Model implements AuthenticatableContract,
         $toCreate = [];
 
         foreach ($permissions as $permission) {
-            unset($resourceType);
-            unset($resourceId);
-            unset($grantType);
-
-            if (isset($permission['type'])) {
-                switch ($permission['type']) {
-                    case 'global':
-                        $resourceType = Permission::RESOURCE_TYPE_DEVICES_FULL;
-                        break;
-                    case 'section':
-                        $resourceType = Permission::RESOURCE_TYPE_DEVICES_SECTION;
-                        break;
-                    case 'device':
-                        $resourceType = Permission::RESOURCE_TYPE_DEVICES_DEVICE;
-                        break;
-                    case 'ip_category':
-                        $resourceType = Permission::RESOURCE_TYPE_IP_CATEGORY;
-                        break;
-                    case 'ip_subnet':
-                        $resourceType = Permission::RESOURCE_TYPE_IP_SUBNET;
-                        break;
-                }
+            if (!isset($permission['level']) || !isset($permission['id']) && !isset($permission['level']) && !isset($permission['type'])) {
+                continue;
             }
 
-            if (isset($permission['id'])) {
-                $resourceId = $permission['id'];
-            }
-
-            $allowed = in_array($permission['type'], ['section', 'ip_category'])
+            $allowed = in_array($permission['type'], [Permission::RESOURCE_TYPE_DEVICES_SECTION, Permission::RESOURCE_TYPE_IP_CATEGORY])
                 ? [
                     Permission::GRANT_TYPE_READ,
                     Permission::GRANT_TYPE_WRITE,
@@ -180,15 +156,11 @@ class User extends Model implements AuthenticatableContract,
                     Permission::GRANT_TYPE_FULL,
                 ];
 
-            if (isset($permission['level']) && in_array($permission['level'], $allowed)) {
-                $grantType = $permission['level'];
-            }
-
-            if (isset($resourceType, $resourceId, $grantType)) {
+            if (in_array($permission['level'], $allowed)) {
                 $toCreate[] = [
-                    'resource_type' => $resourceType,
-                    'resource_id' => $resourceId ? $resourceId : null,
-                    'grant_type' => $grantType,
+                    'resource_type' => $permission['type'],
+                    'resource_id' => $permission['id'] ? $permission['id'] : null,
+                    'grant_type' => $permission['level'],
                 ];
             }
         }
