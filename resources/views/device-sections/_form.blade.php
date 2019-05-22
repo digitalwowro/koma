@@ -101,7 +101,7 @@
             <tbody>
                 @if (isset($deviceSection))
                     @foreach ($deviceSection->fields as $i => $field)
-                        @include('_field-options', compact('field'))
+                        @include('partials._field-options', compact('field'))
                     @endforeach
                 @endif
             </tbody>

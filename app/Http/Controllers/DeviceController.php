@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Device;
 use App\DeviceSection;
 use App\Exceptions\AlreadyHasPermissionException;
+use App\Http\Controllers\Traits\ManagesPermissions;
 use App\IpAddress;
 use App\Permission;
 use App\User;
@@ -17,6 +18,8 @@ use App\Http\Controllers\Controller;
 
 class DeviceController extends Controller
 {
+    use ManagesPermissions;
+
     /**
      * @var \App\Device
      */
@@ -322,66 +325,6 @@ class DeviceController extends Controller
     }
 
     /**
-     * Check if user already has permissions
-     *
-     * @param int $grantType
-     * @param int $user
-     * @param int $id
-     * @param int $type
-     * @throws AlreadyHasPermissionException
-     */
-    protected function alreadyHasPermissions($grantType, $user, $id, $type)
-    {
-        if (in_array($user->role, [User::ROLE_ADMIN, User::ROLE_SUPERADMIN])) {
-            throw new AlreadyHasPermissionException;
-        }
-
-        if ($grantType === Permission::GRANT_TYPE_FULL) { // rwd
-            $greaterPermissions = Permission::getAcl('delete');
-        } elseif ($grantType === Permission::GRANT_TYPE_WRITE) { // rw
-            $greaterPermissions = Permission::getAcl('edit');
-        } elseif ($grantType === Permission::GRANT_TYPE_READ) { // r
-            $greaterPermissions = Permission::getAcl('view');
-        } else {
-            throw new Exception('Invalid permission');
-        }
-
-        $exists = $user->permissions()->whereIn('grant_type', $greaterPermissions)
-            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_DEVICE)
-            ->where('resource_id', $id)
-            ->exists();
-
-        if ($exists) {
-            throw new AlreadyHasPermissionException;
-        }
-
-        $exists = $user->permissions()->whereIn('grant_type', $greaterPermissions)
-            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_SECTION)
-            ->where('resource_id', $type)
-            ->exists();
-
-        if ($exists) {
-            throw new AlreadyHasPermissionException;
-        }
-    }
-
-    protected function deleteInferiorPermissions($grantType, $user, $id)
-    {
-        if ($grantType === Permission::GRANT_TYPE_FULL) { // rwd
-            $toDelete = [Permission::GRANT_TYPE_WRITE, Permission::GRANT_TYPE_READ];
-        } elseif ($grantType === Permission::GRANT_TYPE_WRITE) { // rw
-            $toDelete = [Permission::GRANT_TYPE_READ];
-        }
-
-        if (!empty($toDelete)) {
-            $user->permissions()->whereIn('grant_type', $toDelete)
-                ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_DEVICE)
-                ->where('resource_id', $id)
-                ->delete();
-        }
-    }
-
-    /**
      * @param int     $type
      * @param int     $id
      * @param Request $request
@@ -393,20 +336,24 @@ class DeviceController extends Controller
             $this->authorize('superadmin');
 
             $this->deviceSection->findOrFail($type);
-            $this->model->findOrFail($id);
+            $device = $this->model->findOrFail($id);
+
+            if ($device->section_id !== intval($type)) {
+                throw new Exception('Invalid device');
+            }
 
             $user = User::findOrFail($request->input('user_id'));
             $grantType = intval($request->input('grant_type'));
 
-            $this->alreadyHasPermissions($grantType, $user, $id, $type);
+            $this->validateDevicePermission($grantType, $user, $id, $type);
 
-            $user->permissions()->create([
+            $permission = $user->permissions()->create([
                 'resource_type' => Permission::RESOURCE_TYPE_DEVICES_DEVICE,
                 'resource_id' => $id,
                 'grant_type' => $grantType,
             ]);
 
-            $this->deleteInferiorPermissions($grantType, $user, $id);
+            $this->deleteRedundantPermissions($permission);
 
             Permission::flushCache();
 

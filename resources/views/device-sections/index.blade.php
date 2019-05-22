@@ -71,6 +71,15 @@
                                         </a>
                                         @endcan
 
+                                        @can('superadmin')
+                                        <a href="{{ route('device-sections.share', $deviceSection->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $deviceSection->title }}">
+                                            <span class="fa-stack">
+                                                <i class="fa fa-square fa-stack-2x"></i>
+                                                <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
+                                            </span>
+                                        </a>
+                                        @endcan
+
                                         @can('delete', $deviceSection)
                                         {!! Form::open(['route' => ['device-sections.destroy', $deviceSection->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
                                         <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this device section?')) $(this).closest('form').submit();">
@@ -100,4 +109,17 @@
             </div>
         </div>
     </section>
+
+    @include('partials._share-modal', [
+        'resource_type' => App\Permission::RESOURCE_TYPE_DEVICES_SECTION,
+        'create_permissions' => true,
+    ])
 @stop
+
+@section('footer')
+    <script>
+        $.sharer = sharerUtil.init({
+            type: 'device section',
+        });
+    </script>
+@append

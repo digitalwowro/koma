@@ -3,16 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Device;
+use App\Exceptions\AlreadyHasPermissionException;
+use App\Http\Controllers\Traits\ManagesPermissions;
 use App\IpCategory;
 use App\IpAddress;
 use App\IpField;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Permission;
+use App\User;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 
 class IpController extends Controller
 {
+    use ManagesPermissions;
+
     /**
      * @var \App\IpAddress
      */
@@ -158,4 +165,58 @@ class IpController extends Controller
         return response()->json($return);
     }
 
+    /**
+     * @param int $category
+     * @param int $id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function share($category, $id, Request $request)
+    {
+        try {
+            $this->authorize('superadmin');
+
+            IpCategory::findOrFail($category);
+            $ip = IpAddress::findOrFail($id);
+
+            if ($ip->id !== $ip->firstInSubnet()->id) {
+                throw new Exception('Invalid subnet');
+            }
+
+            if ($ip->category_id !== intval($category)) {
+                throw new Exception('Invalid subnet');
+            }
+
+            $user = User::findOrFail($request->input('user_id'));
+            $grantType = intval($request->input('grant_type'));
+
+            $this->validateIpPermission($grantType, $user, $id, $category);
+
+            $permission = $user->permissions()->create([
+                'resource_type' => Permission::RESOURCE_TYPE_IP_SUBNET,
+                'resource_id' => $id,
+                'grant_type' => $grantType,
+            ]);
+
+            $this->deleteRedundantPermissions($permission);
+
+            Permission::flushCache();
+
+            return response()->json([
+                'success' => true,
+            ]);
+        } catch (AlreadyHasPermissionException $e) {
+            return response()->json([
+                'error' => 'User already has access to this IP subnet',
+            ]);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'error' => 'Could not share IP subnet',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
 }

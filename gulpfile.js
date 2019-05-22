@@ -27,23 +27,24 @@ elixir(function(mix) {
     ], './public/css/all.css', 'node_modules/admin-lte');
 
     mix.scripts([
-        'bower_components/jquery/dist/jquery.js',
-        'bower_components/bootstrap/dist/js/bootstrap.js',
+        '../../../node_modules/admin-lte/bower_components/jquery/dist/jquery.js',
+        '../../../node_modules/admin-lte/bower_components/bootstrap/dist/js/bootstrap.js',
+        '../../../node_modules/admin-lte/plugins/iCheck/icheck.js',
+        '../../../node_modules/admin-lte/bower_components/fastclick/lib/fastclick.js',
+        '../../../node_modules/admin-lte/dist/js/adminlte.js',
 
-        '../../resources/assets/js/jquery-ui.custom.js',
-        '../../resources/assets/js/js.cookie.js',
-        '../../resources/assets/js/bootstrap-datepicker.js',
-        '../../resources/assets/js/select2.min.js',
-        '../../resources/assets/js/jquery.dataTables.js',
-        '../../resources/assets/js/dataTables.fixedHeader.js',
-        '../../resources/assets/js/jquery.dataTables.bootstrap.js',
-        '../../resources/assets/js/jquery.growl.js',
+        'jquery-ui.custom.js',
+        'js.cookie.js',
+        'bootstrap-datepicker.js',
+        'select2.min.js',
+        'jquery.dataTables.js',
+        'dataTables.fixedHeader.js',
+        'jquery.dataTables.bootstrap.js',
+        'jquery.growl.js',
+        'custom.js',
 
-        'plugins/iCheck/icheck.js',
-        'bower_components/fastclick/lib/fastclick.js',
-        'dist/js/adminlte.js',
-        '../../resources/assets/js/custom.js',
-    ], './public/js/all.js', 'node_modules/admin-lte');
+        'class.sharer.js',
+    ], './public/js/all.js');
 
     mix.copy('node_modules/admin-lte/plugins/iCheck/square/blue.png', 'public/build/css');
     mix.copy('node_modules/admin-lte/bower_components/bootstrap/dist/fonts/*.*', 'public/build/fonts');

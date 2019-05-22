@@ -36,28 +36,12 @@ $('.mask-this').click(function(e) {
 
 var clipboard = new Clipboard('.copy-this');
 
-clipboard.on('success', function(e) {
-    var notification = new NotificationFx({
-        message : '<span class="icon fa fa-bullhorn fa-2x"></span><p>Text copied to clipboard.</p>',
-        layout : 'bar',
-        effect : 'slidetop',
-        type : 'success' // notice, warning or error
-    });
-
-    // show the notification
-    notification.show();
+clipboard.on('success', function() {
+    $.growl.notice({message: 'Text copied to clipboard.'});
 });
 
-clipboard.on('error', function(e) {
-    var notification = new NotificationFx({
-        message : '<span class="icon fa fa-bullhorn fa-2x"></span><p>Error copying to clipboard. Please try using a better web browser.</p>',
-        layout : 'bar',
-        effect : 'slidetop',
-        type : 'error' // notice, warning or error
-    });
-
-    // show the notification
-    notification.show();
+clipboard.on('error', function() {
+    $growl.error({message: 'Error copying to clipboard. Please check the security settings or try using a different web browser.'});
 });
 
 $(function($) {

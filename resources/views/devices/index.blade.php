@@ -105,7 +105,7 @@
                                 </a>
 
                                 @can('superadmin')
-                                <a href="{{ route('devices.share', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link share-device" title="Share" data-human-id="{{ $device->present()->humanIdField($deviceSection) }}">
+                                <a href="{{ route('devices.share', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link share-item" title="Share" data-human-id="{{ $device->present()->humanIdField($deviceSection) }}">
                                     <span class="fa-stack">
                                         <i class="fa fa-square fa-stack-2x"></i>
                                         <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
@@ -156,123 +156,16 @@
         </div>
     </section>
 
-    <div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Share Device</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <h4>User</h4>
-
-                        <select id="user-select" class="form-control">
-                            @foreach(App\User::whereRole(App\User::ROLE_SYSADMIN)->orderBy('name')->get() as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <h4>Permission Level</h4>
-
-                        <br>
-
-                        <label>
-                            {!! Form::radio('permission', App\Permission::GRANT_TYPE_READ, null, [
-                                'class' => 'form-control icheck',
-                                'required' => true,
-                            ]) !!}
-                            View
-                        </label>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <label>
-                            {!! Form::radio('permission', App\Permission::GRANT_TYPE_WRITE, null, [
-                                'class' => 'form-control icheck',
-                                'required' => true,
-                            ]) !!}
-                            View &amp; Edit
-                        </label>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <label>
-                            {!! Form::radio('permission', App\Permission::GRANT_TYPE_FULL, null, [
-                                'class' => 'form-control icheck',
-                                'required' => true,
-                            ]) !!}
-                            View, Edit &amp; Delete
-                        </label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <span class="pull-left more-info hidden" style="margin-top: 5px;"></span>
-
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary do-share-device">Share</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('partials._share-modal', [
+        'resource_type' => App\Permission::RESOURCE_TYPE_DEVICES_DEVICE,
+        'create_permissions' => false,
+    ])
 @stop
 
 @section('footer')
     <script>
-        $(document).ready(function() {
-            var url, devId;
-
-            $('a.share-device').click(function(e) {
-                e.preventDefault();
-
-                url = $(this).attr('href');
-                devId = $(this).data('human-id');
-
-                $('#shareModal .modal-title').html('Share device <u>' + devId + '</u>');
-
-                $('#shareModal').modal('show');
-            });
-
-            $('.do-share-device').click(function(e) {
-                e.preventDefault();
-
-                var $modal = $('#shareModal'),
-                    $moreinfo = $modal.find('.modal-footer .more-info'),
-                    params = {
-                        user_id: $('#shareModal #user-select').val(),
-                        grant_type: $('#shareModal [name=permission]:checked').val(),
-                    };
-
-                $modal.find('button').attr('disabled', true);
-
-                $moreinfo.html('<i class="fa fa-spinner fa-spin"></i> Please Wait...')
-                    .removeClass('hidden');
-
-                $.post(url, params, function(r) {
-                    $modal.find('button').removeAttr('disabled');
-
-                    if (r.error) {
-                        $moreinfo.html('<span style="color:darkred;">' + r.error + '</span>');
-                    }
-
-                    if (r.success) {
-                        $moreinfo.addClass('hidden');
-                        $('#shareModal').modal('hide');
-
-                        var notification = new NotificationFx({
-                            message : '<span class="icon fa fa-bullhorn fa-2x"></span><p>Device has been shared</p>',
-                            layout : 'bar',
-                            effect : 'slidetop',
-                            type : 'success' // notice, warning or error
-                        });
-
-                        // show the notification
-                        notification.show();
-                    }
-                }).fail(function() {
-                    $modal.find('button').removeAttr('disabled');
-
-                    $moreinfo.html('<span style="color:darkred;">Could not share device</span>');
-                });
-            });
+        $.sharer = sharerUtil.init({
+            type: 'device',
         });
     </script>
 @append

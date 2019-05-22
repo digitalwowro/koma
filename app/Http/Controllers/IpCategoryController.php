@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\AlreadyHasPermissionException;
+use App\Http\Controllers\Traits\ManagesPermissions;
 use App\IpCategory;
 use App\Permission;
+use App\User;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -11,6 +16,8 @@ use App\Http\Controllers\Controller;
 
 class IpCategoryController extends Controller
 {
+    use ManagesPermissions;
+
     public function index()
     {
         return view('ip-categories.index');
@@ -96,6 +103,50 @@ class IpCategoryController extends Controller
             return redirect()
                 ->back()
                 ->withError('Could not find IP Category');
+        }
+    }
+
+    /**
+     * @param int $id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function share($id, Request $request)
+    {
+        try {
+            $this->authorize('superadmin');
+
+            IpCategory::findOrFail($id);
+            $user = User::findOrFail($request->input('user_id'));
+            $grantType = intval($request->input('grant_type'));
+
+            $this->validateIpCategoryPermission($grantType, $user, $id);
+
+            $permission = $user->permissions()->create([
+                'resource_type' => Permission::RESOURCE_TYPE_IP_CATEGORY,
+                'resource_id' => $id,
+                'grant_type' => $grantType,
+            ]);
+
+            $this->deleteRedundantPermissions($permission);
+
+            Permission::flushCache();
+
+            return response()->json([
+                'success' => true,
+            ]);
+        } catch (AlreadyHasPermissionException $e) {
+            return response()->json([
+                'error' => 'User already has access to this IP category',
+            ]);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'error' => 'Could not share IP category',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 }

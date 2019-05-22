@@ -53,6 +53,15 @@
                                     </span>
                                 </a>
 
+                                @can('superadmin')
+                                    <a href="{{ route('ip.share', ['category' => $subnet->category_id, 'id' => $subnet->id]) }}" class="table-link share-item" title="Share" data-human-id="{{ $subnet->subnet }}">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                @endcan
+
                                 @can('delete', $subnet)
                                     {!! Form::open(['route' => ['ip.destroy', $subnet->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
                                     <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this subnet?')) $(this).closest('form').submit();">
@@ -79,4 +88,16 @@
     </section>
 
     @include('ips._add-subnet-modal')
+    @include('partials._share-modal', [
+        'resource_type' => App\Permission::RESOURCE_TYPE_IP_SUBNET,
+        'create_permissions' => false,
+    ])
 @stop
+
+@section('footer')
+    <script>
+        $.sharer = sharerUtil.init({
+            type: 'IP subnet',
+        });
+    </script>
+@append

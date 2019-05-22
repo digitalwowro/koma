@@ -237,18 +237,10 @@
                 message: '{{ addslashes(Session::get($type)) }}'
             });
             @endif
-         @endforeach
+        @endforeach
 
-         @if (count($errors) > 0)
-             var notification = new NotificationFx({
-                message : '<span class="icon fa fa-bullhorn fa-2x"></span><p>{{ addslashes($errors->first()) }}</p>',
-                layout : 'bar',
-                effect : 'slidetop',
-                type : 'error' // notice, warning or error
-             });
-
-            // show the notification
-            notification.show();
+        @if (count($errors))
+            $.growl.error({!! json_encode(['message' => $errors->first()]) !!});
         @endif
 
         var xsrf_token = Cookies.get("XSRF-TOKEN");

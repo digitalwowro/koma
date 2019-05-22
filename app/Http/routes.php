@@ -27,7 +27,6 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get   ('/devices/{type}/{id}',        ['as' => 'devices.show',      'uses' => 'DeviceController@show']);
     Route::post  ('/devices/{type}',             ['as' => 'devices.store',     'uses' => 'DeviceController@store']);
     Route::get   ('/devices/{type}/{id}/edit',   ['as' => 'devices.edit',      'uses' => 'DeviceController@edit']);
-    Route::post  ('/devices/{type}/{id}/share',  ['as' => 'devices.share',     'uses' => 'DeviceController@share']);
     Route::put   ('/devices/{id}',               ['as' => 'devices.update',    'uses' => 'DeviceController@update']);
     Route::delete('/devices/{id}',               ['as' => 'devices.destroy',   'uses' => 'DeviceController@destroy']);
 
@@ -40,4 +39,9 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get   ('/ip/{category}/{id}/edit', ['as' => 'ip.edit',        'uses' => 'IpController@edit']);
     Route::put   ('/ip/{id}',                 ['as' => 'ip.update',      'uses' => 'IpController@update']);
     Route::delete('/ip/{id}',                 ['as' => 'ip.destroy',     'uses' => 'IpController@destroy']);
+
+    Route::post('/device-sections/{id}/share', ['as' => 'device-sections.share', 'uses' => 'DeviceSectionController@share']);
+    Route::post('/devices/{type}/{id}/share',  ['as' => 'devices.share',         'uses' => 'DeviceController@share']);
+    Route::post('/ip-categories/{id}/share',   ['as' => 'ip-categories.share',   'uses' => 'IpCategoryController@share']);
+    Route::post('/ip/{category}/{id}/share',   ['as' => 'ip.share',              'uses' => 'IpController@share']);
 });
