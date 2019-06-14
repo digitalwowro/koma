@@ -19,54 +19,35 @@
                 <div class="form-group">
                     <h4>Permission Level</h4>
 
-                    <br>
-
-                    @php
-                        $permission = (new App\Permission([
-                            'resource_type' => $resource_type,
-                        ]));
-                    @endphp
-
                     <label>
-                        {!! Form::radio('permission', App\Permission::GRANT_TYPE_READ, null, [
+                        {!! Form::checkbox('permission', App\Permission::GRANT_TYPE_READ, null, [
                             'class' => 'form-control icheck',
-                            'required' => true,
                         ]) !!}
-                        {{ $permission->present()->actionVerb(App\Permission::GRANT_TYPE_READ) }}
+                        Read
                     </label>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <label>
-                        {!! Form::radio('permission', App\Permission::GRANT_TYPE_WRITE, null, [
+                        {!! Form::checkbox('permission', App\Permission::GRANT_TYPE_WRITE, null, [
                             'class' => 'form-control icheck',
-                            'required' => true,
                         ]) !!}
-                        {{ $permission->present()->actionVerb(App\Permission::GRANT_TYPE_WRITE) }}
+                        Write
                     </label>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <label>
-                        {!! Form::radio('permission', App\Permission::GRANT_TYPE_FULL, null, [
+                        {!! Form::checkbox('permission', App\Permission::GRANT_TYPE_DELETE, null, [
                             'class' => 'form-control icheck',
-                            'required' => true,
                         ]) !!}
-                        {{ $permission->present()->actionVerb(App\Permission::GRANT_TYPE_FULL) }}
+                        Delete
                     </label>
 
                     @if ($create_permissions)
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <label>
-                            {!! Form::radio('permission', App\Permission::GRANT_TYPE_CREATE, null, [
+                            {!! Form::checkbox('permission', App\Permission::GRANT_TYPE_CREATE, null, [
                                 'class' => 'form-control icheck',
                                 'required' => true,
                             ]) !!}
-                            {{ $permission->present()->actionVerb(App\Permission::GRANT_TYPE_CREATE) }}
-                        </label>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <label>
-                            {!! Form::radio('permission', App\Permission::GRANT_TYPE_READ_CREATE, null, [
-                                'class' => 'form-control icheck',
-                                'required' => true,
-                            ]) !!}
-                            {{ $permission->present()->actionVerb(App\Permission::GRANT_TYPE_READ_CREATE) }}
+                            Create
                         </label>
                     @endif
                 </div>

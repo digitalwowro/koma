@@ -5,12 +5,13 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": ">=5.5.9",
+        "php": ">=7.2.0",
         "laravel/framework": "5.2.*",
         "laravelcollective/html": "5.2.*",
         "laracasts/presenter": "^0.2.1",
         "cviebrock/eloquent-sluggable": "^3.1",
-        "ext-json": "*"
+        "ext-json": "*",
+        "paragonie/halite": "^4"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

@@ -12,7 +12,7 @@ class IpAddress extends Model
      *
      * @var array
      */
-    protected $fillable = ['ip', 'subnet', 'category_id', 'data'];
+    protected $fillable = ['ip', 'subnet', 'category_id', 'data', 'created_by'];
 
     /**
      * Relationship with IpCategory
@@ -41,7 +41,7 @@ class IpAddress extends Model
      */
     public function setDataAttribute($value)
     {
-        $this->attributes['data'] = dsEncrypt(json_encode($value));
+        $this->attributes['data'] = app('encrypt')->encrypt(json_encode($value));
     }
 
     /**
@@ -53,7 +53,7 @@ class IpAddress extends Model
     public function getDataAttribute($value)
     {
         try {
-            $return = @json_decode(dsDecrypt($value), true);
+            $return = @json_decode(app('encrypt')->decrypt($value), true);
 
             if (!is_array($return)) return [];
 
@@ -67,9 +67,10 @@ class IpAddress extends Model
      * Create a new subnet
      *
      * @param string $subnet
-     * @param int $categoryId
+     * @param int    $categoryId
+     * @param int    $createdBy
      */
-    public static function createSubnet($subnet, $categoryId)
+    public static function createSubnet($subnet, $categoryId, int $createdBy = null)
     {
         list($ip, $mask) = explode('/', $subnet);
 
@@ -83,6 +84,7 @@ class IpAddress extends Model
                 'ip' => long2ip($currentIp + $pos),
                 'subnet' => $subnet,
                 'category_id' => $categoryId,
+                'created_by' => $createdBy,
             ]);
         }
     }

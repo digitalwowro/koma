@@ -20,7 +20,9 @@ class Device extends Model
      *
      * @var array
      */
-    protected $fillable = ['section_id', 'data'];
+    protected $fillable = ['section_id', 'data', 'created_by'];
+
+    private $decrypted;
 
     /**
      * Relationship with DeviceSection
@@ -43,30 +45,17 @@ class Device extends Model
     }
 
     /**
-     * Auto encode the data field
-     *
-     * @param string $value
-     */
-    public function setDataAttribute($value)
-    {
-        $this->attributes['data'] = dsEncrypt(json_encode($value));
-    }
-
-    /**
      * Decode the data field
      *
-     * @param string $value
      * @return array
      */
-    public function getDataAttribute($value)
+    public function getDataAttribute() : array
     {
-        try {
-            $return = @json_decode(dsDecrypt($value), true);
-
-            return is_array($return) ? $return : [];
-        } catch (\Exception $e) {
-            return [];
+        if (is_null($this->decrypted)) {
+            $this->decrypted = EncryptedStore::pull($this);
         }
+
+        return $this->decrypted;
     }
 
     public function sharedWith()

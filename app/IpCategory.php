@@ -11,7 +11,7 @@ class IpCategory extends Model
      *
      * @var array
      */
-    protected $fillable = ['title', 'sort'];
+    protected $fillable = ['title', 'sort', 'owner_id'];
 
     /**
      * Relationship with IpAddress
@@ -21,6 +21,16 @@ class IpCategory extends Model
     public function ips()
     {
         return $this->hasMany('App\IpAddress', 'category_id');
+    }
+
+    /**
+     * Relationship with User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function owner()
+    {
+        return $this->belongsTo('App\User', 'owner_id');
     }
 
     /**

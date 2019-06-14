@@ -94,19 +94,19 @@
                         @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION)
                             <i class="fa fa-server"></i>
 
-                            <a href="{{ route('devices.index', $permission->resource->id) }}" target="_blank">
+                            <a href="{{ route('device.index', $permission->resource->id) }}" target="_blank">
                                 {{ $permission->resource->title }}
                             </a>
                         @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_DEVICE)
                             <i class="fa fa-server"></i>
 
-                            <a href="{{ route('devices.index', $permission->resource->section_id) }}" target="_blank">
+                            <a href="{{ route('device.index', $permission->resource->section_id) }}" target="_blank">
                                 {{ $permission->resource->section->title }}
                             </a>
 
                             &gt;
 
-                            <a href="{{ route('devices.show', ['type' => $permission->resource->section_id, 'id' => $permission->resource->id]) }}" target="_blank">
+                            <a href="{{ route('device.show', ['type' => $permission->resource->section_id, 'id' => $permission->resource->id]) }}" target="_blank">
                                 {{ $permission->resource->present()->humanIdField }}
                             </a>
                         @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_IP_CATEGORY)
@@ -134,64 +134,32 @@
                     </td>
 
                     <td>
-                        <div class="radio icheck pull-left" style="margin-right: 10px;">
+                        <div class="checkbox icheck pull-left" style="margin-right: 10px;">
                             <label>
-                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ, $permission->grant_type === $permission::GRANT_TYPE_READ, [
-                                    'required' => true,
-                                ]) !!}
-
-                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_READ) }}
+                                {!! Form::checkbox("permissions[{$i}][level][]", $permission::GRANT_TYPE_READ, in_array($permission::GRANT_TYPE_READ, $permission->grant_type)) !!}
+                                Read
                             </label>
                         </div>
 
-                        <div class="radio icheck pull-left" style="margin-right: 10px;">
+                        <div class="checkbox icheck pull-left" style="margin-right: 10px;">
                             <label>
-                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_WRITE, $permission->grant_type === $permission::GRANT_TYPE_WRITE, [
-                                    'required' => true,
-                                ]) !!}
-
-                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_WRITE) }}
+                                {!! Form::checkbox("permissions[{$i}][level][]", $permission::GRANT_TYPE_WRITE, in_array($permission::GRANT_TYPE_WRITE, $permission->grant_type)) !!}
+                                Write
                             </label>
                         </div>
 
-                        <div class="radio icheck pull-left" style="margin-right: 10px;">
+                        <div class="checkbox icheck pull-left" style="margin-right: 10px;">
                             <label>
-                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_FULL, $permission->grant_type === $permission::GRANT_TYPE_FULL, [
-                                    'required' => true,
-                                ]) !!}
-
-                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_FULL) }}
+                                {!! Form::checkbox("permissions[{$i}][level][]", $permission::GRANT_TYPE_DELETE, in_array($permission::GRANT_TYPE_DELETE, $permission->grant_type)) !!}
+                                Delete
                             </label>
                         </div>
 
                         @if (in_array($permission->resource_type, [$permission::RESOURCE_TYPE_DEVICES_SECTION, $permission::RESOURCE_TYPE_IP_CATEGORY]))
-                        <div class="radio icheck pull-left" style="margin-right: 10px;">
+                        <div class="checkbox icheck pull-left" style="margin-right: 10px;">
                             <label>
-                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_CREATE, $permission->grant_type === $permission::GRANT_TYPE_CREATE, [
-                                    'required' => true,
-                                ]) !!}
-
-                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_CREATE) }}
-                            </label>
-                        </div>
-
-                        <div class="radio icheck pull-left" style="margin-right: 10px;">
-                            <label>
-                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_READ_CREATE, $permission->grant_type === $permission::GRANT_TYPE_READ_CREATE, [
-                                    'required' => true,
-                                ]) !!}
-
-                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_READ_CREATE) }}
-                            </label>
-                        </div>
-
-                        <div class="radio icheck pull-left" style="margin-right: 10px;">
-                            <label>
-                                {!! Form::radio("permissions[{$i}][level]", $permission::GRANT_TYPE_OWNER, $permission->grant_type === $permission::GRANT_TYPE_OWNER, [
-                                    'required' => true,
-                                ]) !!}
-
-                                {{ $permission->present()->actionVerb($permission::GRANT_TYPE_OWNER) }}
+                                {!! Form::checkbox("permissions[{$i}][level][]", $permission::GRANT_TYPE_CREATE, in_array($permission::GRANT_TYPE_CREATE, $permission->grant_type)) !!}
+                                Create
                             </label>
                         </div>
                         @endif
@@ -387,18 +355,6 @@
             return subnets[subnet_id];
         }
 
-        function actionVerb(action, resource_type) {
-            var verbs = {!! json_encode((new \App\Permission)->present()->verbs) !!};
-
-            if (verbs[action] && verbs[action][resource_type]) {
-                return verbs[action][resource_type];
-            } else if (verbs[action] && verbs[action].default) {
-                return verbs[action].default;
-            }
-
-            return '';
-        }
-
         function addPerm(type, section_id, device_id) {
             var to_add = '<tr><td>',
                 nextId = $table.find('tbody tr:not(.empty)').length
@@ -414,7 +370,7 @@
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="">';
             } else if (type === {{ App\Permission::RESOURCE_TYPE_DEVICES_SECTION }}) {
                 to_add = to_add + '<i class="fa fa-server"></i> ' +
-                    '<a href="' + '{{ route('devices.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
+                    '<a href="' + '{{ route('device.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
                         getSectionTitle(section_id) +
                     '</a>' +
 
@@ -422,11 +378,11 @@
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + section_id + '">';
             } else if (type === {{ App\Permission::RESOURCE_TYPE_DEVICES_DEVICE }}) {
                 to_add = to_add + '<i class="fa fa-server"></i> ' +
-                    '<a href="' + '{{ route('devices.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
+                    '<a href="' + '{{ route('device.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
                         getSectionTitle(section_id) +
                     '</a>' +
                     ' &gt; ' +
-                    '<a href="' + '{{ route('devices.show', ['type' => '_SID_', 'id' => '_DID_']) }}'.replace('_SID_', section_id).replace('_DID_', device_id) + '" target="_blank"> ' +
+                    '<a href="' + '{{ route('device.show', ['type' => '_SID_', 'id' => '_DID_']) }}'.replace('_SID_', section_id).replace('_DID_', device_id) + '" target="_blank"> ' +
                         getDeviceTitle(device_id) +
                     '</a>' +
                     '<input type="hidden" name="permissions[' + nextId + '][type]" value="{{ App\Permission::RESOURCE_TYPE_DEVICES_DEVICE }}">' +
@@ -455,45 +411,27 @@
 
             to_add = to_add +
                 '</td><td>' +
-                    '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
+                    '<div class="checkbox icheck pull-left" style="margin-right: 10px;">' +
                         '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_READ }}" required checked> ' +
-                            actionVerb({{ App\Permission::GRANT_TYPE_READ }}, type) +
+                            '<input type="checkbox" name="permissions[' + nextId + '][level][]" value="{{ App\Permission::GRANT_TYPE_READ }}" checked> Read' +
                         '</label>' +
                     '</div>' +
 
-                    '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
+                    '<div class="checkbox icheck pull-left" style="margin-right: 10px;">' +
                         '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_WRITE }}" required> ' +
-                            actionVerb({{ App\Permission::GRANT_TYPE_WRITE }}, type) +
+                            '<input type="checkbox" name="permissions[' + nextId + '][level][]" value="{{ App\Permission::GRANT_TYPE_WRITE }}"> Write' +
                         '</label>' +
                     '</div>' +
 
-                    '<div class="radio icheck pull-left" style="margin-right: 10px;">' +
+                    '<div class="checkbox icheck pull-left" style="margin-right: 10px;">' +
                         '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_FULL }}" required> ' +
-                            actionVerb({{ App\Permission::GRANT_TYPE_FULL }}, type) +
+                            '<input type="checkbox" name="permissions[' + nextId + '][level][]" value="{{ App\Permission::GRANT_TYPE_DELETE }}"> Delete' +
                         '</label>' +
                     '</div>' +
 
-                    '<div class="radio icheck pull-left' + (hasCreate ? '' : ' hidden') + '" style="margin-right: 10px;">' +
+                    '<div class="checkbox icheck pull-left' + (hasCreate ? '' : ' hidden') + '" style="margin-right: 10px;">' +
                         '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_CREATE }}" required> ' +
-                            actionVerb({{ App\Permission::GRANT_TYPE_CREATE }}, type) +
-                        '</label>' +
-                    '</div>' +
-
-                    '<div class="radio icheck pull-left' + (hasCreate ? '' : ' hidden') + '" style="margin-right: 10px;">' +
-                        '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_READ_CREATE }}" required> ' +
-                            actionVerb({{ App\Permission::GRANT_TYPE_READ_CREATE }}, type) +
-                        '</label>' +
-                    '</div>' +
-
-                    '<div class="radio icheck pull-left' + (hasCreate ? '' : ' hidden') + '" style="margin-right: 10px;">' +
-                        '<label>' +
-                            '<input type="radio" name="permissions[' + nextId + '][level]" value="{{ App\Permission::GRANT_TYPE_OWNER }}" required> ' +
-                            actionVerb({{ App\Permission::GRANT_TYPE_OWNER }}, type) +
+                            '<input type="checkbox" name="permissions[' + nextId + '][level][]" value="{{ App\Permission::GRANT_TYPE_CREATE }}"> Create' +
                         '</label>' +
                     '</div>' +
                 '</td>' +
@@ -598,7 +536,7 @@
             }
         }).change();
 
-        $('input[type=radio][name=role]').click(function() {
+        $('input[type=checkbox][name=role]').click(function() {
             if ($(this).val() == '{{ App\User::ROLE_SYSADMIN }}') {
                 $('#permissions-section').show();
             } else {

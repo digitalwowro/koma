@@ -6,7 +6,7 @@
 
         <ol class="breadcrumb">
             <li><a href="{{ route('home') }}">Home</a></li>
-            <li><a href="{{ route('device-sections.index') }}"><span>Device Sections</span></a></li>
+            <li><a href="{{ route('device-section.index') }}"><span>Device Sections</span></a></li>
             <li class="active"><span>Edit Item</span></li>
         </ol>
     </section>
@@ -18,8 +18,8 @@
             </div>
 
             <div class="box-body">
-                {!! Form::model($deviceSection, ['route' => ['device-sections.update', $deviceSection->id], 'method' => 'PUT', 'class' => 'form-horizontal', 'role' => 'form']) !!}
-                @include('device-sections._form')
+                {!! Form::model($deviceSection, ['route' => ['device-section.update', $deviceSection->id], 'method' => 'PUT', 'class' => 'form-horizontal', 'role' => 'form']) !!}
+                @include('device-section._form')
                 {!! Form::close() !!}
             </div>
         </div>

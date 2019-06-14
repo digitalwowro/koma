@@ -7,7 +7,7 @@
         <ol class="breadcrumb">
             <li><a href="{{ route('home') }}">Home</a></li>
             <li><span>Devices</span></li>
-            <li><a href="{{ route('devices.index', $deviceSection->id) }}"><span>{{ $deviceSection->title }}</span></a></li>
+            <li><a href="{{ route('device.index', $deviceSection->id) }}"><span>{{ $deviceSection->title }}</span></a></li>
             <li class="active"><span>View {{ str_singular($deviceSection->title) }}</span></li>
         </ol>
     </section>
@@ -78,6 +78,6 @@
         </div>
         @endcan
 
-        <a href="{{ route('devices.index', $deviceSection->id) }}" class="btn btn-primary">Go Back</a>
+        <a href="{{ route('device.index', $deviceSection->id) }}" class="btn btn-primary">Go Back</a>
     </section>
 @stop

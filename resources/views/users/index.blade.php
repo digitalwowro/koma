@@ -26,9 +26,9 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th><span>User ID</span></th>
-                        <th><span>Name</span></th>
-                        <th><span>Register date</span></th>
+                        <th>User ID</th>
+                        <th>Name</th>
+                        <th>Register date</th>
                         <th>&nbsp;</th>
                     </tr>
                     </thead>

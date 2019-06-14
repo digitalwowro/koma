@@ -1,5 +1,11 @@
 <?php
 
+use App\Device;
+use App\DeviceSection;
+use App\Exceptions\InvalidResourceException;
+use App\IpAddress;
+use App\IpCategory;
+use App\Permission;
 use Illuminate\Contracts\Encryption\DecryptException;
 
 /**
@@ -62,63 +68,6 @@ function gravatar($email, $size = 24) {
 }
 
 /**
- * Encrypt a string
- *
- * @param $str
- * @param null $key
- * @return string
- */
-function dsEncrypt($str, $key = null) {
-    if (is_null($key)) {
-        $key = request()->cookie('key');
-    }
-
-    $key = md5($key . config('app.key'));
-    $cipher = config('app.cipher');
-
-    if (!isset($GLOBALS['encrypters'])) {
-        $GLOBALS['encrypters'] = [];
-    }
-
-    if (!isset($GLOBALS['encrypters'][$key])) {
-        $GLOBALS['encrypters'][$key] = new \Illuminate\Encryption\Encrypter($key, $cipher);
-    }
-
-    return base64_encode($GLOBALS['encrypters'][$key]->encrypt($str));
-}
-
-/**
- * Decrypt a string
- *
- * @param $str
- * @param null $key
- * @return string
- */
-function dsDecrypt($str, $key = null)
-{
-    if (is_null($key)) {
-        $key = request()->cookie('key');
-    }
-
-    $key = md5($key . config('app.key'));
-    $cipher = config('app.cipher');
-
-    if (!isset($GLOBALS['encrypters'])) {
-        $GLOBALS['encrypters'] = [];
-    }
-
-    if (!isset($GLOBALS['encrypters'][$key])) {
-        $GLOBALS['encrypters'][$key] = new \Illuminate\Encryption\Encrypter($key, $cipher);
-    }
-
-    try {
-        return $GLOBALS['encrypters'][$key]->decrypt(base64_decode($str));
-    } catch (DecryptException $e) {
-        return '- invalid MAC -';
-    }
-}
-
-/**
  * Convert UTF8 string to ASCII using transliteration
  *
  * @param string $s
@@ -154,4 +103,24 @@ function urlify($s) {
     $s = autolink($s, 128, ' target="_blank"');
 
     return $s ?: '-';
+}
+
+/**
+ * @param mixed $resource
+ * @param bool $withCategories
+ * @return int
+ */
+function getResourceType($resource, $withCategories = false)
+{
+    if ($resource instanceof Device) {
+        return Permission::RESOURCE_TYPE_DEVICES_DEVICE;
+    } elseif ($resource instanceof IpAddress) {
+        return Permission::RESOURCE_TYPE_IP_SUBNET;
+    } elseif ($withCategories && $resource instanceof DeviceSection) {
+        return Permission::RESOURCE_TYPE_DEVICES_SECTION;
+    } elseif ($withCategories && $resource instanceof IpCategory) {
+        return Permission::RESOURCE_TYPE_IP_CATEGORY;
+    } else {
+        throw new InvalidResourceException;
+    }
 }

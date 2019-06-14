@@ -146,7 +146,7 @@
 <div class="form-group">
     <div class="col-lg-10 col-lg-offset-2">
         <button type="submit" class="btn btn-primary">{{ isset($deviceSection) ? 'Save' : 'Add' }}</button>
-        <a href="{{ route('device-sections.index') }}" class="btn btn-default">Cancel</a>
+        <a href="{{ route('device-section.index') }}" class="btn btn-default">Cancel</a>
     </div>
 </div>
 
@@ -241,7 +241,7 @@
 
                 $tr.find('td.field-options').html('<center><img src="{{ asset('img/loading.gif') }}"></center>');
 
-                $.post('{{ route('device-sections.get-options') }}', params, function(r) {
+                $.post('{{ route('device-section.get-options') }}', params, function(r) {
                     $tr.find('td.field-options').html(r);
                     bindIcheck();
                 });

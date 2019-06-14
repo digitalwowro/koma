@@ -16,7 +16,8 @@ class CreateDevicesTable extends Migration
             $table->increments('id');
             $table->integer('section_id')->unsigned()->index()->nullable();
             $table->foreign('section_id')->references('id')->on('device_sections')->onDelete('cascade');
-            $table->mediumText('data');
+            $table->integer('created_by')->unsigned()->index()->nullable();
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->timestamps();
         });
     }

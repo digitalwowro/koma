@@ -11,13 +11,11 @@ class Permission extends Model
 {
     use PresentableTrait;
 
-    const GRANT_TYPE_NONE        = 0;
-    const GRANT_TYPE_READ        = 1;
-    const GRANT_TYPE_WRITE       = 2;
-    const GRANT_TYPE_FULL        = 3;
-    const GRANT_TYPE_CREATE      = 4; // only for device sections
-    const GRANT_TYPE_READ_CREATE = 5; // only for device sections
-    const GRANT_TYPE_OWNER       = 6; // only for device sections
+    const GRANT_TYPE_NONE   = 0;
+    const GRANT_TYPE_READ   = 1;
+    const GRANT_TYPE_WRITE  = 2;
+    const GRANT_TYPE_DELETE = 4;
+    const GRANT_TYPE_CREATE = 8;
 
     const RESOURCE_TYPE_DEVICES_FULL    = 1;
     const RESOURCE_TYPE_DEVICES_SECTION = 2;
@@ -40,36 +38,14 @@ class Permission extends Model
     protected $fillable = ['resource_type', 'resource_id', 'resource_type', 'grant_type'];
 
     private static $acl = [
-        'view' => [
-            self::GRANT_TYPE_READ,
-            self::GRANT_TYPE_WRITE,
-            self::GRANT_TYPE_FULL,
-            self::GRANT_TYPE_READ_CREATE,
-            self::GRANT_TYPE_OWNER,
-        ],
+        'view' => self::GRANT_TYPE_READ,
+        'edit' => self::GRANT_TYPE_WRITE,
+        'delete' => self::GRANT_TYPE_DELETE,
+        'create' => self::GRANT_TYPE_CREATE,
 
-        'edit' => [
-            self::GRANT_TYPE_WRITE,
-            self::GRANT_TYPE_FULL,
-            self::GRANT_TYPE_OWNER,
-        ],
-
-        'delete' => [
-            self::GRANT_TYPE_FULL,
-            self::GRANT_TYPE_OWNER,
-        ],
-
-        'create' => [
-            self::GRANT_TYPE_WRITE,
-            self::GRANT_TYPE_FULL,
-            self::GRANT_TYPE_CREATE,
-            self::GRANT_TYPE_READ_CREATE,
-            self::GRANT_TYPE_OWNER,
-        ],
-
-        'manage' => [
-            self::GRANT_TYPE_OWNER,
-        ],
+        //'manage' => [
+        //    self::GRANT_TYPE_OWNER,
+        //],
     ];
 
     public static function getAcl($action) {
@@ -106,6 +82,101 @@ class Permission extends Model
         Permission::deleted(function() {
             Permission::flushCache();
         });
+    }
+
+    /**
+     * Auto encode the grant type field
+     *
+     * @param array $value
+     */
+    public function setGrantTypeAttribute(array $value)
+    {
+        $this->attributes['grant_type'] = array_sum($value);
+    }
+
+    /**
+     * Decode the grant type field
+     *
+     * @param string $value
+     * @return array
+     */
+    public function getGrantTypeAttribute($value) : array
+    {
+        $results = [];
+
+        $permissions = [
+            $this::GRANT_TYPE_CREATE,
+            $this::GRANT_TYPE_DELETE,
+            $this::GRANT_TYPE_WRITE,
+            $this::GRANT_TYPE_READ,
+        ];
+
+        foreach ($permissions as $permission) {
+            if ($value >= $permission) {
+                $value -= $permission;
+                $results[] = $permission;
+            }
+        }
+
+        return $results;
+    }
+
+    public static function userIdsHavingPermission($resource)
+    {
+        $userIds = [];
+
+        $userIds[] = self::where([
+            'resource_type' => self::RESOURCE_TYPE_DEVICES_FULL,
+        ])->pluck('user_id')->toArray();
+
+        if ($resource instanceof Device || $resource instanceof DeviceSection) {
+            $section = $resource instanceof Device
+                ? $resource->section
+                : $resource;
+
+            if ($section->owner_id) {
+                $userIds[] = $section->owner_id;
+            }
+
+            $userIds[] = self::where(function($query) use ($section) {
+                $query
+                    ->where('resource_type', self::RESOURCE_TYPE_DEVICES_DEVICE)
+                    ->whereIn('resource_id', function ($query) use ($section) {
+                        $query
+                            ->select('id')
+                            ->where('section_id', $section->id)
+                            ->from('devices');
+                    });
+            })->orWhere(function($query) use ($section) {
+                $query->where([
+                    'resource_type' => self::RESOURCE_TYPE_DEVICES_SECTION,
+                    'resource_id' => $section->id,
+                ]);
+            })->pluck('user_id')->toArray();
+        } elseif ($resource instanceof IpAddress || $resource instanceof IpCategory) {
+            $category = $resource instanceof Device
+                ? $resource->category
+                : $resource;
+
+            if ($category->owner_id) {
+                $userIds[] = $category->owner_id;
+            }
+
+            $userIds[] = self::where(function($query) use ($category) {
+                $subnetIds = IpAddress::getSubnetsFor($category->id)->pluck('id');
+
+                $query
+                    ->where('resource_type', self::RESOURCE_TYPE_IP_SUBNET)
+                    ->whereIn('resource_id', $subnetIds);
+            })->orWhere(function($query) use ($category) {
+                $query->where([
+                    'resource_type' => self::RESOURCE_TYPE_IP_CATEGORY,
+                    'resource_id' => $category->id,
+                ]);
+            })->pluck('user_id')->toArray();
+        }
+
+        return array_unique(array_flatten($userIds));
     }
 
     /**
@@ -192,9 +263,9 @@ class Permission extends Model
         if (is_null($userId)) {
             $userId = auth()->id();
         }
-
+//dd(self::allForUser($userId));
         foreach (self::allForUser($userId) as $permission) {
-            if (!in_array($permission['grant_type'], self::$acl[$action])) {
+            if (!in_array(self::$acl[$action], $permission['grant_type'])) {
                 continue;
             }
 

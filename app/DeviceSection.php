@@ -16,7 +16,7 @@ class DeviceSection extends Model
      *
      * @var array
      */
-    protected $fillable = ['title', 'icon', 'sort', 'fields', 'categories', 'created_by'];
+    protected $fillable = ['title', 'icon', 'sort', 'fields', 'categories', 'owner_id'];
 
     /**
      * @var string
@@ -49,7 +49,7 @@ class DeviceSection extends Model
     /**
      * Relationship with DeviceSection
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function devices()
     {
@@ -61,9 +61,9 @@ class DeviceSection extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function creator()
+    public function owner()
     {
-        return $this->belongsTo('App\User', 'created_by');
+        return $this->belongsTo('App\User', 'owner_id');
     }
 
     /**

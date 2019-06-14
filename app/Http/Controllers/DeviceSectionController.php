@@ -6,7 +6,6 @@ use App\Device;
 use App\DeviceSection;
 use App\Exceptions\AlreadyHasPermissionException;
 use App\Fields\Factory;
-use App\Http\Controllers\Traits\ManagesPermissions;
 use App\Permission;
 use App\User;
 use Exception;
@@ -18,8 +17,6 @@ use App\Http\Controllers\Controller;
 
 class DeviceSectionController extends Controller
 {
-    use ManagesPermissions;
-
     protected function getCategories(Request $request)
     {
         $categories = $request->input('categories');
@@ -44,19 +41,19 @@ class DeviceSectionController extends Controller
         $data = $request->only('title', 'icon', 'fields');
 
         $data['categories'] = $this->getCategories($request);
-        $data['created_by'] = $request->user()->id;
+        $data['owner_id'] = $request->user()->id;
 
         return $data;
     }
 
     public function index()
     {
-        return view('device-sections.index');
+        return view('device-section.index');
     }
 
     public function create()
     {
-        return view('device-sections.create');
+        return view('device-section.create');
     }
 
     public function store(Request $request)
@@ -73,7 +70,7 @@ class DeviceSectionController extends Controller
             }
 
             return redirect()
-                ->route('device-sections.index')
+                ->route('device-section.index')
                 ->withSuccess('Device section has been added');
         } catch (Exception $e) {
             return redirect()
@@ -90,7 +87,7 @@ class DeviceSectionController extends Controller
 
             $this->authorize('manage', $deviceSection);
 
-            return view('device-sections.edit', compact('deviceSection'));
+            return view('device-section.edit', compact('deviceSection'));
         } catch (Exception $e) {
             return redirect()
                 ->back()
@@ -124,7 +121,7 @@ class DeviceSectionController extends Controller
             }
 
             return redirect()
-                ->route('device-sections.index')
+                ->route('device-section.index')
                 ->withSuccess('Device section has been updated');
         } catch (Exception $e) {
             return redirect()
@@ -144,7 +141,7 @@ class DeviceSectionController extends Controller
             $deviceSection->delete();
 
             return redirect()
-                ->route('device-sections.index')
+                ->route('device-section.index')
                 ->withSuccess('Device section has been deleted');
         } catch (Exception $e) {
             return redirect()

@@ -39,7 +39,7 @@
                             </td>
                             <td>
                                 @if ($ip->assigned())
-                                    assigned to <a href="{{ route('devices.edit', ['type' => $ip->device->section_id, 'id' => $ip->device->id]) }}">{{ $ip->device->present()->humanIdField }}</a>
+                                    assigned to <a href="{{ route('device.edit', ['type' => $ip->device->section_id, 'id' => $ip->device->id]) }}">{{ $ip->device->present()->humanIdField }}</a>
                                 @else
                                     <span class="label label-danger">Unassigned</span>
                                 @endif

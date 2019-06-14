@@ -26,7 +26,7 @@ class ComposerServiceProvider extends ServiceProvider
         );
 
         view()->composer(
-            'device-sections.index', 'App\Composers\DeviceSectionComposer@admin'
+            'device-section.index', 'App\Composers\DeviceSectionComposer@admin'
         );
 
         view()->composer('users._form', 'App\Composers\DeviceSectionComposer@getForPermission');
@@ -42,7 +42,7 @@ class ComposerServiceProvider extends ServiceProvider
         );
 
         view()->composer(
-            'ip-categories.index', 'App\Composers\IpCategoryComposer@admin'
+            'ip-category.index', 'App\Composers\IpCategoryComposer@admin'
         );
 
         view()->composer('users._form', 'App\Composers\IpCategoryComposer@getForPermission');

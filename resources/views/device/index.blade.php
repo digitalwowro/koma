@@ -10,7 +10,7 @@
             @if (empty($categoryLabel))
                 <li class="active"><span>{{ $deviceSection->title }}</span></li>
             @else
-                <li><a href="{{ route('devices.index', $type) }}"><span>{{ $deviceSection->title }}</span></a></li>
+                <li><a href="{{ route('device.index', $type) }}"><span>{{ $deviceSection->title }}</span></a></li>
                 <li class="active"><span>{{ $categoryLabel }}</span></li>
             @endif
         </ol>
@@ -51,9 +51,9 @@
 
                     @can('create', $deviceSection)
                         @if (empty($categoryLabel))
-                            <a href="{{ route('devices.create', $deviceSection->id) }}" class="btn btn-primary btn-sm pull-left">
+                            <a href="{{ route('device.create', $deviceSection->id) }}" class="btn btn-primary btn-sm pull-left">
                         @else
-                            <a href="{{ route('devices.create', ['type' => $deviceSection->id, 'category' => $category]) }}" class="btn btn-primary pull-left">
+                            <a href="{{ route('device.create', ['type' => $deviceSection->id, 'category' => $category]) }}" class="btn btn-primary pull-left">
                                 @endif
                                 <i class="fa fa-plus-circle fa-lg"></i> Add device
                             </a>
@@ -67,7 +67,7 @@
                     <tr>
                         @foreach ($deviceSection->fields as $field)
                             @if ($field->showInDeviceList())
-                                <th><span>{{ $field->getName() }}</span></th>
+                                <th>{{ $field->getName() }}</th>
                             @endif
                         @endforeach
 
@@ -97,7 +97,7 @@
                             @endforeach
 
                             <td style="width: 1%; white-space: nowrap;">
-                                <a href="{{ route('devices.show', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link" title="View">
+                                <a href="{{ route('device.show', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link" title="View">
                                     <span class="fa-stack">
                                         <i class="fa fa-square fa-stack-2x"></i>
                                         <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
@@ -105,7 +105,7 @@
                                 </a>
 
                                 @can('superadmin')
-                                <a href="{{ route('devices.share', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link share-item" title="Share" data-human-id="{{ $device->present()->humanIdField($deviceSection) }}">
+                                <a href="{{ route('device.share', $device->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $device->present()->humanIdField($deviceSection) }}">
                                     <span class="fa-stack">
                                         <i class="fa fa-square fa-stack-2x"></i>
                                         <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
@@ -114,7 +114,7 @@
                                 @endcan
 
                                 @can('edit', $device)
-                                <a href="{{ route('devices.edit', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link" title="Edit">
+                                <a href="{{ route('device.edit', ['type' => $device->section_id, 'id' => $device->id]) }}" class="table-link" title="Edit">
                                     <span class="fa-stack">
                                         <i class="fa fa-square fa-stack-2x"></i>
                                         <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
@@ -123,7 +123,7 @@
                                 @endcan
 
                                 @can('delete', $device)
-                                {!! Form::open(['route' => ['devices.destroy', $device->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
+                                {!! Form::open(['route' => ['device.destroy', $device->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
                                 <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this device?')) $(this).closest('form').submit();" title="Delete">
                                     <span class="fa-stack">
                                         <i class="fa fa-square fa-stack-2x"></i>
@@ -141,9 +141,9 @@
                                 There are currently no devices added. How about
 
                                 @if (empty($categoryLabel))
-                                    <a href="{{ route('devices.create', $deviceSection->id) }}">creating one</a>
+                                    <a href="{{ route('device.create', $deviceSection->id) }}">creating one</a>
                                 @else
-                                    <a href="{{ route('devices.create', ['type' => $deviceSection->id, 'category' => $category]) }}">creating one</a>
+                                    <a href="{{ route('device.create', ['type' => $deviceSection->id, 'category' => $category]) }}">creating one</a>
                                 @endif
 
                                 now?

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\AlreadyHasPermissionException;
-use App\Http\Controllers\Traits\ManagesPermissions;
 use App\IpCategory;
 use App\Permission;
 use App\User;
@@ -16,22 +15,29 @@ use App\Http\Controllers\Controller;
 
 class IpCategoryController extends Controller
 {
-    use ManagesPermissions;
-
     public function index()
     {
-        return view('ip-categories.index');
+        return view('ip-category.index');
+    }
+
+    protected function getFields(Request $request)
+    {
+        $data = $request->only('title');
+
+        $data['owner_id'] = $request->user()->id;
+
+        return $data;
     }
 
     public function create()
     {
-        return view('ip-categories.create');
+        return view('ip-category.create');
     }
 
     public function store(Request $request)
     {
         try {
-            $ipCategory = IpCategory::create($request->input());
+            $ipCategory = IpCategory::create($this->getFields($request));
 
             if (!$request->user()->isAdmin()) {
                 $request->user()->permissions()->create([
@@ -42,7 +48,7 @@ class IpCategoryController extends Controller
             }
 
             return redirect()
-                ->route('ip-categories.index')
+                ->route('ip-category.index')
                 ->withSuccess('IP category has been added');
         } catch (\Exception $e) {
             return redirect()
@@ -59,7 +65,7 @@ class IpCategoryController extends Controller
 
             $this->authorize('manage', $ipCategory);
 
-            return view('ip-categories.edit', compact('ipCategory'));
+            return view('ip-category.edit', compact('ipCategory'));
         } catch (\Exception $e) {
             return redirect()
                 ->back()
@@ -74,10 +80,10 @@ class IpCategoryController extends Controller
 
             $this->authorize('manage', $ipCategory);
 
-            $ipCategory->update($request->input());
+            $ipCategory->update($this->getFields($request));
 
             return redirect()
-                ->route('ip-categories.index')
+                ->route('ip-category.index')
                 ->withSuccess('IP category has been updated');
         } catch (\Exception $e) {
             return redirect()
@@ -97,7 +103,7 @@ class IpCategoryController extends Controller
             $ipCategory->delete();
 
             return redirect()
-                ->route('ip-categories.index')
+                ->route('ip-category.index')
                 ->withSuccess('IP category has been deleted');
         } catch (\Exception $e) {
             return redirect()

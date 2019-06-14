@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Device;
+use App\EncryptedStore;
 use App\Exceptions\AlreadyHasPermissionException;
-use App\Http\Controllers\Traits\ManagesPermissions;
 use App\IpCategory;
 use App\IpAddress;
 use App\IpField;
@@ -18,8 +18,6 @@ use Illuminate\Http\Request;
 
 class IpController extends Controller
 {
-    use ManagesPermissions;
-
     /**
      * @var \App\IpAddress
      */
@@ -70,7 +68,7 @@ class IpController extends Controller
 
             $this->authorize('create', $ipCategory);
 
-            $this->model->createSubnet($request->input('subnet'), $category);
+            $this->model->createSubnet($request->input('subnet'), $category, $request->user()->id());
 
             return redirect()
                 ->route('ip.index', $category)
@@ -89,6 +87,8 @@ class IpController extends Controller
             $subnet = $this->model->findOrFail($id);
 
             $this->authorize('delete', $subnet);
+
+            EncryptedStore::destroy($subnet);
 
             $this->model->where([
                 'subnet' => $subnet->subnet,

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Traits\ManagesUserProfiles;
-use Input, Validator;
+use Validator;
 use App\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -77,7 +77,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $data = Input::only(['name', 'email', 'password', 'role']);
+        $data = $request->only(['name', 'email', 'password', 'role']);
 
         $permissions = $request->input('permissions');
 
@@ -126,15 +126,16 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  int    $id
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function update($id)
+    public function update($id, Request $request)
     {
         try {
             $row = User::findOrFail($id);
 
-            $data = Input::only(['name', 'email', 'password', 'role']);
-            $permissions = Input::get('permissions');
+            $data = $request->only(['name', 'email', 'password', 'role']);
+            $permissions = $request->input('permissions');
             $validator = $this->validator($data, $id);
 
             if ($validator->fails()) {

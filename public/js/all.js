@@ -42935,10 +42935,16 @@ var sharerUtil = {
             e.preventDefault();
 
             var $moreinfo = that.$modal.find('.modal-footer .more-info'),
-                params = {
-                    user_id: that.$modal.find('#user-select').val(),
-                    grant_type: that.$modal.find('[name=permission]:checked').val(),
-                };
+                grantType = [];
+
+            $('[name=permission]:checked').each(function(i, el) {
+                grantType.push(el.value);
+            });
+
+            var params = {
+                user_id: that.$modal.find('#user-select').val(),
+                grant_type: grantType,
+            };
 
             that.$modal.find('button').attr('disabled', true);
 

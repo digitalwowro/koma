@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <title>Neutral Admin</title>
+    <title>Koma</title>
 
     <link rel="stylesheet" href="{{ elixir('css/all.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
@@ -46,7 +46,7 @@
                                 @can('create', $deviceSection)
                                     @if (auth()->user()->deviceSectionVisible($deviceSection->id))
                                         <li class="item">
-                                            <a href="{{ route('devices.create', $deviceSection->id) }}">
+                                            <a href="{{ route('device.create', $deviceSection->id) }}">
                                                 {!! $deviceSection->present()->icon !!}
                                                 Add {{ str_singular($deviceSection->title) }}
                                             </a>
@@ -96,7 +96,7 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
-                <li class="treeview {{ is_route('devices.*', false) }}">
+                <li class="treeview {{ is_route('device.*', false) }}">
                     <a href="#">
                         <i class="fa fa-server"></i>
                         <span>Devices</span>
@@ -109,14 +109,14 @@
                             @can('list', $deviceSection)
                                 @if (auth()->user()->deviceSectionVisible($deviceSection->id))
                                     @php
-                                        $isActive = !!is_route('devices.index', false, ['type' => $deviceSection->id]);
+                                        $isActive = !!is_route('device.index', false, ['type' => $deviceSection->id]);
                                     @endphp
 
                                     <li class="
                                         {{ count($deviceSection->categories) ? 'treeview' : '' }}
-                                        {{ is_route_bool('devices.*', ['type' => $deviceSection->id]) ? 'active menu-open' : '' }}">
+                                        {{ is_route_bool('device.*', ['type' => $deviceSection->id]) ? 'active menu-open' : '' }}">
 
-                                        <a href="{{ route('devices.index', $deviceSection->id) }}" class="{{ $isActive ? 'active' : '' }}">
+                                        <a href="{{ route('device.index', $deviceSection->id) }}" class="{{ $isActive ? 'active' : '' }}">
                                             {!! $deviceSection->present()->icon !!}
                                             {{ $deviceSection->title }}
 
@@ -131,7 +131,7 @@
                                             <ul class="treeview-menu">
                                                 @foreach ($deviceSection->categories as $categoryId => $categoryName)
                                                 <li class="{{ $isActive && request()->route()->getParameter('category') === $categoryId ? 'active' : '' }}">
-                                                    <a href="{{ route('devices.index', [$deviceSection->id, $categoryId]) }}">
+                                                    <a href="{{ route('device.index', [$deviceSection->id, $categoryId]) }}">
                                                         <i class="fa fa-circle-o"></i>
                                                         {{ $categoryName }}
                                                     </a>
@@ -139,7 +139,7 @@
                                                 @endforeach
 
                                                 <li class="{{ $isActive && !request()->route()->getParameter('category') ? 'active' : '' }}">
-                                                    <a href="{{ route('devices.index', $deviceSection->id) }}">
+                                                    <a href="{{ route('device.index', $deviceSection->id) }}">
                                                         <i class="fa fa-circle"></i>
                                                         show all
                                                     </a>
@@ -183,15 +183,15 @@
                     Administration
                 </li>
 
-                <li {!! is_route('device-sections.*') !!}>
-                    <a href="{{ route('device-sections.index') }}">
+                <li {!! is_route('device-section.*') !!}>
+                    <a href="{{ route('device-section.index') }}">
                         <i class="fa fa-server"></i>
                         <span>Device Sections</span>
                     </a>
                 </li>
 
-                <li {!! is_route('ip-categories.*') !!}>
-                    <a href="{{ route('ip-categories.index') }}">
+                <li {!! is_route('ip-category.*') !!}>
+                    <a href="{{ route('ip-category.index') }}">
                         <i class="fa fa-ellipsis-h"></i>
                         <span>IP Categories</span>
                     </a>

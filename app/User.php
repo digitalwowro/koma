@@ -2,7 +2,6 @@
 
 namespace App;
 
-use Hash, Session;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Passwords\CanResetPassword;
@@ -40,7 +39,7 @@ class User extends Model implements AuthenticatableContract,
      *
      * @var array
      */
-    protected $hidden = ['password', 'remember_token', 'encryption_key'];
+    protected $hidden = ['password', 'remember_token', 'public_key', 'salt'];
 
     /**
      * Auto encode the data field
@@ -49,9 +48,7 @@ class User extends Model implements AuthenticatableContract,
      */
     public function setPasswordAttribute($value)
     {
-        $encryptionKey = request()->cookie('key');
-        $this->attributes['password'] = Hash::make($value);
-        $this->attributes['encryption_key'] = dsEncrypt($encryptionKey, $value);
+        $this->attributes['password'] = bcrypt($value);
     }
 
     /**
@@ -138,29 +135,27 @@ class User extends Model implements AuthenticatableContract,
         $toCreate = [];
 
         foreach ($permissions as $permission) {
-            if (!isset($permission['level']) || !isset($permission['id']) && !isset($permission['level']) && !isset($permission['type'])) {
+            if (!isset($permission['level'], $permission['id'], $permission['type']) || !is_array($permission['level'])) {
                 continue;
             }
 
-            $allowed = in_array($permission['type'], [Permission::RESOURCE_TYPE_DEVICES_SECTION, Permission::RESOURCE_TYPE_IP_CATEGORY])
-                ? [
-                    Permission::GRANT_TYPE_READ,
-                    Permission::GRANT_TYPE_WRITE,
-                    Permission::GRANT_TYPE_FULL,
-                    Permission::GRANT_TYPE_CREATE,
-                    Permission::GRANT_TYPE_READ_CREATE,
-                    Permission::GRANT_TYPE_OWNER,
-                ] : [
-                    Permission::GRANT_TYPE_READ,
-                    Permission::GRANT_TYPE_WRITE,
-                    Permission::GRANT_TYPE_FULL,
-                ];
+            $allowed = [
+                Permission::GRANT_TYPE_READ,
+                Permission::GRANT_TYPE_WRITE,
+                Permission::GRANT_TYPE_DELETE,
+            ];
 
-            if (in_array($permission['level'], $allowed)) {
+            if (in_array($permission['type'], [Permission::RESOURCE_TYPE_DEVICES_SECTION, Permission::RESOURCE_TYPE_IP_CATEGORY])) {
+                $allowed[] = Permission::GRANT_TYPE_CREATE;
+            }
+
+            $level = array_intersect($allowed, $permission['level']);
+
+            if (count($level)) {
                 $toCreate[] = [
                     'resource_type' => $permission['type'],
                     'resource_id' => $permission['id'] ? $permission['id'] : null,
-                    'grant_type' => $permission['level'],
+                    'grant_type' => $level,
                 ];
             }
         }
@@ -169,5 +164,7 @@ class User extends Model implements AuthenticatableContract,
         $this->permissions()->createMany($toCreate);
 
         Permission::flushCache();
+
+        // @todo EncryptedStore::ensureUserPermissions()
     }
 }

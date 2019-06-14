@@ -18,6 +18,8 @@ class CreateDeviceSectionsTable extends Migration
             $table->string('icon');
             $table->smallInteger('sort')->unsigned()->index();
             $table->mediumText('fields');
+            $table->integer('owner_id')->unsigned()->index();
+            $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
