@@ -44,16 +44,4 @@ class IpCategoryComposer
         $view->with('ipCategories', $this->ipCategory->getAll());
     }
 
-    /**
-     * Get IP Categories for permission management
-     *
-     * @param View $view
-     */
-    public function getForPermission(View $view)
-    {
-        $ipCategories = $this->ipCategory->orderBy('title')->get();
-
-        $view->with('ipCategories', $ipCategories);
-    }
-
 }

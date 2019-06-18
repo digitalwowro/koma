@@ -4,7 +4,7 @@
     "gulp": "^3.9.1"
   },
   "dependencies": {
-    "admin-lte": "^2.4.10",
+    "admin-lte": "^2.4.12",
     "laravel-elixir": "^6.0.0-18"
   }
 }

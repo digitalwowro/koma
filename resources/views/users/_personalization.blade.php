@@ -8,7 +8,7 @@
     </div>
 </div>
 
-<div class="form-group">
+{{--<div class="form-group">
     <label for="devices_per_page" class="col-xs-2 control-label">Favorite device sections</label>
     <div class="col-xs-10">
         <div class="checkbox icheck">
@@ -27,15 +27,13 @@
             <p>Select device sections you want to see in sidebar</p>
 
             @foreach ($deviceSections as $deviceSection)
-                @can('list', $deviceSection)
-                    <div class="checkbox icheck">
-                        <label>
-                            {!! Form::checkbox("device_sections[]", $deviceSection->id, auth()->user()->deviceSectionVisible($deviceSection->id)) !!}
+                <div class="checkbox icheck">
+                    <label>
+                        {!! Form::checkbox("device_sections[]", $deviceSection->id, auth()->user()->deviceSectionVisible($deviceSection->id)) !!}
 
-                            {{ $deviceSection->title }}
-                        </label>
-                    </div>
-                @endcan
+                        {{ $deviceSection->title }}
+                    </label>
+                </div>
             @endforeach
         </div>
     </div>
@@ -58,30 +56,26 @@
             <p>Select IP categories you want to see in sidebar</p>
 
             @foreach ($ipCategories as $ipCategory)
-                @can('list', $ipCategory)
-                    <div class="checkbox icheck">
-                        <label>
-                            {!! Form::checkbox("ip_categories[]", $ipCategory->id, auth()->user()->ipCategoryVisible($ipCategory->id)) !!}
+                <div class="checkbox icheck">
+                    <label>
+                        {!! Form::checkbox("ip_categories[]", $ipCategory->id, auth()->user()->ipCategoryVisible($ipCategory->id)) !!}
 
-                            {{ $ipCategory->title }}
-                        </label>
-                    </div>
-                @endcan
+                        {{ $ipCategory->title }}
+                    </label>
+                </div>
             @endforeach
         </div>
     </div>
+</div>--}}
 
-
-</div>
-
-@section('footer')
-    <script>
-        $('#device_sections_customize').on('ifToggled', function() {
-            $('#device_sections_list').toggleClass('hidden', !$(this).is(':checked'));
-        });
-
-        $('#ip_categories_customize').on('ifToggled', function() {
-            $('#ip_categories_list').toggleClass('hidden', !$(this).is(':checked'));
-        });
-    </script>
-@append
+{{--@section('footer')--}}
+    {{--<script>--}}
+        {{--$('#device_sections_customize').on('ifToggled', function() {--}}
+            {{--$('#device_sections_list').toggleClass('hidden', !$(this).is(':checked'));--}}
+        {{--});--}}
+{{----}}
+        {{--$('#ip_categories_customize').on('ifToggled', function() {--}}
+            {{--$('#ip_categories_list').toggleClass('hidden', !$(this).is(':checked'));--}}
+        {{--});--}}
+    {{--</script>--}}
+{{--@append--}}

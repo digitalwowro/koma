@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <title>Neutral Admin</title>
+    <title>Koma</title>
 
     <link rel="stylesheet" href="{{ elixir('css/all.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
@@ -46,7 +46,7 @@
                                 @can('create', $deviceSection)
                                     @if (auth()->user()->deviceSectionVisible($deviceSection->id))
                                         <li class="item">
-                                            <a href="{{ route('devices.create', $deviceSection->id) }}">
+                                            <a href="{{ route('device.create', $deviceSection->id) }}">
                                                 {!! $deviceSection->present()->icon !!}
                                                 Add {{ str_singular($deviceSection->title) }}
                                             </a>
@@ -66,7 +66,9 @@
                     </li>
 
                     <li>
-                        <a href="/auth/logout" data-toggle="control-sidebar"><i class="fa fa-power-off"></i></a>
+                        {!! Form::open(['route' => 'logout', 'method' => 'POST', 'id' => 'logout-form']) !!}
+                        {!! Form::close() !!}
+                        <a href="/auth/logout" data-toggle="control-sidebar" onclick="$('#logout-form').submit(); return false;"><i class="fa fa-power-off"></i></a>
                     </li>
                 </ul>
             </div>
@@ -96,7 +98,7 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
-                <li class="treeview {{ is_route('devices.*', false) }}">
+                <li class="treeview {{ is_route('device.*', false) }}">
                     <a href="#">
                         <i class="fa fa-server"></i>
                         <span>Devices</span>
@@ -106,49 +108,47 @@
                     </a>
                     <ul class="treeview-menu">
                         @foreach ($deviceSections as $deviceSection)
-                            @can('list', $deviceSection)
-                                @if (auth()->user()->deviceSectionVisible($deviceSection->id))
-                                    @php
-                                        $isActive = !!is_route('devices.index', false, ['type' => $deviceSection->id]);
-                                    @endphp
+                            @if (auth()->user()->deviceSectionVisible($deviceSection->id))
+                                @php
+                                    $isActive = !!is_route('device.index', false, ['type' => $deviceSection->id]);
+                                @endphp
 
-                                    <li class="
-                                        {{ count($deviceSection->categories) ? 'treeview' : '' }}
-                                        {{ is_route_bool('devices.*', ['type' => $deviceSection->id]) ? 'active menu-open' : '' }}">
+                                <li class="
+                                    {{ count($deviceSection->categories) ? 'treeview' : '' }}
+                                    {{ is_route_bool('device.*', ['type' => $deviceSection->id]) ? 'active menu-open' : '' }}">
 
-                                        <a href="{{ route('devices.index', $deviceSection->id) }}" class="{{ $isActive ? 'active' : '' }}">
-                                            {!! $deviceSection->present()->icon !!}
-                                            {{ $deviceSection->title }}
-
-                                            @if (count($deviceSection->categories))
-                                                <span class="pull-right-container">
-                                                    <i class="fa fa-angle-left pull-right"></i>
-                                                </span>
-                                            @endif
-                                        </a>
+                                    <a href="{{ route('device.index', $deviceSection->id) }}" class="{{ $isActive ? 'active' : '' }}">
+                                        {!! $deviceSection->present()->icon !!}
+                                        {{ $deviceSection->title }}
 
                                         @if (count($deviceSection->categories))
-                                            <ul class="treeview-menu">
-                                                @foreach ($deviceSection->categories as $categoryId => $categoryName)
-                                                <li class="{{ $isActive && request()->route()->getParameter('category') === $categoryId ? 'active' : '' }}">
-                                                    <a href="{{ route('devices.index', [$deviceSection->id, $categoryId]) }}">
-                                                        <i class="fa fa-circle-o"></i>
-                                                        {{ $categoryName }}
-                                                    </a>
-                                                </li>
-                                                @endforeach
-
-                                                <li class="{{ $isActive && !request()->route()->getParameter('category') ? 'active' : '' }}">
-                                                    <a href="{{ route('devices.index', $deviceSection->id) }}">
-                                                        <i class="fa fa-circle"></i>
-                                                        show all
-                                                    </a>
-                                                </li>
-                                            </ul>
+                                            <span class="pull-right-container">
+                                                <i class="fa fa-angle-left pull-right"></i>
+                                            </span>
                                         @endif
-                                    </li>
-                                @endif
-                            @endcan
+                                    </a>
+
+                                    @if (count($deviceSection->categories))
+                                        <ul class="treeview-menu">
+                                            @foreach ($deviceSection->categories as $categoryId => $categoryName)
+                                            <li class="{{ $isActive && request()->route()->getParameter('category') === $categoryId ? 'active' : '' }}">
+                                                <a href="{{ route('device.index', [$deviceSection->id, $categoryId]) }}">
+                                                    <i class="fa fa-circle-o"></i>
+                                                    {{ $categoryName }}
+                                                </a>
+                                            </li>
+                                            @endforeach
+
+                                            <li class="{{ $isActive && !request()->route()->getParameter('category') ? 'active' : '' }}">
+                                                <a href="{{ route('device.index', $deviceSection->id) }}">
+                                                    <i class="fa fa-circle"></i>
+                                                    show all
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    @endif
+                                </li>
+                            @endif
                         @endforeach
                     </ul>
                 </li>
@@ -166,15 +166,13 @@
                     </a>
                     <ul class="treeview-menu">
                         @foreach ($ipCategories as $ipCategory)
-                            @can('list', $ipCategory)
-                                @if (auth()->user()->ipCategoryVisible($ipCategory->id))
-                                    <li class="{{ $isActive && request()->route()->getParameter('category') == $ipCategory->id ? 'active' : '' }}">
-                                        <a href="{{ route('ip.index', $ipCategory->id) }}" {!! is_route('ip.index', true, ['category' => $ipCategory->id]) !!}>
-                                            {{ $ipCategory->title }}
-                                        </a>
-                                    </li>
-                                @endif
-                            @endcan
+                            @if (auth()->user()->ipCategoryVisible($ipCategory->id))
+                                <li class="{{ $isActive && request()->route()->getParameter('category') == $ipCategory->id ? 'active' : '' }}">
+                                    <a href="{{ route('ip.index', $ipCategory->id) }}" {!! is_route('ip.index', true, ['category' => $ipCategory->id]) !!}>
+                                        {{ $ipCategory->title }}
+                                    </a>
+                                </li>
+                            @endif
                         @endforeach
                     </ul>
                 </li>
@@ -183,30 +181,28 @@
                     Administration
                 </li>
 
-                <li {!! is_route('device-sections.*') !!}>
-                    <a href="{{ route('device-sections.index') }}">
+                <li {!! is_route('device-section.*') !!}>
+                    <a href="{{ route('device-section.index') }}">
                         <i class="fa fa-server"></i>
                         <span>Device Sections</span>
                     </a>
                 </li>
 
-                <li {!! is_route('ip-categories.*') !!}>
-                    <a href="{{ route('ip-categories.index') }}">
+                <li {!! is_route('ip-category.*') !!}>
+                    <a href="{{ route('ip-category.index') }}">
                         <i class="fa fa-ellipsis-h"></i>
                         <span>IP Categories</span>
                     </a>
                 </li>
 
-                @can('admin')
                 <li {!! is_route('ip-fields.*') !!}>
                     <a href="{{ route('ip-fields.index') }}">
                         <i class="fa fa-ellipsis-h"></i>
                         <span>IP Fields</span>
                     </a>
                 </li>
-                @endcan
 
-                @can('superadmin')
+                @can('admin')
                     <li {!! is_route('users.*') !!}>
                         <a href="{{ route('users.index') }}">
                             <i class="fa fa-users"></i>

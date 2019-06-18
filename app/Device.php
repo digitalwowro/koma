@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Presenters\DevicePresenter;
+use App\Scopes\DeviceTenant;
 use Illuminate\Database\Eloquent\Model;
 use Laracasts\Presenter\PresentableTrait;
 
@@ -20,7 +21,21 @@ class Device extends Model
      *
      * @var array
      */
-    protected $fillable = ['section_id', 'data'];
+    protected $fillable = ['section_id', 'data', 'created_by'];
+
+    private $decrypted;
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new DeviceTenant);
+    }
 
     /**
      * Relationship with DeviceSection
@@ -43,48 +58,48 @@ class Device extends Model
     }
 
     /**
-     * Auto encode the data field
+     * Decode the data field
      *
-     * @param string $value
+     * @return array
      */
-    public function setDataAttribute($value)
+    public function getDataAttribute() : array
     {
-        $this->attributes['data'] = dsEncrypt(json_encode($value));
+        if (is_null($this->decrypted)) {
+            $this->decrypted = EncryptedStore::pull($this);
+        }
+
+        return $this->decrypted;
     }
 
     /**
-     * Decode the data field
+     * Returns all permissions referring to this resource
      *
-     * @param string $value
-     * @return array
+     * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getDataAttribute($value)
-    {
-        try {
-            $return = @json_decode(dsDecrypt($value), true);
-
-            return is_array($return) ? $return : [];
-        } catch (\Exception $e) {
-            return [];
-        }
-    }
-
     public function sharedWith()
     {
         return Permission::with('user')
             ->orWhere(function($query) {
                 $query
-                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_DEVICE)
+                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE)
                     ->where('resource_id', $this->id);
             })
             ->orWhere(function($query) {
                 $query
-                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_SECTION)
+                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE_SECTION)
                     ->where('resource_id', $this->section_id);
             })
-            ->orWhere(function($query) {
-                $query->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_FULL);
-            })
             ->get();
+    }
+
+    /**
+     * Returns whether given user is owner of current resource
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function isOwner(User $user)
+    {
+        return $this->section->owner_id === $user->id;
     }
 }

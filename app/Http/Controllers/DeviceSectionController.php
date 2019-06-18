@@ -6,7 +6,6 @@ use App\Device;
 use App\DeviceSection;
 use App\Exceptions\AlreadyHasPermissionException;
 use App\Fields\Factory;
-use App\Http\Controllers\Traits\ManagesPermissions;
 use App\Permission;
 use App\User;
 use Exception;
@@ -18,8 +17,6 @@ use App\Http\Controllers\Controller;
 
 class DeviceSectionController extends Controller
 {
-    use ManagesPermissions;
-
     protected function getCategories(Request $request)
     {
         $categories = $request->input('categories');
@@ -44,36 +41,43 @@ class DeviceSectionController extends Controller
         $data = $request->only('title', 'icon', 'fields');
 
         $data['categories'] = $this->getCategories($request);
-        $data['created_by'] = $request->user()->id;
+        $data['owner_id'] = $request->user()->id;
 
         return $data;
     }
 
     public function index()
     {
-        return view('device-sections.index');
+        return view('device-section.index');
+    }
+
+    public function show($id)
+    {
+        try {
+            $deviceSection = DeviceSection::findOrFail($id);
+
+            $this->authorize('view', $deviceSection);
+
+            return view('device-section.show', compact('deviceSection'));
+        } catch (Exception $e) {
+            return redirect()
+                ->route('device-section.index')
+                ->withError('Could not find device section');
+        }
     }
 
     public function create()
     {
-        return view('device-sections.create');
+        return view('device-section.create');
     }
 
     public function store(Request $request)
     {
         try {
-            $deviceSection = DeviceSection::create($this->getFields($request));
-
-            if (!$request->user()->isAdmin()) {
-                $request->user()->permissions()->create([
-                    'resource_type' => Permission::RESOURCE_TYPE_DEVICES_SECTION,
-                    'resource_id' => $deviceSection->id,
-                    'grant_type' => Permission::GRANT_TYPE_OWNER,
-                ]);
-            }
+            DeviceSection::create($this->getFields($request));
 
             return redirect()
-                ->route('device-sections.index')
+                ->route('device-section.index')
                 ->withSuccess('Device section has been added');
         } catch (Exception $e) {
             return redirect()
@@ -90,7 +94,7 @@ class DeviceSectionController extends Controller
 
             $this->authorize('manage', $deviceSection);
 
-            return view('device-sections.edit', compact('deviceSection'));
+            return view('device-section.edit', compact('deviceSection'));
         } catch (Exception $e) {
             return redirect()
                 ->back()
@@ -124,7 +128,7 @@ class DeviceSectionController extends Controller
             }
 
             return redirect()
-                ->route('device-sections.index')
+                ->route('device-section.index')
                 ->withSuccess('Device section has been updated');
         } catch (Exception $e) {
             return redirect()
@@ -144,7 +148,7 @@ class DeviceSectionController extends Controller
             $deviceSection->delete();
 
             return redirect()
-                ->route('device-sections.index')
+                ->route('device-section.index')
                 ->withSuccess('Device section has been deleted');
         } catch (Exception $e) {
             return redirect()
@@ -167,45 +171,34 @@ class DeviceSectionController extends Controller
     }
 
     /**
-     * @param int $id
+     * @param int $sectionId
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function share($id, Request $request)
+    public function share($sectionId, Request $request)
     {
         try {
-            $this->authorize('superadmin');
+            $section = DeviceSection::findOrFail($sectionId);
 
-            DeviceSection::findOrFail($id);
+            $this->authorize('share', $section);
+
             $user = User::findOrFail($request->input('user_id'));
-            $grantType = intval($request->input('grant_type'));
+            $grantType = $request->input('grant_type', []);
 
-            $this->validateDeviceSectionPermission($grantType, $user, $id);
+            app('share')->share($user, $section, $grantType);
 
-            $permission = $user->permissions()->create([
-                'resource_type' => Permission::RESOURCE_TYPE_DEVICES_SECTION,
-                'resource_id' => $id,
-                'grant_type' => $grantType,
-            ]);
-
-            $this->deleteRedundantPermissions($permission);
-
-            Permission::flushCache();
-
-            return response()->json([
-                'success' => true,
-            ]);
+            if ($request->isXmlHttpRequest()) {
+                return response()->json(['success' => true]);
+            } else {
+                return redirect()->back();
+            }
         } catch (AlreadyHasPermissionException $e) {
             return response()->json([
                 'error' => 'User already has access to this device section',
             ]);
-        } catch (AuthorizationException $e) {
-            return response()->json([
-                'error' => 'Could not share device section',
-            ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => $e->getMessage(),
+                'error' => 'Could not share device section',
             ]);
         }
     }

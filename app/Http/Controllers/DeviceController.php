@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Device;
 use App\DeviceSection;
+use App\EncryptedStore;
 use App\Exceptions\AlreadyHasPermissionException;
-use App\Http\Controllers\Traits\ManagesPermissions;
 use App\IpAddress;
 use App\Permission;
 use App\User;
@@ -18,39 +18,15 @@ use App\Http\Controllers\Controller;
 
 class DeviceController extends Controller
 {
-    use ManagesPermissions;
-
-    /**
-     * @var \App\Device
-     */
-    private $model;
-
-    /**
-     * @var \App\DeviceSection
-     */
-    private $deviceSection;
-
-    /**
-     * @var \App\IpAddress
-     */
-    private $ipAddress;
-
-    public function __construct(Device $model, DeviceSection $deviceSection, IpAddress $ipAddress)
-    {
-        $this->model = $model;
-        $this->deviceSection = $deviceSection;
-        $this->ipAddress = $ipAddress;
-    }
-
     public function index($type, $category = null)
     {
         try {
-            $deviceSection = $this->deviceSection->findOrFail($type);
+            $deviceSection = DeviceSection::findOrFail($type);
             $devices = $deviceSection->devices;
 
             if ($category) {
                 if (!isset($deviceSection->categories[$category])) {
-                    return redirect()->route('devices.index', $type);
+                    return redirect()->route('device.index', $type);
                 }
 
                 $devices = $devices->filter(function ($device) use ($category) {
@@ -82,7 +58,7 @@ class DeviceController extends Controller
                 }
             }
 
-            return view('devices.index', compact('deviceSection', 'devices', 'colspan', 'filters', 'category', 'categoryLabel', 'type'));
+            return view('device.index', compact('deviceSection', 'devices', 'colspan', 'filters', 'category', 'categoryLabel', 'type'));
         } catch (Exception $e) {
             return redirect()
                 ->back()
@@ -93,11 +69,11 @@ class DeviceController extends Controller
     public function create($type)
     {
         try {
-            $deviceSection = $this->deviceSection->findOrFail($type);
+            $deviceSection = DeviceSection::findOrFail($type);
 
             $this->authorize('create', $deviceSection);
 
-            return view('devices.create', compact('deviceSection'));
+            return view('device.create', compact('deviceSection'));
         } catch (Exception $e) {
             return redirect()
                 ->back()
@@ -123,14 +99,14 @@ class DeviceController extends Controller
                 $idArray[] = $ip;
                 unset($ipArray[$key]);
             } else {
-                if ($existingIp = $this->ipAddress->where('ip', $ipArray)->first()) {
+                if ($existingIp = IpAddress::where('ip', $ipArray)->first()) {
                     $idArray[] = $existingIp->id;
                     unset($ipArray[$key]);
                 }
             }
         }
 
-        $ips = $this->ipAddress->whereIn('id', $idArray)->get();
+        $ips = IpAddress::whereIn('id', $idArray)->get();
 
         // preset IPs
         foreach ($ips as $ip) {
@@ -152,7 +128,7 @@ class DeviceController extends Controller
                 throw new Exception("IP {$customIp} is not a valid IP address");
             }
 
-            $this->ipAddress->forceCreate([
+            IpAddress::forceCreate([
                 'ip' => $customIp,
                 'device_id' => $device->id,
             ]);
@@ -187,8 +163,8 @@ class DeviceController extends Controller
 
     public function store($type, Request $request)
     {
-        try {
-            $section = $this->deviceSection->findOrFail($type);
+        //try {
+            $section = DeviceSection::findOrFail($type);
 
             $this->authorize('create', $section);
 
@@ -197,10 +173,12 @@ class DeviceController extends Controller
             unset($data['_token']);
             unset($data['_method']);
 
-            $device = $this->model->create([
+            $device = Device::create([
                 'section_id' => $type,
-                'data' => $data,
+                'created_by' => $request->user()->id,
             ]);
+
+            EncryptedStore::upsert($device, $data);
 
             $this->setCategory($device, $request);
 
@@ -214,35 +192,39 @@ class DeviceController extends Controller
                 // able to access his device, so we'll assign rwd permission for the newly created device
 
                 $request->user()->permissions()->create([
-                    'resource_type' => Permission::RESOURCE_TYPE_DEVICES_DEVICE,
+                    'resource_type' => Permission::RESOURCE_TYPE_DEVICE,
                     'resource_id' => $device->id,
-                    'grant_type' => Permission::GRANT_TYPE_FULL,
+                    'grant_type' => [
+                        Permission::GRANT_TYPE_READ,
+                        Permission::GRANT_TYPE_WRITE,
+                        Permission::GRANT_TYPE_DELETE,
+                    ],
                 ]);
             }
 
             return redirect()
-                ->route('devices.index', $type)
+                ->route('device.index', $type)
                 ->withSuccess('Device has been added');
-        } catch (Exception $e) {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->withError('Error saving device');
-        }
+        //} catch (Exception $e) {
+        //    return redirect()
+        //        ->back()
+        //        ->withInput()
+        //        ->withError('Error saving device');
+        //}
     }
 
-    public function edit($type, $id)
+    public function edit($id)
     {
         try {
-            $deviceSection = $this->deviceSection->findOrFail($type);
-            $device = $this->model->findOrFail($id);
+            $device = Device::findOrFail($id);
+            $deviceSection = $device->section;
 
             $this->authorize('edit', $device);
 
-            return view('devices.edit', compact('deviceSection', 'device'));
+            return view('device.edit', compact('deviceSection', 'device'));
         } catch (Exception $e) {
             return redirect()
-                ->route('devices.index', $type)
+                ->back()
                 ->withError('Could not find device');
         }
     }
@@ -250,17 +232,16 @@ class DeviceController extends Controller
     public function update($id, Request $request)
     {
         try {
+            $device = Device::findOrFail($id);
+
+            $this->authorize('edit', $device);
+
             $data = $request->input();
 
             unset($data['_token']);
             unset($data['_method']);
 
-            $device = $this->model->findOrFail($id);
-
-            $this->authorize('edit', $device);
-
-
-            $device->data = $data;
+            EncryptedStore::upsert($device, $data);
 
             $this->setCategory($device, $request);
 
@@ -271,7 +252,7 @@ class DeviceController extends Controller
                 }
             });
 
-            $this->ipAddress->whereNull('device_id')->whereNull('subnet')->delete();
+            IpAddress::whereNull('device_id')->whereNull('subnet')->delete();
 
             if (isset($data['ips']) && is_array($data['ips'])) {
                 $assignedBy = $request->user()->isAdmin() ? null : $request->user();
@@ -279,7 +260,7 @@ class DeviceController extends Controller
             }
 
             return redirect()
-                ->route('devices.index', $device->section_id)
+                ->route('device.index', $device->section_id)
                 ->withSuccess('Device has been updated');
         } catch (Exception $e) {
             return redirect()
@@ -292,9 +273,11 @@ class DeviceController extends Controller
     public function destroy($id)
     {
         try {
-            $device = $this->model->findOrFail($id);
+            $device = Device::findOrFail($id);
 
             $this->authorize('delete', $device);
+
+            EncryptedStore::destroy($device);
 
             $device->delete();
 
@@ -308,69 +291,51 @@ class DeviceController extends Controller
         }
     }
 
-    public function show($type, $id)
+    public function show($id)
     {
         try {
-            $deviceSection = $this->deviceSection->findOrFail($type);
-            $device = $this->model->findOrFail($id);
+            $device = Device::findOrFail($id);
+            $deviceSection = $device->section;
 
             $this->authorize('view', $device);
 
-            return view('devices.show', compact('device', 'deviceSection'));
+            return view('device.show', compact('device', 'deviceSection'));
         } catch (Exception $e) {
             return redirect()
-                ->route('devices.index', $type)
+                ->back()
                 ->withError('Could not find device');
         }
     }
 
     /**
-     * @param int     $type
-     * @param int     $id
+     * @param int     $deviceId
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function share($type, $id, Request $request)
+    public function share($deviceId, Request $request)
     {
         try {
-            $this->authorize('superadmin');
+            $device = Device::findOrFail($deviceId);
 
-            $this->deviceSection->findOrFail($type);
-            $device = $this->model->findOrFail($id);
-
-            if ($device->section_id !== intval($type)) {
-                throw new Exception('Invalid device');
-            }
+            $this->authorize('share', $device);
 
             $user = User::findOrFail($request->input('user_id'));
-            $grantType = intval($request->input('grant_type'));
+            $grantType = $request->input('grant_type', []);
 
-            $this->validateDevicePermission($grantType, $user, $id, $type);
+            app('share')->share($user, $device, $grantType);
 
-            $permission = $user->permissions()->create([
-                'resource_type' => Permission::RESOURCE_TYPE_DEVICES_DEVICE,
-                'resource_id' => $id,
-                'grant_type' => $grantType,
-            ]);
-
-            $this->deleteRedundantPermissions($permission);
-
-            Permission::flushCache();
-
-            return response()->json([
-                'success' => true,
-            ]);
+            if ($request->isXmlHttpRequest()) {
+                return response()->json(['success' => true]);
+            } else {
+                return redirect()->back();
+            }
         } catch (AlreadyHasPermissionException $e) {
             return response()->json([
                 'error' => 'User already has access to this device',
             ]);
-        } catch (AuthorizationException $e) {
-            return response()->json([
-                'error' => 'Could not share device',
-            ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => $e->getMessage(),
+                'error' => 'Could not share device',
             ]);
         }
     }

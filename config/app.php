@@ -13,6 +13,7 @@ return [
     |
     */
 
+    'name' => 'Koma',
     'debug' => env('APP_DEBUG', false),
     'env' => env('APP_ENV', 'production'),
 

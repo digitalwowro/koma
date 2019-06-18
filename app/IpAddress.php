@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Exceptions\SubnetTooLargeException;
+use App\Scopes\IpAddressTenant;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,7 +14,19 @@ class IpAddress extends Model
      *
      * @var array
      */
-    protected $fillable = ['ip', 'subnet', 'category_id', 'data'];
+    protected $fillable = ['ip', 'subnet', 'category_id', 'data', 'created_by'];
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new IpAddressTenant);
+    }
 
     /**
      * Relationship with IpCategory
@@ -41,7 +55,7 @@ class IpAddress extends Model
      */
     public function setDataAttribute($value)
     {
-        $this->attributes['data'] = dsEncrypt(json_encode($value));
+        $this->attributes['data'] = app('encrypt')->encrypt(json_encode($value));
     }
 
     /**
@@ -53,7 +67,7 @@ class IpAddress extends Model
     public function getDataAttribute($value)
     {
         try {
-            $return = @json_decode(dsDecrypt($value), true);
+            $return = @json_decode(app('encrypt')->decrypt($value), true);
 
             if (!is_array($return)) return [];
 
@@ -64,12 +78,37 @@ class IpAddress extends Model
     }
 
     /**
+     * Returns all permissions referring to this resource
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function sharedWith()
+    {
+        $ip = $this->firstInSubnet();
+
+        return Permission::with('user')
+            ->orWhere(function($query) use ($ip) {
+                $query
+                    ->where('resource_type', Permission::RESOURCE_TYPE_IP_SUBNET)
+                    ->where('resource_id', $ip->id);
+            })
+            ->orWhere(function($query) use ($ip) {
+                $query
+                    ->where('resource_type', Permission::RESOURCE_TYPE_IP_CATEGORY)
+                    ->where('resource_id', $ip->category_id);
+            })
+            ->get();
+    }
+
+    /**
      * Create a new subnet
      *
      * @param string $subnet
-     * @param int $categoryId
+     * @param int    $categoryId
+     * @param int    $createdBy
+     * @throws SubnetTooLargeException
      */
-    public static function createSubnet($subnet, $categoryId)
+    public static function createSubnet($subnet, $categoryId, int $createdBy = null)
     {
         list($ip, $mask) = explode('/', $subnet);
 
@@ -77,12 +116,18 @@ class IpAddress extends Model
 
         // convert last (32-$mask) bits to zeroes
         $currentIp = $ipEnc | pow(2, (32 - $mask)) - pow(2, (32 - $mask));
+        $ipsCount = pow(2, (32 - $mask));
 
-        for ($pos = 0; $pos < pow(2, (32 - $mask)); ++$pos) {
+        if ($ipsCount > 65536) {
+            throw new SubnetTooLargeException;
+        }
+
+        for ($pos = 0; $pos < $ipsCount; ++$pos) {
             self::create([
                 'ip' => long2ip($currentIp + $pos),
                 'subnet' => $subnet,
                 'category_id' => $categoryId,
+                'created_by' => $createdBy,
             ]);
         }
     }
@@ -227,6 +272,19 @@ class IpAddress extends Model
         }
 
         return '-';
+    }
+
+    /**
+     * Returns whether given user is owner of current resource
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function isOwner(User $user)
+    {
+        $first = $this->firstInSubnet();
+
+        return $first->category->owner_id === $user->id;
     }
 
 }

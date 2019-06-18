@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\AlreadyHasPermissionException;
-use App\Http\Controllers\Traits\ManagesPermissions;
 use App\IpCategory;
 use App\Permission;
 use App\User;
@@ -16,33 +15,47 @@ use App\Http\Controllers\Controller;
 
 class IpCategoryController extends Controller
 {
-    use ManagesPermissions;
+    protected function getFields(Request $request)
+    {
+        $data = $request->only('title');
+
+        $data['owner_id'] = $request->user()->id;
+
+        return $data;
+    }
 
     public function index()
     {
-        return view('ip-categories.index');
+        return view('ip-category.index');
+    }
+
+    public function show($id)
+    {
+        try {
+            $category = IpCategory::findOrFail($id);
+
+            $this->authorize('view', $category);
+
+            return view('ip-category.show', compact('category'));
+        } catch (Exception $e) {
+            return redirect()
+                ->route('ip-category.index')
+                ->withError('Could not find IP Category');
+        }
     }
 
     public function create()
     {
-        return view('ip-categories.create');
+        return view('ip-category.create');
     }
 
     public function store(Request $request)
     {
         try {
-            $ipCategory = IpCategory::create($request->input());
-
-            if (!$request->user()->isAdmin()) {
-                $request->user()->permissions()->create([
-                    'resource_type' => Permission::RESOURCE_TYPE_IP_CATEGORY,
-                    'resource_id' => $ipCategory->id,
-                    'grant_type' => Permission::GRANT_TYPE_OWNER,
-                ]);
-            }
+            IpCategory::create($this->getFields($request));
 
             return redirect()
-                ->route('ip-categories.index')
+                ->route('ip-category.index')
                 ->withSuccess('IP category has been added');
         } catch (\Exception $e) {
             return redirect()
@@ -59,7 +72,7 @@ class IpCategoryController extends Controller
 
             $this->authorize('manage', $ipCategory);
 
-            return view('ip-categories.edit', compact('ipCategory'));
+            return view('ip-category.edit', compact('ipCategory'));
         } catch (\Exception $e) {
             return redirect()
                 ->back()
@@ -74,10 +87,10 @@ class IpCategoryController extends Controller
 
             $this->authorize('manage', $ipCategory);
 
-            $ipCategory->update($request->input());
+            $ipCategory->update($this->getFields($request));
 
             return redirect()
-                ->route('ip-categories.index')
+                ->route('ip-category.index')
                 ->withSuccess('IP category has been updated');
         } catch (\Exception $e) {
             return redirect()
@@ -97,7 +110,7 @@ class IpCategoryController extends Controller
             $ipCategory->delete();
 
             return redirect()
-                ->route('ip-categories.index')
+                ->route('ip-category.index')
                 ->withSuccess('IP category has been deleted');
         } catch (\Exception $e) {
             return redirect()
@@ -114,38 +127,27 @@ class IpCategoryController extends Controller
     public function share($id, Request $request)
     {
         try {
-            $this->authorize('superadmin');
+            $category = IpCategory::findOrFail($id);
 
-            IpCategory::findOrFail($id);
+            $this->authorize('share', $category);
+
             $user = User::findOrFail($request->input('user_id'));
-            $grantType = intval($request->input('grant_type'));
+            $grantType = $request->input('grant_type', []);
 
-            $this->validateIpCategoryPermission($grantType, $user, $id);
+            app('share')->share($user, $category, $grantType);
 
-            $permission = $user->permissions()->create([
-                'resource_type' => Permission::RESOURCE_TYPE_IP_CATEGORY,
-                'resource_id' => $id,
-                'grant_type' => $grantType,
-            ]);
-
-            $this->deleteRedundantPermissions($permission);
-
-            Permission::flushCache();
-
-            return response()->json([
-                'success' => true,
-            ]);
+            if ($request->isXmlHttpRequest()) {
+                return response()->json(['success' => true]);
+            } else {
+                return redirect()->back();
+            }
         } catch (AlreadyHasPermissionException $e) {
             return response()->json([
                 'error' => 'User already has access to this IP category',
             ]);
-        } catch (AuthorizationException $e) {
-            return response()->json([
-                'error' => 'Could not share IP category',
-            ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => $e->getMessage(),
+                'error' => 'Could not share IP category',
             ]);
         }
     }

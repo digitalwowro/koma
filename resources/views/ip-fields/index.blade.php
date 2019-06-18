@@ -27,7 +27,7 @@
                     <thead>
                     <tr>
                         <th style="width:1px;">#</th>
-                        <th><span>Title</span></th>
+                        <th>Title</th>
                         <th>&nbsp;</th>
                     </tr>
                     </thead>

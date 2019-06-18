@@ -18,7 +18,8 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->string('password', 60);
             $table->tinyInteger('role')->default(1);
-            $table->text('encryption_key');
+            $table->string('public_key');
+            $table->string('salt');
             $table->rememberToken();
             $table->timestamps();
         });

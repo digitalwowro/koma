@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Device;
+use App\EncryptedStore;
 use App\Exceptions\AlreadyHasPermissionException;
-use App\Http\Controllers\Traits\ManagesPermissions;
+use App\Exceptions\SubnetTooLargeException;
 use App\IpCategory;
 use App\IpAddress;
 use App\IpField;
@@ -18,8 +19,6 @@ use Illuminate\Http\Request;
 
 class IpController extends Controller
 {
-    use ManagesPermissions;
-
     /**
      * @var \App\IpAddress
      */
@@ -47,8 +46,6 @@ class IpController extends Controller
         try {
             $ipCategory = $this->ipCategory->findOrFail($category);
 
-            $this->authorize('list', $ipCategory);
-
             $subnets = $this->model
                 ->getSubnetsFor($category)
                 ->filter(function ($subnet) use ($request) {
@@ -70,11 +67,16 @@ class IpController extends Controller
 
             $this->authorize('create', $ipCategory);
 
-            $this->model->createSubnet($request->input('subnet'), $category);
+            $this->model->createSubnet($request->input('subnet'), $category, $request->user()->id);
 
             return redirect()
                 ->route('ip.index', $category)
                 ->withSuccess('IP Address has been added');
+        } catch (SubnetTooLargeException $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withError('Subnet too large');
         } catch (Exception $e) {
             return redirect()
                 ->back()
@@ -89,6 +91,8 @@ class IpController extends Controller
             $subnet = $this->model->findOrFail($id);
 
             $this->authorize('delete', $subnet);
+
+            EncryptedStore::destroy($subnet);
 
             $this->model->where([
                 'subnet' => $subnet->subnet,
@@ -171,51 +175,35 @@ class IpController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function share($category, $id, Request $request)
+    public function share($id, Request $request)
     {
         try {
-            $this->authorize('superadmin');
-
-            IpCategory::findOrFail($category);
             $ip = IpAddress::findOrFail($id);
+
 
             if ($ip->id !== $ip->firstInSubnet()->id) {
                 throw new Exception('Invalid subnet');
             }
 
-            if ($ip->category_id !== intval($category)) {
-                throw new Exception('Invalid subnet');
-            }
+            $this->authorize('share', $ip);
 
             $user = User::findOrFail($request->input('user_id'));
-            $grantType = intval($request->input('grant_type'));
+            $grantType = $request->input('grant_type', []);
 
-            $this->validateIpPermission($grantType, $user, $id, $category);
+            app('share')->share($user, $ip, $grantType);
 
-            $permission = $user->permissions()->create([
-                'resource_type' => Permission::RESOURCE_TYPE_IP_SUBNET,
-                'resource_id' => $id,
-                'grant_type' => $grantType,
-            ]);
-
-            $this->deleteRedundantPermissions($permission);
-
-            Permission::flushCache();
-
-            return response()->json([
-                'success' => true,
-            ]);
+            if ($request->isXmlHttpRequest()) {
+                return response()->json(['success' => true]);
+            } else {
+                return redirect()->back();
+            }
         } catch (AlreadyHasPermissionException $e) {
             return response()->json([
                 'error' => 'User already has access to this IP subnet',
             ]);
-        } catch (AuthorizationException $e) {
-            return response()->json([
-                'error' => 'Could not share IP subnet',
-            ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => $e->getMessage(),
+                'error' => 'Could not share IP subnet',
             ]);
         }
     }

@@ -7,13 +7,13 @@
         <ol class="breadcrumb">
             <li><a href="{{ route('home') }}">Home</a></li>
             <li><span>Devices</span></li>
-            <li><a href="{{ route('devices.index', $deviceSection->id) }}"><span>{{ $deviceSection->title }}</span></a></li>
+            <li><a href="{{ route('device.index', $deviceSection->id) }}"><span>{{ $deviceSection->title }}</span></a></li>
             <li class="active"><span>Edit</span></li>
         </ol>
     </section>
 
     <section class="content">
-        {!! Form::model($device, ['route' => ['devices.update', $device->id], 'method' => 'PUT', 'class' => 'form-horizontal', 'role' => 'form']) !!}
+        {!! Form::model($device, ['route' => ['device.update', $device->id], 'method' => 'PUT', 'class' => 'form-horizontal', 'role' => 'form']) !!}
 
         <div class="box box-info">
             <div class="box-header with-border">
@@ -21,16 +21,16 @@
             </div>
 
             <div class="box-body">
-                @include('devices._form')
+                @include('device._form')
             </div>
         </div>
 
-        @include('devices._ip-addresses')
-        @include('devices._category')
-        @include('devices._save')
+        @include('device._ip-addresses')
+        @include('device._category')
+        @include('device._save')
 
         {!! Form::close() !!}
     </section>
 
-    @include('devices._modals')
+    @include('device._modals')
 @stop

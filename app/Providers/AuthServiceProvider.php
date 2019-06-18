@@ -2,10 +2,9 @@
 
 namespace App\Providers;
 
-use App\DeviceSection;
 use App\Permission;
-use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,43 +20,42 @@ class AuthServiceProvider extends ServiceProvider
     /**
      * Register any application authentication / authorization services.
      *
-     * @param  \Illuminate\Contracts\Auth\Access\Gate  $gate
      * @return void
      */
-    public function boot(GateContract $gate)
+    public function boot()
     {
-        parent::registerPolicies($gate);
+        parent::registerPolicies();
 
-        $gate->define('superadmin', function($user) {
-            return $user->isSuperAdmin();
-        });
-
-        $gate->define('admin', function($user) {
+        Gate::define('admin', function($user) {
             return $user->isAdmin();
         });
 
-        $gate->define('list', function($user, $section) {
-            return $user->isAdmin() || Permission::canList($section);
+        Gate::define('view', function($user, $resource) {
+            return Permission::can('view', $resource, $user);
         });
 
-        $gate->define('view', function($user, $resource) {
-            return $user->isAdmin() || Permission::can('view', $resource);
+        Gate::define('edit', function($user, $resource) {
+            return Permission::can('edit', $resource, $user);
         });
 
-        $gate->define('edit', function($user, $resource) {
-            return $user->isAdmin() || Permission::can('edit', $resource);
+        Gate::define('delete', function($user, $resource) {
+            return Permission::can('delete', $resource, $user);
         });
 
-        $gate->define('delete', function($user, $resource) {
-            return $user->isAdmin() || Permission::can('delete', $resource);
+        Gate::define('create', function($user, $resource) {
+            return Permission::can('create', $resource, $user);
         });
 
-        $gate->define('create', function($user, $resource) {
-            return $user->isAdmin() || Permission::can('create', $resource);
+        Gate::define('share', function($user, $resource) {
+            return $resource->isOwner($user); // @todo separate permission?
         });
 
-        $gate->define('manage', function($user, $resource) {
-            return $user->isAdmin() || Permission::can('manage', $resource);
+        Gate::define('owner', function($user, $resource) {
+            return $resource->isOwner($user);
+        });
+
+        Gate::define('manage', function($user, $resource) {
+            return $resource->isOwner($user); // @todo separate permission?
         });
     }
 }
