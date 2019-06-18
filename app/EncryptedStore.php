@@ -33,11 +33,9 @@ class EncryptedStore extends Model
 
     public static function upsertSingle($resource, array $data, User $user)
     {
-        $resourceType = getResourceType($resource);
-
         return EncryptedStore::updateOrInsert([
             'user_id' => $user->id,
-            'resource_type' => $resourceType,
+            'resource_type' => getResourceType($resource),
             'resource_id' => $resource->id,
         ], [
             'data' => app('encrypt')->encryptForUser(json_encode($data), $user),
@@ -104,4 +102,38 @@ class EncryptedStore extends Model
 
         Permission::where($filters)->delete();
     }
+
+    public static function ensurePermissions(User $user, array $queries)
+    {
+        $existing = EncryptedStore::select('id', 'resource_type', 'resource_id')
+            ->where('user_id', $user->id)
+            ->get();
+
+        foreach ($queries as $query) {
+            $query->chunk(200, function($resources) use (&$existing, $user) {
+                $resourceType = getResourceType($resources->first());
+
+                foreach ($resources as $resource) {
+                    $test = function ($value) use ($resource, $user, $resourceType) {
+                        return intval($value->resource_type) === $resourceType
+                            && intval($value->resource_id) === intval($resource->id);
+                    };
+
+                    $exists = $existing->first($test);
+
+                    if ($exists) {
+                        $existing = $existing->reject($test);
+
+                        continue;
+                    }
+
+                    $data = self::pull($resource);
+                    self::upsertSingle($resource, $data, $user);
+                }
+            });
+        }
+
+        EncryptedStore::whereIn('id', $existing->pluck('id'))->delete();
+    }
+
 }

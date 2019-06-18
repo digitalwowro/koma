@@ -10,7 +10,7 @@
                     <h4>User</h4>
 
                     <select id="user-select" class="form-control">
-                        @foreach(App\User::whereRole(App\User::ROLE_SYSADMIN)->orderBy('name')->get() as $user)
+                        @foreach(App\User::where('id', '!=', auth()->id())->orderBy('name')->get() as $user)
                             <option value="{{ $user->id }}">{{ $user->name }}</option>
                         @endforeach
                     </select>

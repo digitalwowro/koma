@@ -17,11 +17,10 @@ class Permission extends Model
     const GRANT_TYPE_DELETE = 4;
     const GRANT_TYPE_CREATE = 8;
 
-    const RESOURCE_TYPE_DEVICES_FULL    = 1;
-    const RESOURCE_TYPE_DEVICES_SECTION = 2;
-    const RESOURCE_TYPE_DEVICES_DEVICE  = 3;
-    const RESOURCE_TYPE_IP_CATEGORY     = 4;
-    const RESOURCE_TYPE_IP_SUBNET       = 5;
+    const RESOURCE_TYPE_DEVICE_SECTION = 1;
+    const RESOURCE_TYPE_DEVICE         = 2;
+    const RESOURCE_TYPE_IP_CATEGORY    = 3;
+    const RESOURCE_TYPE_IP_SUBNET      = 4;
 
     private static $cachedPermissions;
 
@@ -42,10 +41,6 @@ class Permission extends Model
         'edit' => self::GRANT_TYPE_WRITE,
         'delete' => self::GRANT_TYPE_DELETE,
         'create' => self::GRANT_TYPE_CREATE,
-
-        //'manage' => [
-        //    self::GRANT_TYPE_OWNER,
-        //],
     ];
 
     public static function getAcl($action) {
@@ -125,10 +120,6 @@ class Permission extends Model
     {
         $userIds = [];
 
-        $userIds[] = self::where([
-            'resource_type' => self::RESOURCE_TYPE_DEVICES_FULL,
-        ])->pluck('user_id')->toArray();
-
         if ($resource instanceof Device || $resource instanceof DeviceSection) {
             $section = $resource instanceof Device
                 ? $resource->section
@@ -140,7 +131,7 @@ class Permission extends Model
 
             $userIds[] = self::where(function($query) use ($section) {
                 $query
-                    ->where('resource_type', self::RESOURCE_TYPE_DEVICES_DEVICE)
+                    ->where('resource_type', self::RESOURCE_TYPE_DEVICE)
                     ->whereIn('resource_id', function ($query) use ($section) {
                         $query
                             ->select('id')
@@ -149,7 +140,7 @@ class Permission extends Model
                     });
             })->orWhere(function($query) use ($section) {
                 $query->where([
-                    'resource_type' => self::RESOURCE_TYPE_DEVICES_SECTION,
+                    'resource_type' => self::RESOURCE_TYPE_DEVICE_SECTION,
                     'resource_id' => $section->id,
                 ]);
             })->pluck('user_id')->toArray();
@@ -186,12 +177,10 @@ class Permission extends Model
     {
         try {
             switch ($this->resource_type) {
-                case self::RESOURCE_TYPE_DEVICES_FULL:
-                    break;
-                case self::RESOURCE_TYPE_DEVICES_SECTION:
+                case self::RESOURCE_TYPE_DEVICE_SECTION:
                     $this->resource = DeviceSection::findOrFail($this->resource_id);
                     break;
-                case self::RESOURCE_TYPE_DEVICES_DEVICE:
+                case self::RESOURCE_TYPE_DEVICE:
                     $this->resource = Device::findOrFail($this->resource_id);
                     break;
                 case self::RESOURCE_TYPE_IP_CATEGORY:
@@ -236,13 +225,13 @@ class Permission extends Model
     }
 
     /**
-     * @param int $userId
+     * @param User $user
      * @return array
      */
-    public static function allForUser(int $userId)
+    public static function allForUser(User $user)
     {
-        return array_filter(self::getCached(), function ($permission) use ($userId) {
-            return $permission['user_id'] === $userId;
+        return array_filter(self::getCached(), function ($permission) use ($user) {
+            return $permission['user_id'] === $user->id;
         });
     }
 
@@ -251,36 +240,36 @@ class Permission extends Model
      *
      * @param string $action: view, edit, delete, create
      * @param mixed $resource
-     * @param int|null $userId
+     * @param User $user
      * @return bool
      */
-    public static function can($action, $resource, $userId = null)
+    public static function can($action, $resource, User $user)
     {
         if (!isset(self::$acl[$action])) {
             return false;
         }
 
-        if (is_null($userId)) {
-            $userId = auth()->id();
+        if ($resource->isOwner($user)) {
+            return true;
         }
-//dd(self::allForUser($userId));
-        foreach (self::allForUser($userId) as $permission) {
+
+        foreach (self::allForUser($user) as $permission) {
             if (!in_array(self::$acl[$action], $permission['grant_type'])) {
                 continue;
             }
 
-            if ($permission['resource_type'] === self::RESOURCE_TYPE_DEVICES_FULL) {
-                return true;
-            } elseif ($resource instanceof DeviceSection) {
-                if ($permission['resource_type'] === self::RESOURCE_TYPE_DEVICES_SECTION && $permission['resource_id'] == $resource->id) {
+            if ($resource instanceof DeviceSection) {
+
+
+                if ($permission['resource_type'] === self::RESOURCE_TYPE_DEVICE_SECTION && $permission['resource_id'] == $resource->id) {
                     return true;
                 }
             } elseif ($resource instanceof Device) {
-                if ($permission['resource_type'] === self::RESOURCE_TYPE_DEVICES_DEVICE && $permission['resource_id'] == $resource->id) {
+                if ($permission['resource_type'] === self::RESOURCE_TYPE_DEVICE && $permission['resource_id'] == $resource->id) {
                     return true;
                 }
 
-                if ($permission['resource_type'] === self::RESOURCE_TYPE_DEVICES_SECTION && $permission['resource_id'] == $resource->section_id) {
+                if ($permission['resource_type'] === self::RESOURCE_TYPE_DEVICE_SECTION && $permission['resource_id'] == $resource->section_id) {
                     return true;
                 }
             } elseif ($resource instanceof IpCategory) {
@@ -307,17 +296,15 @@ class Permission extends Model
      * Check if given user can list given resource
      *
      * @param mixed $resource
-     * @param null|int $userId
+     * @param User $user
      * @return bool
      */
-    public static function canList($resource, $userId = null)
+    public static function canList($resource, User $user)
     {
-        $userId = is_null($userId) ? auth()->id() : $userId;
-
         if ($resource instanceof DeviceSection) {
-            return self::canListDeviceSection($resource, $userId);
+            return self::canListDeviceSection($resource, $user);
         } elseif ($resource instanceof IpCategory) {
-            return self::canListIpCategory($resource, $userId);
+            return self::canListIpCategory($resource, $user);
         }
 
         return false;
@@ -327,26 +314,28 @@ class Permission extends Model
      * Check if given user can list given device section
      *
      * @param \App\DeviceSection $section
-     * @param int $userId
+     * @param User $user
      * @return bool
      */
-    public static function canListDeviceSection(DeviceSection $section, $userId)
+    public static function canListDeviceSection(DeviceSection $section, User $user)
     {
+        if ($section->isOwner($user)) {
+            return true;
+        }
+
         $devices = Device::where('section_id', $section->id)
             ->pluck('id')
             ->toArray();
-        $permissions = self::allForUser($userId);
+        $permissions = self::allForUser($user);
 
         foreach ($permissions as $permission) {
             switch($permission['resource_type']) {
-                case self::RESOURCE_TYPE_DEVICES_FULL:
-                    return true;
-                case self::RESOURCE_TYPE_DEVICES_SECTION:
+                case self::RESOURCE_TYPE_DEVICE_SECTION:
                     if ($permission['resource_id'] == $section->id) {
                         return true;
                     }
                     break;
-                case self::RESOURCE_TYPE_DEVICES_DEVICE:
+                case self::RESOURCE_TYPE_DEVICE:
                     if (in_array($permission['resource_id'], $devices)) {
                         return true;
                     }
@@ -357,20 +346,29 @@ class Permission extends Model
         return false;
     }
 
-    public static function canListIpCategory(IpCategory $category, $userId)
+    /**
+     * Check if given user can list given IP Category
+     *
+     * @param IpCategory $category
+     * @param User $user
+     * @return bool
+     */
+    public static function canListIpCategory(IpCategory $category, User $user)
     {
+        if ($category->isOwner($user)) {
+            return true;
+        }
+
         $subnetIds = IpAddress::selectRaw('min(id) as id')
             ->where('category_id', $category->id)
             ->groupBy('subnet')
             ->pluck('id')
             ->toArray();
 
-        $permissions = self::allForUser($userId);
+        $permissions = self::allForUser($user);
 
         foreach ($permissions as $permission) {
             switch ($permission['resource_type']) {
-                case self::RESOURCE_TYPE_DEVICES_FULL:
-                    return true;
                 case self::RESOURCE_TYPE_IP_CATEGORY:
                     if ($permission['resource_id'] == $category->id) {
                         return true;

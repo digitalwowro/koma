@@ -48,13 +48,17 @@
                                     </td>
 
                                     <td>
-                                        <a href="{{ route('users.edit', $deviceSection->owner->id) }}">
+                                        @can('superadmin')
+                                            <a href="{{ route('users.edit', $deviceSection->owner->id) }}">
+                                                {{ $deviceSection->owner->name }}
+                                            </a>
+                                        @else
                                             {{ $deviceSection->owner->name }}
-                                        </a>
+                                        @endcan
                                     </td>
 
                                     <td style="width: 1%; white-space: nowrap;">
-                                        @can('edit', $deviceSection)
+                                        @can('manage', $deviceSection)
                                         <a href="{{ route('device-section.edit', $deviceSection->id) }}" class="table-link">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
@@ -63,7 +67,7 @@
                                         </a>
                                         @endcan
 
-                                        @can('superadmin')
+                                        @can('share', $deviceSection)
                                         <a href="{{ route('device-section.share', $deviceSection->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $deviceSection->title }}">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
@@ -72,7 +76,7 @@
                                         </a>
                                         @endcan
 
-                                        @can('delete', $deviceSection)
+                                        @can('owner', $deviceSection)
                                         {!! Form::open(['route' => ['device-section.destroy', $deviceSection->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
                                         <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this device section?')) $(this).closest('form').submit();">
                                             <span class="fa-stack">
@@ -89,7 +93,7 @@
 
                         @if (empty($visible))
                             <tr>
-                                <td colspan="{{ auth()->user()->can('admin') ? 4 : 3 }}" style="text-align:center;">
+                                <td colspan="4" style="text-align:center;">
                                     There are currently no device sections added. How about <a href="{{ route('device-section.create') }}">creating one</a> now?
                                 </td>
                             </tr>
@@ -103,7 +107,7 @@
     </section>
 
     @include('partials._share-modal', [
-        'resource_type' => App\Permission::RESOURCE_TYPE_DEVICES_SECTION,
+        'resource_type' => App\Permission::RESOURCE_TYPE_DEVICE_SECTION,
         'create_permissions' => true,
     ])
 @stop

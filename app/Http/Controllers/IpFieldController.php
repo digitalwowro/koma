@@ -10,26 +10,9 @@ use App\Http\Controllers\Controller;
 
 class IpFieldController extends Controller
 {
-    /**
-     * @var \App\IpField
-     */
-    private $model;
-
-    /**
-     * IpFieldController constructor.
-     *
-     * @param \App\IpField $model
-     */
-    public function __construct(IpField $model)
-    {
-        $this->model = $model;
-
-        $this->authorize('admin');
-    }
-
     public function index()
     {
-        $fields = $this->model->all();
+        $fields = IpField::all();
 
         return view('ip-fields.index', compact('fields'));
     }
@@ -43,7 +26,7 @@ class IpFieldController extends Controller
     {
         try
         {
-            $this->model->create($request->input());
+            IpField::create($request->input());
 
             return redirect()
                 ->route('ip-fields.index')
@@ -61,7 +44,7 @@ class IpFieldController extends Controller
     {
         try
         {
-            $field = $this->model->findOrFail($id);
+            $field = IpField::findOrFail($id);
 
             return view('ip-fields.edit', compact('field'));
         }
@@ -77,7 +60,7 @@ class IpFieldController extends Controller
     {
         try
         {
-            $field = $this->model->findOrFail($id);
+            $field = IpField::findOrFail($id);
 
             $field->update($request->input());
 
@@ -99,7 +82,7 @@ class IpFieldController extends Controller
     {
         foreach ($request->input('st') as $key => $value)
         {
-            $row = $this->model->find($value);
+            $row = IpField::find($value);
 
             if ($row)
             {
@@ -114,7 +97,7 @@ class IpFieldController extends Controller
     {
         try
         {
-            $field = $this->model->findOrFail($id);
+            $field = IpField::findOrFail($id);
 
             $field->delete();
 

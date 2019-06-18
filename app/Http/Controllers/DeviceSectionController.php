@@ -59,15 +59,7 @@ class DeviceSectionController extends Controller
     public function store(Request $request)
     {
         try {
-            $deviceSection = DeviceSection::create($this->getFields($request));
-
-            if (!$request->user()->isAdmin()) {
-                $request->user()->permissions()->create([
-                    'resource_type' => Permission::RESOURCE_TYPE_DEVICES_SECTION,
-                    'resource_id' => $deviceSection->id,
-                    'grant_type' => Permission::GRANT_TYPE_OWNER,
-                ]);
-            }
+            DeviceSection::create($this->getFields($request));
 
             return redirect()
                 ->route('device-section.index')
@@ -164,30 +156,21 @@ class DeviceSectionController extends Controller
     }
 
     /**
-     * @param int $id
+     * @param int $sectionId
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function share($id, Request $request)
+    public function share($sectionId, Request $request)
     {
         try {
-            $this->authorize('superadmin');
+            $section = DeviceSection::findOrFail($sectionId);
 
-            DeviceSection::findOrFail($id);
+            $this->authorize('share', $section);
+
             $user = User::findOrFail($request->input('user_id'));
-            $grantType = intval($request->input('grant_type'));
+            $grantType = $request->input('grant_type');
 
-            $this->validateDeviceSectionPermission($grantType, $user, $id);
-
-            $permission = $user->permissions()->create([
-                'resource_type' => Permission::RESOURCE_TYPE_DEVICES_SECTION,
-                'resource_id' => $id,
-                'grant_type' => $grantType,
-            ]);
-
-            $this->deleteRedundantPermissions($permission);
-
-            Permission::flushCache();
+            app('share')->share($user, $section, $grantType);
 
             return response()->json([
                 'success' => true,
@@ -196,13 +179,9 @@ class DeviceSectionController extends Controller
             return response()->json([
                 'error' => 'User already has access to this device section',
             ]);
-        } catch (AuthorizationException $e) {
-            return response()->json([
-                'error' => 'Could not share device section',
-            ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => $e->getMessage(),
+                'error' => 'Could not share device section',
             ]);
         }
     }

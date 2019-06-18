@@ -90,13 +90,20 @@ class UserController extends Controller
                 ->withError($validator->errors()->first());
         }
 
-        $row = User::create($data);
+        $key = app('encrypt')->generateEncryptionKey($data['password']);
+
+        $user = User::create($data);
+
+        $user->salt = $key['salt'];
+        $user->public_key = $key['publicKey'];
+
+        $user->save();
 
         if (!is_array($permissions)) {
             $permissions = [];
         }
 
-        $row->syncPermissions($permissions);
+        app('permissionSync')->sync($user, $permissions);
 
         return redirect()
             ->route('users.index')
@@ -132,9 +139,8 @@ class UserController extends Controller
     public function update($id, Request $request)
     {
         try {
-            $row = User::findOrFail($id);
-
-            $data = $request->only(['name', 'email', 'password', 'role']);
+            $user = User::findOrFail($id);
+            $data = $request->only(['name', 'email', 'role']);
             $permissions = $request->input('permissions');
             $validator = $this->validator($data, $id);
 
@@ -145,21 +151,17 @@ class UserController extends Controller
                     ->withError($validator->errors()->first());
             }
 
-            if (isset($data['password']) && empty($data['password'])) {
-                unset($data['password']);
-            }
-
             if ($id == auth()->id()) {
                 unset($data['role']);
             }
 
-            $row->update($data);
+            $user->update($data);
 
             if (!is_array($permissions)) {
                 $permissions = [];
             }
 
-            $row->syncPermissions($permissions);
+            app('permissionSync')->sync($user, $permissions);
 
             return redirect()
                 ->route('users.index')

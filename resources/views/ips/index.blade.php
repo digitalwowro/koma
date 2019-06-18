@@ -53,7 +53,7 @@
                                     </span>
                                 </a>
 
-                                @can('superadmin')
+                                @can('share', $subnet)
                                     <a href="{{ route('ip.share', ['category' => $subnet->category_id, 'id' => $subnet->id]) }}" class="table-link share-item" title="Share" data-human-id="{{ $subnet->subnet }}">
                                         <span class="fa-stack">
                                             <i class="fa fa-square fa-stack-2x"></i>
@@ -62,7 +62,7 @@
                                     </a>
                                 @endcan
 
-                                @can('delete', $subnet)
+                                @can('owner', $subnet)
                                     {!! Form::open(['route' => ['ip.destroy', $subnet->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
                                     <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this subnet?')) $(this).closest('form').submit();">
                                         <span class="fa-stack">

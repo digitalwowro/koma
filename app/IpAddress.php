@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Exceptions\SubnetTooLargeException;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 
@@ -78,8 +79,13 @@ class IpAddress extends Model
 
         // convert last (32-$mask) bits to zeroes
         $currentIp = $ipEnc | pow(2, (32 - $mask)) - pow(2, (32 - $mask));
+        $ipsCount = pow(2, (32 - $mask));
 
-        for ($pos = 0; $pos < pow(2, (32 - $mask)); ++$pos) {
+        if ($ipsCount > 65536) {
+            throw new SubnetTooLargeException;
+        }
+
+        for ($pos = 0; $pos < $ipsCount; ++$pos) {
             self::create([
                 'ip' => long2ip($currentIp + $pos),
                 'subnet' => $subnet,
@@ -229,6 +235,19 @@ class IpAddress extends Model
         }
 
         return '-';
+    }
+
+    /**
+     * Returns whether given user is owner of current resource
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function isOwner(User $user)
+    {
+        $first = $this->firstInSubnet();
+
+        return $first->category->owner_id === $user->id;
     }
 
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Device;
 use App\EncryptedStore;
 use App\Exceptions\AlreadyHasPermissionException;
+use App\Exceptions\SubnetTooLargeException;
 use App\IpCategory;
 use App\IpAddress;
 use App\IpField;
@@ -73,6 +74,11 @@ class IpController extends Controller
             return redirect()
                 ->route('ip.index', $category)
                 ->withSuccess('IP Address has been added');
+        } catch (SubnetTooLargeException $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withError('Subnet too large');
         } catch (Exception $e) {
             return redirect()
                 ->back()

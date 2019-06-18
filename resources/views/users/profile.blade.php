@@ -14,7 +14,7 @@
             </div>
 
             <div class="box-body">
-                @include('users._form')
+                @include('users._form', ['profile' => true])
             </div>
         </div>
 

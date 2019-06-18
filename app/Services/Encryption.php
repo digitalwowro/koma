@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\EncryptedStore;
 use App\User;
 use Exception;
 use ParagonIE\Halite\Asymmetric\EncryptionPublicKey;
@@ -71,5 +72,62 @@ class Encryption
     public function decrypt($str)
     {
         return Asymmetric::unseal($str, $this->getKeyPair()->getSecretKey())->getString();
+    }
+
+    /**
+     * Generate new salt & encryption key
+     *
+     * @param string $password
+     * @return array
+     * @throws Exception
+     */
+    public function generateEncryptionKey(string $password) : array
+    {
+        $salt = random_bytes(16);
+
+        $password = new HiddenString($password);
+        $security = $this->securityLevel();
+
+        $publicKey = KeyFactory::deriveEncryptionKeyPair($password, $salt, $security)
+            ->getPublicKey()
+            ->getRawKeyMaterial();
+
+        $salt = base64_encode($salt);
+        $publicKey = base64_encode($publicKey);
+
+        return compact('salt', 'publicKey');
+    }
+
+    /**
+     * Re-encrypt entire encrypted store for current
+     * logged in user using a new provided password
+     *
+     * @param string $password
+     */
+    public function changePassword(string $password)
+    {
+        $user = auth()->user();
+        $salt = base64_decode($user->salt);
+        $password = new HiddenString($password);
+        $security = $this->securityLevel();
+
+        $newKeyPair = KeyFactory::deriveEncryptionKeyPair($password, $salt, $security);
+        $publicKey = $newKeyPair->getPublicKey();
+
+        EncryptedStore::where('user_id', auth()->id())
+            ->chunk(200, function($items) use ($password, $publicKey) {
+                foreach ($items as $item) {
+                    try {
+                        $data = new HiddenString($this->decrypt($item->data));
+
+                        $item->data = Asymmetric::seal($data, $publicKey);
+                        $item->save();
+                    } catch (Exception $e) {
+                        // skip
+                    }
+                }
+            });
+
+        return base64_encode($publicKey->getRawKeyMaterial());
     }
 }

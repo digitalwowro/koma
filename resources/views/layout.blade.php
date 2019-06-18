@@ -66,7 +66,9 @@
                     </li>
 
                     <li>
-                        <a href="/auth/logout" data-toggle="control-sidebar"><i class="fa fa-power-off"></i></a>
+                        {!! Form::open(['route' => 'logout', 'method' => 'POST', 'id' => 'logout-form']) !!}
+                        {!! Form::close() !!}
+                        <a href="/auth/logout" data-toggle="control-sidebar" onclick="$('#logout-form').submit(); return false;"><i class="fa fa-power-off"></i></a>
                     </li>
                 </ul>
             </div>
@@ -197,14 +199,12 @@
                     </a>
                 </li>
 
-                @can('admin')
                 <li {!! is_route('ip-fields.*') !!}>
                     <a href="{{ route('ip-fields.index') }}">
                         <i class="fa fa-ellipsis-h"></i>
                         <span>IP Fields</span>
                     </a>
                 </li>
-                @endcan
 
                 @can('superadmin')
                     <li {!! is_route('users.*') !!}>

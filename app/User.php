@@ -63,20 +63,24 @@ class User extends Model implements AuthenticatableContract,
 
     public function deviceSectionVisible($sectionId)
     {
-        if (!isset($this->profile['device_sections']) || !is_array($this->profile['device_sections'])) {
+        return true; // @todo still needed?
+
+        /*if (!isset($this->profile['device_sections']) || !is_array($this->profile['device_sections'])) {
             return true;
         }
 
-        return in_array($sectionId, $this->profile['device_sections']);
+        return in_array($sectionId, $this->profile['device_sections']);*/
     }
 
     public function ipCategoryVisible($categoryId)
     {
-        if (!isset($this->profile['ip_categories']) || !is_array($this->profile['ip_categories'])) {
+        return true; // @todo still needed?
+
+        /*if (!isset($this->profile['ip_categories']) || !is_array($this->profile['ip_categories'])) {
             return true;
         }
 
-        return in_array($categoryId, $this->profile['ip_categories']);
+        return in_array($categoryId, $this->profile['ip_categories']);*/
     }
 
     /**
@@ -125,46 +129,5 @@ class User extends Model implements AuthenticatableContract,
     public static function pagedForAdmin()
     {
         return self::orderBy('id')->paginate(30);
-    }
-
-    /**
-     * @param array $permissions
-     */
-    public function syncPermissions(array $permissions)
-    {
-        $toCreate = [];
-
-        foreach ($permissions as $permission) {
-            if (!isset($permission['level'], $permission['id'], $permission['type']) || !is_array($permission['level'])) {
-                continue;
-            }
-
-            $allowed = [
-                Permission::GRANT_TYPE_READ,
-                Permission::GRANT_TYPE_WRITE,
-                Permission::GRANT_TYPE_DELETE,
-            ];
-
-            if (in_array($permission['type'], [Permission::RESOURCE_TYPE_DEVICES_SECTION, Permission::RESOURCE_TYPE_IP_CATEGORY])) {
-                $allowed[] = Permission::GRANT_TYPE_CREATE;
-            }
-
-            $level = array_intersect($allowed, $permission['level']);
-
-            if (count($level)) {
-                $toCreate[] = [
-                    'resource_type' => $permission['type'],
-                    'resource_id' => $permission['id'] ? $permission['id'] : null,
-                    'grant_type' => $level,
-                ];
-            }
-        }
-
-        $this->permissions()->delete();
-        $this->permissions()->createMany($toCreate);
-
-        Permission::flushCache();
-
-        // @todo EncryptedStore::ensureUserPermissions()
     }
 }

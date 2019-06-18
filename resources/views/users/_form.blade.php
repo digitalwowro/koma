@@ -21,6 +21,7 @@
     </div>
 </div>
 
+@if (!isset($user) || isset($profile))
 <div class="form-group">
     <label for="password" class="col-xs-2 control-label">Password</label>
     <div class="col-xs-10">
@@ -28,10 +29,11 @@
             'id' => 'password',
             'class' => 'form-control',
             'style' => 'font-style:italic;',
-            'placeholder' => 'leave blank if you don\'t want to assign or change the password',
+            'placeholder' => 'leave blank if you don\'t want to change the password',
         ]) !!}
     </div>
 </div>
+@endif
 
 @if (!isset($user) || auth()->id() != $user->id)
     <div class="form-group">
@@ -87,17 +89,13 @@
                 @if ($permission->preloadResource())
                 <tr>
                     <td>
-                        @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_FULL)
-                            <i class="fa fa-star"></i>
-
-                            Global
-                        @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_SECTION)
+                        @if ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICE_SECTION)
                             <i class="fa fa-server"></i>
 
                             <a href="{{ route('device.index', $permission->resource->id) }}" target="_blank">
                                 {{ $permission->resource->title }}
                             </a>
-                        @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICES_DEVICE)
+                        @elseif ($permission->resource_type === $permission::RESOURCE_TYPE_DEVICE)
                             <i class="fa fa-server"></i>
 
                             <a href="{{ route('device.index', $permission->resource->section_id) }}" target="_blank">
@@ -155,7 +153,7 @@
                             </label>
                         </div>
 
-                        @if (in_array($permission->resource_type, [$permission::RESOURCE_TYPE_DEVICES_SECTION, $permission::RESOURCE_TYPE_IP_CATEGORY]))
+                        @if (in_array($permission->resource_type, [$permission::RESOURCE_TYPE_DEVICE_SECTION, $permission::RESOURCE_TYPE_IP_CATEGORY]))
                         <div class="checkbox icheck pull-left" style="margin-right: 10px;">
                             <label>
                                 {!! Form::checkbox("permissions[{$i}][level][]", $permission::GRANT_TYPE_CREATE, in_array($permission::GRANT_TYPE_CREATE, $permission->grant_type)) !!}
@@ -178,24 +176,19 @@
             <tfoot>
                 <tr>
                     <td colspan="3" style="text-align:right;">
-                        <a class="btn btn-primary add-global-access">
-                            <i class="fa fa-star"></i>
-                            Add Global Access
-                        </a>
-
                         <a class="btn btn-primary" href="#addSectionModal" data-toggle="modal">
                             <i class="fa fa-server"></i>
                             Add Device Section
                         </a>
 
-                        <a class="btn btn-primary" href="#addIpSectionModal" data-toggle="modal">
-                            <i class="fa fa-ellipsis-h"></i>
-                            Add IP Category
-                        </a>
-
                         <a class="btn btn-primary" href="#addDeviceModal" data-toggle="modal">
                             <i class="fa fa-server"></i>
                             Add Device
+                        </a>
+
+                        <a class="btn btn-primary" href="#addIpSectionModal" data-toggle="modal">
+                            <i class="fa fa-ellipsis-h"></i>
+                            Add IP Category
                         </a>
 
                         <a class="btn btn-primary" href="#addIpSubnetModal" data-toggle="modal">
@@ -361,22 +354,15 @@
                     ? (parseInt($table.find('tbody tr:last [name^=permissions]').first().attr('name').split('[')[1].replace(/[^0-9]/g, '')) + 1)
                     : 0;
 
-            if (type === {{ App\Permission::RESOURCE_TYPE_DEVICES_FULL }}) {
-                to_add = to_add + '<i class="fa fa-star"></i> ' +
-                    '' +
-                    'Global' +
-                    '' +
-                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="{{ App\Permission::RESOURCE_TYPE_DEVICES_FULL }}">' +
-                    '<input type="hidden" name="permissions[' + nextId + '][id]" value="">';
-            } else if (type === {{ App\Permission::RESOURCE_TYPE_DEVICES_SECTION }}) {
+            if (type === {{ App\Permission::RESOURCE_TYPE_DEVICE_SECTION }}) {
                 to_add = to_add + '<i class="fa fa-server"></i> ' +
                     '<a href="' + '{{ route('device.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
                         getSectionTitle(section_id) +
                     '</a>' +
 
-                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="{{ App\Permission::RESOURCE_TYPE_DEVICES_SECTION }}">' +
+                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="{{ App\Permission::RESOURCE_TYPE_DEVICE_SECTION }}">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + section_id + '">';
-            } else if (type === {{ App\Permission::RESOURCE_TYPE_DEVICES_DEVICE }}) {
+            } else if (type === {{ App\Permission::RESOURCE_TYPE_DEVICE }}) {
                 to_add = to_add + '<i class="fa fa-server"></i> ' +
                     '<a href="' + '{{ route('device.index', '_SID_') }}'.replace('_SID_', section_id) + '" target="_blank"> ' +
                         getSectionTitle(section_id) +
@@ -385,7 +371,7 @@
                     '<a href="' + '{{ route('device.show', ['type' => '_SID_', 'id' => '_DID_']) }}'.replace('_SID_', section_id).replace('_DID_', device_id) + '" target="_blank"> ' +
                         getDeviceTitle(device_id) +
                     '</a>' +
-                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="{{ App\Permission::RESOURCE_TYPE_DEVICES_DEVICE }}">' +
+                    '<input type="hidden" name="permissions[' + nextId + '][type]" value="{{ App\Permission::RESOURCE_TYPE_DEVICE }}">' +
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + device_id + '">';
             } else if (type === {{ App\Permission::RESOURCE_TYPE_IP_CATEGORY }}) {
                 to_add = to_add + '<i class="fa fa-ellipsis-h"></i> ' +
@@ -407,7 +393,7 @@
                     '<input type="hidden" name="permissions[' + nextId + '][id]" value="' + device_id + '">';
             }
 
-            var hasCreate = [{{ App\Permission::RESOURCE_TYPE_DEVICES_SECTION }}, {{ App\Permission::RESOURCE_TYPE_IP_CATEGORY }}].includes(parseInt(type));
+            var hasCreate = [{{ App\Permission::RESOURCE_TYPE_DEVICE_SECTION }}, {{ App\Permission::RESOURCE_TYPE_IP_CATEGORY }}].includes(parseInt(type));
 
             to_add = to_add +
                 '</td><td>' +
@@ -458,15 +444,9 @@
             e.preventDefault();
         });
 
-        $('.add-global-access').click(function(e) {
-            addPerm({{ App\Permission::RESOURCE_TYPE_DEVICES_FULL }});
-
-            e.preventDefault();
-        });
-
         /** Add section **/
         $('.do-add-section').click(function(e) {
-            addPerm({{ App\Permission::RESOURCE_TYPE_DEVICES_SECTION }}, $('#section-select').val());
+            addPerm({{ App\Permission::RESOURCE_TYPE_DEVICE_SECTION }}, $('#section-select').val());
 
             $('#addSectionModal').modal('hide');
 
@@ -475,7 +455,7 @@
 
         /** Add device **/
         $('.do-add-device').click(function(e) {
-            addPerm({{ App\Permission::RESOURCE_TYPE_DEVICES_DEVICE }}, $('#device-section-select').val(), $('#device-select').val());
+            addPerm({{ App\Permission::RESOURCE_TYPE_DEVICE }}, $('#device-section-select').val(), $('#device-select').val());
 
             $('#addDeviceModal').modal('hide');
 

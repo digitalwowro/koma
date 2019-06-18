@@ -8,7 +8,7 @@
     </div>
 </div>
 
-<div class="form-group">
+{{--<div class="form-group">
     <label for="devices_per_page" class="col-xs-2 control-label">Favorite device sections</label>
     <div class="col-xs-10">
         <div class="checkbox icheck">
@@ -70,18 +70,16 @@
             @endforeach
         </div>
     </div>
+</div>--}}
 
-
-</div>
-
-@section('footer')
-    <script>
-        $('#device_sections_customize').on('ifToggled', function() {
-            $('#device_sections_list').toggleClass('hidden', !$(this).is(':checked'));
-        });
-
-        $('#ip_categories_customize').on('ifToggled', function() {
-            $('#ip_categories_list').toggleClass('hidden', !$(this).is(':checked'));
-        });
-    </script>
-@append
+{{--@section('footer')--}}
+    {{--<script>--}}
+        {{--$('#device_sections_customize').on('ifToggled', function() {--}}
+            {{--$('#device_sections_list').toggleClass('hidden', !$(this).is(':checked'));--}}
+        {{--});--}}
+{{----}}
+        {{--$('#ip_categories_customize').on('ifToggled', function() {--}}
+            {{--$('#ip_categories_list').toggleClass('hidden', !$(this).is(':checked'));--}}
+        {{--});--}}
+    {{--</script>--}}
+{{--@append--}}

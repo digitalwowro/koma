@@ -37,15 +37,7 @@ class IpCategoryController extends Controller
     public function store(Request $request)
     {
         try {
-            $ipCategory = IpCategory::create($this->getFields($request));
-
-            if (!$request->user()->isAdmin()) {
-                $request->user()->permissions()->create([
-                    'resource_type' => Permission::RESOURCE_TYPE_IP_CATEGORY,
-                    'resource_id' => $ipCategory->id,
-                    'grant_type' => Permission::GRANT_TYPE_OWNER,
-                ]);
-            }
+            IpCategory::create($this->getFields($request));
 
             return redirect()
                 ->route('ip-category.index')

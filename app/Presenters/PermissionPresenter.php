@@ -41,15 +41,13 @@ class PermissionPresenter extends Presenter
     public function grantThrough()
     {
         switch ($this->entity->resource_type) {
-            case $this->entity::RESOURCE_TYPE_DEVICES_DEVICE:
+            case $this->entity::RESOURCE_TYPE_DEVICE:
                 return '<u>' . $this->grantType() . '</u> access to this device';
-            case $this->entity::RESOURCE_TYPE_DEVICES_SECTION:
+            case $this->entity::RESOURCE_TYPE_DEVICE_SECTION:
                 return '<u>' .
                     $this->grantType() .
                     '</u> access to section ' .
                     $this->sectionUrl();
-            case $this->entity::RESOURCE_TYPE_DEVICES_FULL:
-                return 'full <u>' . $this->grantType() . '</u> access';
             default:
                 return '-';
         }

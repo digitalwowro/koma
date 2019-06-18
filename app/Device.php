@@ -63,17 +63,25 @@ class Device extends Model
         return Permission::with('user')
             ->orWhere(function($query) {
                 $query
-                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_DEVICE)
+                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE)
                     ->where('resource_id', $this->id);
             })
             ->orWhere(function($query) {
                 $query
-                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_SECTION)
+                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE_SECTION)
                     ->where('resource_id', $this->section_id);
             })
-            ->orWhere(function($query) {
-                $query->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_FULL);
-            })
             ->get();
+    }
+
+    /**
+     * Returns whether given user is owner of current resource
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function isOwner(User $user)
+    {
+        return $this->section->owner_id === $user->id;
     }
 }

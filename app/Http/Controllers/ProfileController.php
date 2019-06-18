@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Traits\ManagesUserProfiles;
+use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
@@ -23,23 +23,32 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         try {
-            $row = auth()->user();
+            $user = auth()->user();
+            $data = $request->only(['password', 'name', 'email']);
 
-            $data = $request->input();
-
-            unset($data['role']);
-
-            if (isset($data['password']) && empty($data['password'])) {
+            if (empty($data['password'])) {
                 unset($data['password']);
+            } else {
+                DB::beginTransaction();
+                $user->public_key = app('encrypt')->changePassword($data['password']);
             }
 
-            $data['profile'] = $this->profileSettings($request, $row->profile);
+            $data['profile'] = $this->profileSettings($request, $user->profile);
 
-            $row->update($data);
+            $user->update($data);
 
-            return redirect()
-                ->back()
-                ->withSuccess('Your profile has been updated');
+            if (empty($data['password'])) {
+                return redirect()
+                    ->back()
+                    ->withSuccess('Your profile has been updated');
+            } else {
+                DB::commit();
+
+                return redirect()
+                    ->back()
+                    ->withSuccess('Your profile has been updated')
+                    ->withCookie(cookie()->forever('key', $data['password']));
+            }
         } catch (QueryException $e) {
             $error = $e->getMessage();
 

@@ -113,11 +113,11 @@ function urlify($s) {
 function getResourceType($resource, $withCategories = false)
 {
     if ($resource instanceof Device) {
-        return Permission::RESOURCE_TYPE_DEVICES_DEVICE;
+        return Permission::RESOURCE_TYPE_DEVICE;
     } elseif ($resource instanceof IpAddress) {
         return Permission::RESOURCE_TYPE_IP_SUBNET;
     } elseif ($withCategories && $resource instanceof DeviceSection) {
-        return Permission::RESOURCE_TYPE_DEVICES_SECTION;
+        return Permission::RESOURCE_TYPE_DEVICE_SECTION;
     } elseif ($withCategories && $resource instanceof IpCategory) {
         return Permission::RESOURCE_TYPE_IP_CATEGORY;
     } else {

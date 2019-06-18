@@ -8,7 +8,9 @@ if(version_compare(PHP_VERSION, '7.2.0', '>=')) {
 
 Route::pattern('type', '[0-9]+');
 
-Route::controller('auth', 'Auth\AuthController');
+Route::get ('/auth/login',  ['as' => 'login',      'uses' => 'Auth\LoginController@showLoginForm']);
+Route::post('/auth/login',  ['as' => 'login.post', 'uses' => 'Auth\LoginController@login']);
+Route::post('/auth/logout', ['as' => 'logout',     'uses' => 'Auth\LoginController@logout']);
 
 Route::group(['middleware' => 'auth'], function() {
     Route::get ('/',        ['as' => 'home',           'uses' => 'DashboardController@index']);

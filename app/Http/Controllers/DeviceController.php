@@ -18,32 +18,10 @@ use App\Http\Controllers\Controller;
 
 class DeviceController extends Controller
 {
-    /**
-     * @var \App\Device
-     */
-    private $model;
-
-    /**
-     * @var \App\DeviceSection
-     */
-    private $deviceSection;
-
-    /**
-     * @var \App\IpAddress
-     */
-    private $ipAddress;
-
-    public function __construct(Device $model, DeviceSection $deviceSection, IpAddress $ipAddress)
-    {
-        $this->model = $model;
-        $this->deviceSection = $deviceSection;
-        $this->ipAddress = $ipAddress;
-    }
-
     public function index($type, $category = null)
     {
         try {
-            $deviceSection = $this->deviceSection->findOrFail($type);
+            $deviceSection = DeviceSection::findOrFail($type);
             $devices = $deviceSection->devices;
 
             if ($category) {
@@ -91,7 +69,7 @@ class DeviceController extends Controller
     public function create($type)
     {
         try {
-            $deviceSection = $this->deviceSection->findOrFail($type);
+            $deviceSection = DeviceSection::findOrFail($type);
 
             $this->authorize('create', $deviceSection);
 
@@ -121,14 +99,14 @@ class DeviceController extends Controller
                 $idArray[] = $ip;
                 unset($ipArray[$key]);
             } else {
-                if ($existingIp = $this->ipAddress->where('ip', $ipArray)->first()) {
+                if ($existingIp = IpAddress::where('ip', $ipArray)->first()) {
                     $idArray[] = $existingIp->id;
                     unset($ipArray[$key]);
                 }
             }
         }
 
-        $ips = $this->ipAddress->whereIn('id', $idArray)->get();
+        $ips = IpAddress::whereIn('id', $idArray)->get();
 
         // preset IPs
         foreach ($ips as $ip) {
@@ -150,7 +128,7 @@ class DeviceController extends Controller
                 throw new Exception("IP {$customIp} is not a valid IP address");
             }
 
-            $this->ipAddress->forceCreate([
+            IpAddress::forceCreate([
                 'ip' => $customIp,
                 'device_id' => $device->id,
             ]);
@@ -186,7 +164,7 @@ class DeviceController extends Controller
     public function store($type, Request $request)
     {
         //try {
-            $section = $this->deviceSection->findOrFail($type);
+            $section = DeviceSection::findOrFail($type);
 
             $this->authorize('create', $section);
 
@@ -195,7 +173,7 @@ class DeviceController extends Controller
             unset($data['_token']);
             unset($data['_method']);
 
-            $device = $this->model->create([
+            $device = Device::create([
                 'section_id' => $type,
                 'created_by' => $request->user()->id,
             ]);
@@ -214,7 +192,7 @@ class DeviceController extends Controller
                 // able to access his device, so we'll assign rwd permission for the newly created device
 
                 $request->user()->permissions()->create([
-                    'resource_type' => Permission::RESOURCE_TYPE_DEVICES_DEVICE,
+                    'resource_type' => Permission::RESOURCE_TYPE_DEVICE,
                     'resource_id' => $device->id,
                     'grant_type' => [
                         Permission::GRANT_TYPE_READ,
@@ -238,8 +216,8 @@ class DeviceController extends Controller
     public function edit($type, $id)
     {
         try {
-            $deviceSection = $this->deviceSection->findOrFail($type);
-            $device = $this->model->findOrFail($id);
+            $deviceSection = DeviceSection::findOrFail($type);
+            $device = Device::findOrFail($id);
 
             $this->authorize('edit', $device);
 
@@ -254,7 +232,7 @@ class DeviceController extends Controller
     public function update($id, Request $request)
     {
         try {
-            $device = $this->model->findOrFail($id);
+            $device = Device::findOrFail($id);
 
             $this->authorize('edit', $device);
 
@@ -274,7 +252,7 @@ class DeviceController extends Controller
                 }
             });
 
-            $this->ipAddress->whereNull('device_id')->whereNull('subnet')->delete();
+            IpAddress::whereNull('device_id')->whereNull('subnet')->delete();
 
             if (isset($data['ips']) && is_array($data['ips'])) {
                 $assignedBy = $request->user()->isAdmin() ? null : $request->user();
@@ -295,7 +273,7 @@ class DeviceController extends Controller
     public function destroy($id)
     {
         try {
-            $device = $this->model->findOrFail($id);
+            $device = Device::findOrFail($id);
 
             $this->authorize('delete', $device);
 
@@ -316,8 +294,8 @@ class DeviceController extends Controller
     public function show($type, $id)
     {
         try {
-            $deviceSection = $this->deviceSection->findOrFail($type);
-            $device = $this->model->findOrFail($id);
+            $deviceSection = DeviceSection::findOrFail($type);
+            $device = Device::findOrFail($id);
 
             $this->authorize('view', $device);
 
@@ -337,10 +315,11 @@ class DeviceController extends Controller
     public function share($deviceId, Request $request)
     {
         //try {
-            $this->authorize('superadmin');
+            $device = Device::findOrFail($deviceId);
+
+            $this->authorize('share', $device);
 
             $user = User::findOrFail($request->input('user_id'));
-            $device = $this->model->findOrFail($deviceId);
             $grantType = $request->input('grant_type');
 
             app('share')->share($user, $device, $grantType);
@@ -352,13 +331,9 @@ class DeviceController extends Controller
         //    return response()->json([
         //        'error' => 'User already has access to this device',
         //    ]);
-        //} catch (AuthorizationException $e) {
-        //    return response()->json([
-        //        'error' => 'Could not share device',
-        //    ]);
         //} catch (Exception $e) {
         //    return response()->json([
-        //        'error' => $e->getMessage(),
+        //        'error' => 'Could not share device',
         //    ]);
         //}
     }

@@ -104,7 +104,7 @@
                                     </span>
                                 </a>
 
-                                @can('superadmin')
+                                @can('share', $device)
                                 <a href="{{ route('device.share', $device->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $device->present()->humanIdField($deviceSection) }}">
                                     <span class="fa-stack">
                                         <i class="fa fa-square fa-stack-2x"></i>
@@ -157,7 +157,7 @@
     </section>
 
     @include('partials._share-modal', [
-        'resource_type' => App\Permission::RESOURCE_TYPE_DEVICES_DEVICE,
+        'resource_type' => App\Permission::RESOURCE_TYPE_DEVICE,
         'create_permissions' => false,
     ])
 @stop

@@ -157,4 +157,15 @@ class DeviceSection extends Model
 
         return $return;
     }
+
+    /**
+     * Returns whether given user is owner of current resource
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function isOwner(User $user)
+    {
+        return $this->owner_id === $user->id;
+    }
 }

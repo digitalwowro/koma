@@ -42,13 +42,17 @@
                                     </td>
 
                                     <td>
-                                        <a href="{{ route('users.edit', $ipCategory->owner->id) }}">
+                                        @can('superadmin')
+                                            <a href="{{ route('users.edit', $ipCategory->owner->id) }}">
+                                                {{ $ipCategory->owner->name }}
+                                            </a>
+                                        @else
                                             {{ $ipCategory->owner->name }}
-                                        </a>
+                                        @endcan
                                     </td>
 
                                     <td style="width: 1%; white-space: nowrap;">
-                                        @can('edit', $ipCategory)
+                                        @can('owner', $ipCategory)
                                         <a href="{{ route('ip-category.edit', $ipCategory->id) }}" class="table-link">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
@@ -57,7 +61,7 @@
                                         </a>
                                         @endcan
 
-                                        @can('superadmin')
+                                        @can('share', $ipCategory)
                                         <a href="{{ route('ip-category.share', $ipCategory->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $ipCategory->title }}">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
@@ -66,7 +70,6 @@
                                         </a>
                                         @endcan
 
-                                        @can('delete', $ipCategory)
                                         {!! Form::open(['route' => ['ip-category.destroy', $ipCategory->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
                                         <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this category?')) $(this).closest('form').submit();">
                                             <span class="fa-stack">

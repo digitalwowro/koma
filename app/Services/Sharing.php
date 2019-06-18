@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Device;
 use App\DeviceSection;
-use App\EncryptedShare;
+use App\EncryptedStore;
 use App\Exceptions\AlreadyHasPermissionException;
 use App\IpAddress;
 use App\IpCategory;
@@ -14,17 +14,6 @@ use Exception;
 
 class Sharing
 {
-    /**
-     * @param User $user
-     * @throws AlreadyHasPermissionException
-     */
-    protected function checkAdmin(User $user)
-    {
-        if (in_array($user->role, [User::ROLE_ADMIN, User::ROLE_SUPERADMIN])) {
-            throw new AlreadyHasPermissionException;
-        }
-    }
-
     /**
      * Get greater permissions than given one
      *
@@ -58,11 +47,10 @@ class Sharing
      */
     protected function validateDevicePermission(User $user, Device $device, array $grantType)
     {
-        $this->checkAdmin($user);
         $greaterPermissions = $this->greaterPermissions($grantType);
 
         $exists = $user->permissions()->whereIn('grant_type', $greaterPermissions)
-            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_DEVICE)
+            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE)
             ->where('resource_id', $device->id)
             ->exists();
 
@@ -71,7 +59,7 @@ class Sharing
         }
 
         $exists = $user->permissions()->whereIn('grant_type', $greaterPermissions)
-            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_SECTION)
+            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE_SECTION)
             ->where('resource_id', $device->section_id)
             ->exists();
 
@@ -88,11 +76,10 @@ class Sharing
      */
     protected function validateDeviceSectionPermission(User $user, DeviceSection $section, array $grantType)
     {
-        $this->checkAdmin($user);
         $greaterPermissions = $this->greaterPermissions($grantType);
 
         $exists = $user->permissions()->whereIn('grant_type', $greaterPermissions)
-            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICES_SECTION)
+            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE_SECTION)
             ->where('resource_id', $section->id)
             ->exists();
 
@@ -109,7 +96,6 @@ class Sharing
      */
     protected function validateIpPermission(User $user, IpAddress $ipAddress, array $grantType)
     {
-        $this->checkAdmin($user);
         $greaterPermissions = $this->greaterPermissions($grantType);
 
         $exists = $user->permissions()->whereIn('grant_type', $greaterPermissions)
@@ -139,7 +125,6 @@ class Sharing
      */
     protected function validateIpCategoryPermission(User $user, IpCategory $ipCategory, array $grantType)
     {
-        $this->checkAdmin($user);
         $greaterPermissions = $this->greaterPermissions($grantType);
 
         $exists = $user->permissions()->whereIn('grant_type', $greaterPermissions)
@@ -155,7 +140,7 @@ class Sharing
     /**
      * Delete redundant permissions
      *
-     * @param Permission $permission
+     * @param PermissionSync $permission
      */
     protected function deleteRedundantPermissions(Permission $permission)
     {
@@ -187,16 +172,23 @@ class Sharing
         if ($resource instanceof Device) {
             $data = json_encode($resource->data);
 
-            EncryptedShare::create([
+            EncryptedStore::create([
                 'user_id' => $user->id,
-                'resource_type' => Permission::RESOURCE_TYPE_DEVICES_DEVICE,
+                'resource_type' => Permission::RESOURCE_TYPE_DEVICE,
                 'resource_id' => $resource->id,
                 'data' => app('encrypt')->encryptForUser($data, $user),
             ]);
         } elseif ($resource instanceof DeviceSection) {
 
         } elseif ($resource instanceof IpAddress) {
+            $data = json_encode($resource->data);
 
+            EncryptedStore::create([
+                'user_id' => $user->id,
+                'resource_type' => Permission::RESOURCE_TYPE_IP_SUBNET,
+                'resource_id' => $resource->id,
+                'data' => app('encrypt')->encryptForUser($data, $user),
+            ]);
         } elseif ($resource instanceof IpCategory) {
 
         }
@@ -211,18 +203,16 @@ class Sharing
     public function share(User $user, $resource, array $grantType) {
         if ($resource instanceof Device) {
             $this->validateDevicePermission($user, $resource, $grantType);
-            $resourceType = Permission::RESOURCE_TYPE_DEVICES_DEVICE;
+            $resourceType = Permission::RESOURCE_TYPE_DEVICE;
         } elseif ($resource instanceof DeviceSection) {
             $this->validateDeviceSectionPermission($user, $resource, $grantType);
-            $resourceType = Permission::RESOURCE_TYPE_DEVICES_SECTION;
+            $resourceType = Permission::RESOURCE_TYPE_DEVICE_SECTION;
         } elseif ($resource instanceof IpAddress) {
             $this->validateIpPermission($user, $resource, $grantType);
             $resourceType = Permission::RESOURCE_TYPE_IP_SUBNET;
         } elseif ($resource instanceof IpCategory) {
             $this->validateIpCategoryPermission($user, $resource, $grantType);
             $resourceType = Permission::RESOURCE_TYPE_IP_CATEGORY;
-        } elseif ($resource === 'full') {
-            $resourceType = Permission::RESOURCE_TYPE_DEVICES_FULL;
         } else {
             throw new Exception('Invalid resource');
         }

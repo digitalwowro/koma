@@ -52,4 +52,15 @@ class IpCategory extends Model
     {
         return self::orderBy('sort')->orderBy('title')->get();
     }
+
+    /**
+     * Returns whether given user is owner of current resource
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function isOwner(User $user)
+    {
+        return $this->owner_id === $user->id;
+    }
 }
