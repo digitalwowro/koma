@@ -33,7 +33,7 @@ class EncryptedStore extends Model
 
     public static function upsertSingle($resource, array $data, User $user)
     {
-        return EncryptedStore::updateOrInsert([
+        EncryptedStore::updateOrInsert([
             'user_id' => $user->id,
             'resource_type' => getResourceType($resource),
             'resource_id' => $resource->id,
@@ -101,6 +101,30 @@ class EncryptedStore extends Model
         EncryptedStore::where($filters)->delete();
 
         Permission::where($filters)->delete();
+
+        if ($resource instanceof DeviceSection) {
+            $deviceIds = $resource->devices()->pluck('id');
+
+            EncryptedStore::where('resource_type', Permission::RESOURCE_TYPE_DEVICE)
+                ->whereIn('resource_id', $deviceIds)
+                ->delete();
+
+            Permission::where('resource_type', Permission::RESOURCE_TYPE_DEVICE)
+                ->whereIn('resource_id', $deviceIds)
+                ->delete();
+        }
+
+        if ($resource instanceof IpCategory) {
+            $subnetIds = $resource->ips()->pluck('id');
+
+            EncryptedStore::where('resource_type', Permission::RESOURCE_TYPE_IP_SUBNET)
+                ->whereIn('resource_id', $subnetIds)
+                ->delete();
+
+            Permission::where('resource_type', Permission::RESOURCE_TYPE_IP_SUBNET)
+                ->whereIn('resource_id', $subnetIds)
+                ->delete();
+        }
     }
 
     public static function ensurePermissions(User $user, array $queries)

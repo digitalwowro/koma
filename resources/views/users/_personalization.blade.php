@@ -27,15 +27,13 @@
             <p>Select device sections you want to see in sidebar</p>
 
             @foreach ($deviceSections as $deviceSection)
-                @can('list', $deviceSection)
-                    <div class="checkbox icheck">
-                        <label>
-                            {!! Form::checkbox("device_sections[]", $deviceSection->id, auth()->user()->deviceSectionVisible($deviceSection->id)) !!}
+                <div class="checkbox icheck">
+                    <label>
+                        {!! Form::checkbox("device_sections[]", $deviceSection->id, auth()->user()->deviceSectionVisible($deviceSection->id)) !!}
 
-                            {{ $deviceSection->title }}
-                        </label>
-                    </div>
-                @endcan
+                        {{ $deviceSection->title }}
+                    </label>
+                </div>
             @endforeach
         </div>
     </div>
@@ -58,15 +56,13 @@
             <p>Select IP categories you want to see in sidebar</p>
 
             @foreach ($ipCategories as $ipCategory)
-                @can('list', $ipCategory)
-                    <div class="checkbox icheck">
-                        <label>
-                            {!! Form::checkbox("ip_categories[]", $ipCategory->id, auth()->user()->ipCategoryVisible($ipCategory->id)) !!}
+                <div class="checkbox icheck">
+                    <label>
+                        {!! Form::checkbox("ip_categories[]", $ipCategory->id, auth()->user()->ipCategoryVisible($ipCategory->id)) !!}
 
-                            {{ $ipCategory->title }}
-                        </label>
-                    </div>
-                @endcan
+                        {{ $ipCategory->title }}
+                    </label>
+                </div>
             @endforeach
         </div>
     </div>

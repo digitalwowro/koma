@@ -15,11 +15,6 @@ use App\Http\Controllers\Controller;
 
 class IpCategoryController extends Controller
 {
-    public function index()
-    {
-        return view('ip-category.index');
-    }
-
     protected function getFields(Request $request)
     {
         $data = $request->only('title');
@@ -27,6 +22,26 @@ class IpCategoryController extends Controller
         $data['owner_id'] = $request->user()->id;
 
         return $data;
+    }
+
+    public function index()
+    {
+        return view('ip-category.index');
+    }
+
+    public function show($id)
+    {
+        try {
+            $category = IpCategory::findOrFail($id);
+
+            $this->authorize('view', $category);
+
+            return view('ip-category.show', compact('category'));
+        } catch (Exception $e) {
+            return redirect()
+                ->route('ip-category.index')
+                ->withError('Could not find IP Category');
+        }
     }
 
     public function create()
@@ -112,38 +127,27 @@ class IpCategoryController extends Controller
     public function share($id, Request $request)
     {
         try {
-            $this->authorize('superadmin');
+            $category = IpCategory::findOrFail($id);
 
-            IpCategory::findOrFail($id);
+            $this->authorize('share', $category);
+
             $user = User::findOrFail($request->input('user_id'));
-            $grantType = intval($request->input('grant_type'));
+            $grantType = $request->input('grant_type', []);
 
-            $this->validateIpCategoryPermission($grantType, $user, $id);
+            app('share')->share($user, $category, $grantType);
 
-            $permission = $user->permissions()->create([
-                'resource_type' => Permission::RESOURCE_TYPE_IP_CATEGORY,
-                'resource_id' => $id,
-                'grant_type' => $grantType,
-            ]);
-
-            $this->deleteRedundantPermissions($permission);
-
-            Permission::flushCache();
-
-            return response()->json([
-                'success' => true,
-            ]);
+            if ($request->isXmlHttpRequest()) {
+                return response()->json(['success' => true]);
+            } else {
+                return redirect()->back();
+            }
         } catch (AlreadyHasPermissionException $e) {
             return response()->json([
                 'error' => 'User already has access to this IP category',
             ]);
-        } catch (AuthorizationException $e) {
-            return response()->json([
-                'error' => 'Could not share IP category',
-            ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => $e->getMessage(),
+                'error' => 'Could not share IP category',
             ]);
         }
     }

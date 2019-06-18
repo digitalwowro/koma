@@ -200,7 +200,7 @@ class Sharing
      * @param array $grantType
      * @throws AlreadyHasPermissionException
      */
-    public function share(User $user, $resource, array $grantType) {
+    public function share(User $user, $resource, array $grantType = []) {
         if ($resource instanceof Device) {
             $this->validateDevicePermission($user, $resource, $grantType);
             $resourceType = Permission::RESOURCE_TYPE_DEVICE;
@@ -217,13 +217,22 @@ class Sharing
             throw new Exception('Invalid resource');
         }
 
-        $permission = $user->permissions()->create([
-            'resource_type' => $resourceType,
-            'resource_id' => $resource->id,
-            'grant_type' => $grantType,
-        ]);
+        if (!count($grantType)) {
+            $user->permissions()->where([
+                'resource_type' => $resourceType,
+                'resource_id' => $resource->id,
+            ])->delete();
+        } else { // upsert
+            $permission = Permission::updateOrCreate([
+                'resource_type' => $resourceType,
+                'resource_id' => $resource->id,
+                'user_id' => $user->id,
+            ], [
+                'grant_type' => $grantType,
+            ]);
 
-        $this->deleteRedundantPermissions($permission);
+            $this->deleteRedundantPermissions($permission);
+        }
 
         $this->ensureEncryptedShares($user, $resource);
 

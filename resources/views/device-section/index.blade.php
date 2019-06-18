@@ -33,65 +33,70 @@
                     </tr>
                     </thead>
                     <tbody>
-                        @php $visible = 0; @endphp
+                        @php $displayed = 0 @endphp
                         @foreach ($deviceSections as $deviceSection)
-                            @can('list', $deviceSection)
-                                @php $visible++; @endphp
-                                <tr>
-                                    <td>
-                                        {!! $deviceSection->present()->icon !!}
-                                        <a href="{{ route('device.index', $deviceSection->id) }}">{{ $deviceSection->title }}</a>
-                                    </td>
+                            @php $displayed++ @endphp
+                            <tr>
+                                <td>
+                                    {!! $deviceSection->present()->icon !!}
+                                    <a href="{{ route('device.index', $deviceSection->id) }}">{{ $deviceSection->title }}</a>
+                                </td>
 
-                                    <td>
-                                        {{ count($deviceSection->fields) }}
-                                    </td>
+                                <td>
+                                    {{ count($deviceSection->fields) }}
+                                </td>
 
-                                    <td>
-                                        @can('superadmin')
-                                            <a href="{{ route('users.edit', $deviceSection->owner->id) }}">
-                                                {{ $deviceSection->owner->name }}
-                                            </a>
-                                        @else
+                                <td>
+                                    @can('admin')
+                                        <a href="{{ route('users.edit', $deviceSection->owner->id) }}">
                                             {{ $deviceSection->owner->name }}
-                                        @endcan
-                                    </td>
-
-                                    <td style="width: 1%; white-space: nowrap;">
-                                        @can('manage', $deviceSection)
-                                        <a href="{{ route('device-section.edit', $deviceSection->id) }}" class="table-link">
-                                            <span class="fa-stack">
-                                                <i class="fa fa-square fa-stack-2x"></i>
-                                                <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
-                                            </span>
                                         </a>
-                                        @endcan
+                                    @else
+                                        {{ $deviceSection->owner->name }}
+                                    @endcan
+                                </td>
 
-                                        @can('share', $deviceSection)
-                                        <a href="{{ route('device-section.share', $deviceSection->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $deviceSection->title }}">
-                                            <span class="fa-stack">
-                                                <i class="fa fa-square fa-stack-2x"></i>
-                                                <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
-                                            </span>
-                                        </a>
-                                        @endcan
+                                <td style="width: 1%; white-space: nowrap;">
+                                    <a href="{{ route('device-section.show', $deviceSection->id) }}" class="table-link" title="View">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
 
-                                        @can('owner', $deviceSection)
-                                        {!! Form::open(['route' => ['device-section.destroy', $deviceSection->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
-                                        <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this device section?')) $(this).closest('form').submit();">
-                                            <span class="fa-stack">
-                                                <i class="fa fa-square fa-stack-2x"></i>
-                                                <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
-                                            </span>
-                                        </a>
-                                        {!! Form::close() !!}
-                                        @endcan
-                                    </td>
-                                </tr>
-                            @endcan
+                                    @can('manage', $deviceSection)
+                                    <a href="{{ route('device-section.edit', $deviceSection->id) }}" class="table-link">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                    @endcan
+
+                                    @can('share', $deviceSection)
+                                    <a href="{{ route('device-section.share', $deviceSection->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $deviceSection->title }}">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                    @endcan
+
+                                    @can('owner', $deviceSection)
+                                    {!! Form::open(['route' => ['device-section.destroy', $deviceSection->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
+                                    <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this device section?')) $(this).closest('form').submit();">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                    {!! Form::close() !!}
+                                    @endcan
+                                </td>
+                            </tr>
                         @endforeach
 
-                        @if (empty($visible))
+                        @if (!$displayed)
                             <tr>
                                 <td colspan="4" style="text-align:center;">
                                     There are currently no device sections added. How about <a href="{{ route('device-section.create') }}">creating one</a> now?

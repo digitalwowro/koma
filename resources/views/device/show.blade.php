@@ -56,7 +56,7 @@
             </div>
         </div>
 
-        @can('admin')
+        @can('owner', $device)
         <div class="box box-danger">
             <div class="box-header with-border">
                 <h3 class="box-title">Shared with</h3>
@@ -69,6 +69,15 @@
                             <a href="{{ route('users.edit', $share->user_id) }}">{{ $share->user->name }}</a>
 
                             ({!! $share->present()->grantThrough !!})
+
+                            {!! Form::open(['route' => ['device.share', $device->id], 'method' => 'POST', 'style' => 'display: inline;']) !!}
+                            {!! Form::hidden('user_id', $share->user_id) !!}
+
+                            <a href="#" style="color: red;" onclick="$(this).closest('form').submit(); return false;">
+                                <i class="fa fa-times"></i>
+                                Revoke
+                            </a>
+                            {!! Form::close() !!}
                         </li>
                     @empty
                         <li>Device is not shared</li>

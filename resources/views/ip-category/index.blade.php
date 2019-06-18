@@ -32,63 +32,73 @@
                     </tr>
                     </thead>
                     <tbody>
-                        @forelse ($ipCategories as $ipCategory)
-                            @can('list', $ipCategory)
-                                <tr>
-                                    <td>
-                                        <a href="{{ route('ip.index', $ipCategory->id) }}">
-                                            {{ $ipCategory->title }}
-                                        </a>
-                                    </td>
+                        @php $displayed = 0 @endphp
+                        @foreach ($ipCategories as $ipCategory)
+                            @php $displayed++ @endphp
+                            <tr>
+                                <td>
+                                    <a href="{{ route('ip.index', $ipCategory->id) }}">
+                                        {{ $ipCategory->title }}
+                                    </a>
+                                </td>
 
-                                    <td>
-                                        @can('superadmin')
-                                            <a href="{{ route('users.edit', $ipCategory->owner->id) }}">
-                                                {{ $ipCategory->owner->name }}
-                                            </a>
-                                        @else
+                                <td>
+                                    @can('admin')
+                                        <a href="{{ route('users.edit', $ipCategory->owner->id) }}">
                                             {{ $ipCategory->owner->name }}
-                                        @endcan
-                                    </td>
-
-                                    <td style="width: 1%; white-space: nowrap;">
-                                        @can('owner', $ipCategory)
-                                        <a href="{{ route('ip-category.edit', $ipCategory->id) }}" class="table-link">
-                                            <span class="fa-stack">
-                                                <i class="fa fa-square fa-stack-2x"></i>
-                                                <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
-                                            </span>
                                         </a>
-                                        @endcan
+                                    @else
+                                        {{ $ipCategory->owner->name }}
+                                    @endcan
+                                </td>
 
-                                        @can('share', $ipCategory)
-                                        <a href="{{ route('ip-category.share', $ipCategory->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $ipCategory->title }}">
-                                            <span class="fa-stack">
-                                                <i class="fa fa-square fa-stack-2x"></i>
-                                                <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
-                                            </span>
-                                        </a>
-                                        @endcan
+                                <td style="width: 1%; white-space: nowrap;">
+                                    <a href="{{ route('ip-category.show', $ipCategory->id) }}" class="table-link" title="View">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
 
-                                        {!! Form::open(['route' => ['ip-category.destroy', $ipCategory->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
-                                        <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this category?')) $(this).closest('form').submit();">
-                                            <span class="fa-stack">
-                                                <i class="fa fa-square fa-stack-2x"></i>
-                                                <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
-                                            </span>
-                                        </a>
-                                        {!! Form::close() !!}
-                                        @endcan
-                                    </td>
-                                </tr>
-                            @endcan
-                        @empty
+                                    @can('owner', $ipCategory)
+                                    <a href="{{ route('ip-category.edit', $ipCategory->id) }}" class="table-link">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                    @endcan
+
+                                    @can('share', $ipCategory)
+                                    <a href="{{ route('ip-category.share', $ipCategory->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $ipCategory->title }}">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                    @endcan
+
+                                    @can('owner', $ipCategory)
+                                    {!! Form::open(['route' => ['ip-category.destroy', $ipCategory->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
+                                    <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this category?')) $(this).closest('form').submit();">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                    {!! Form::close() !!}
+                                    @endcan
+                                </td>
+                            </tr>
+                        @endforeach
+
+                        @if (!$displayed)
                             <tr>
                                 <td colspan="3" style="text-align:center;">
                                     There are currently no categories added. How about <a href="{{ route('ip-category.create') }}">creating one</a> now?
                                 </td>
                             </tr>
-                        @endforelse
+                        @endif
                     </tbody>
                 </table>
 

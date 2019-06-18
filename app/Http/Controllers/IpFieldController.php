@@ -24,16 +24,13 @@ class IpFieldController extends Controller
 
     public function store(Request $request)
     {
-        try
-        {
+        try {
             IpField::create($request->input());
 
             return redirect()
                 ->route('ip-fields.index')
                 ->withSuccess('Field has been added');
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withError($e->getMessage());
@@ -42,14 +39,11 @@ class IpFieldController extends Controller
 
     public function edit($id)
     {
-        try
-        {
+        try {
             $field = IpField::findOrFail($id);
 
             return view('ip-fields.edit', compact('field'));
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->route('ip-fields.index')
                 ->withError('Could not find field');
@@ -58,8 +52,7 @@ class IpFieldController extends Controller
 
     public function update(Request $request, $id)
     {
-        try
-        {
+        try {
             $field = IpField::findOrFail($id);
 
             $field->update($request->input());
@@ -69,9 +62,7 @@ class IpFieldController extends Controller
             return redirect()
                 ->route('ip-fields.index')
                 ->withSuccess('Field has been saved');
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withError($e->getMessage());
@@ -80,14 +71,11 @@ class IpFieldController extends Controller
 
     public function reorder(Request $request)
     {
-        foreach ($request->input('st') as $key => $value)
-        {
+        foreach ($request->input('st') as $key => $value) {
             $row = IpField::find($value);
 
-            if ($row)
-            {
+            if ($row) {
                 $row->sort = $key;
-
                 $row->save();
             }
         }
@@ -95,8 +83,7 @@ class IpFieldController extends Controller
 
     public function destroy($id)
     {
-        try
-        {
+        try {
             $field = IpField::findOrFail($id);
 
             $field->delete();
@@ -104,9 +91,7 @@ class IpFieldController extends Controller
             return redirect()
                 ->route('ip-fields.index')
                 ->withSuccess('Field has been deleted');
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withError('Could not find field');

@@ -4,6 +4,7 @@ namespace App;
 
 use App\Fields\Factory;
 use App\Presenters\DeviceSectionPresenter;
+use App\Scopes\DeviceSectionTenant;
 use Illuminate\Database\Eloquent\Model;
 use Laracasts\Presenter\PresentableTrait;
 
@@ -22,6 +23,18 @@ class DeviceSection extends Model
      * @var string
      */
     protected $presenter = DeviceSectionPresenter::class;
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new DeviceSectionTenant);
+    }
 
     /**
      * Auto encode the data field
@@ -113,6 +126,19 @@ class DeviceSection extends Model
         }
 
         return $return;
+    }
+
+    /**
+     * Returns all permissions referring to this resource
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function sharedWith()
+    {
+        return Permission::with('user')
+            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE_SECTION)
+            ->where('resource_id', $this->id)
+            ->get();
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Scopes\IpCategoryTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class IpCategory extends Model
@@ -12,6 +13,18 @@ class IpCategory extends Model
      * @var array
      */
     protected $fillable = ['title', 'sort', 'owner_id'];
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new IpCategoryTenant);
+    }
 
     /**
      * Relationship with IpAddress
@@ -31,6 +44,19 @@ class IpCategory extends Model
     public function owner()
     {
         return $this->belongsTo('App\User', 'owner_id');
+    }
+
+    /**
+     * Returns all permissions referring to this resource
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function sharedWith()
+    {
+        return Permission::with('user')
+            ->where('resource_type', Permission::RESOURCE_TYPE_IP_CATEGORY)
+            ->where('resource_id', $this->id)
+            ->get();
     }
 
     /**

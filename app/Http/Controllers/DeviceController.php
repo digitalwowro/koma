@@ -213,18 +213,18 @@ class DeviceController extends Controller
         //}
     }
 
-    public function edit($type, $id)
+    public function edit($id)
     {
         try {
-            $deviceSection = DeviceSection::findOrFail($type);
             $device = Device::findOrFail($id);
+            $deviceSection = $device->section;
 
             $this->authorize('edit', $device);
 
             return view('device.edit', compact('deviceSection', 'device'));
         } catch (Exception $e) {
             return redirect()
-                ->route('device.index', $type)
+                ->back()
                 ->withError('Could not find device');
         }
     }
@@ -291,18 +291,18 @@ class DeviceController extends Controller
         }
     }
 
-    public function show($type, $id)
+    public function show($id)
     {
         try {
-            $deviceSection = DeviceSection::findOrFail($type);
             $device = Device::findOrFail($id);
+            $deviceSection = $device->section;
 
             $this->authorize('view', $device);
 
             return view('device.show', compact('device', 'deviceSection'));
         } catch (Exception $e) {
             return redirect()
-                ->route('device.index', $type)
+                ->back()
                 ->withError('Could not find device');
         }
     }
@@ -314,28 +314,30 @@ class DeviceController extends Controller
      */
     public function share($deviceId, Request $request)
     {
-        //try {
+        try {
             $device = Device::findOrFail($deviceId);
 
             $this->authorize('share', $device);
 
             $user = User::findOrFail($request->input('user_id'));
-            $grantType = $request->input('grant_type');
+            $grantType = $request->input('grant_type', []);
 
             app('share')->share($user, $device, $grantType);
 
+            if ($request->isXmlHttpRequest()) {
+                return response()->json(['success' => true]);
+            } else {
+                return redirect()->back();
+            }
+        } catch (AlreadyHasPermissionException $e) {
             return response()->json([
-                'success' => true,
+                'error' => 'User already has access to this device',
             ]);
-        //} catch (AlreadyHasPermissionException $e) {
-        //    return response()->json([
-        //        'error' => 'User already has access to this device',
-        //    ]);
-        //} catch (Exception $e) {
-        //    return response()->json([
-        //        'error' => 'Could not share device',
-        //    ]);
-        //}
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Could not share device',
+            ]);
+        }
     }
 
 }

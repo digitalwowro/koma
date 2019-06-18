@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Exceptions\SubnetTooLargeException;
+use App\Scopes\IpAddressTenant;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,6 +15,18 @@ class IpAddress extends Model
      * @var array
      */
     protected $fillable = ['ip', 'subnet', 'category_id', 'data', 'created_by'];
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new IpAddressTenant);
+    }
 
     /**
      * Relationship with IpCategory
@@ -65,11 +78,35 @@ class IpAddress extends Model
     }
 
     /**
+     * Returns all permissions referring to this resource
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function sharedWith()
+    {
+        $ip = $this->firstInSubnet();
+
+        return Permission::with('user')
+            ->orWhere(function($query) use ($ip) {
+                $query
+                    ->where('resource_type', Permission::RESOURCE_TYPE_IP_SUBNET)
+                    ->where('resource_id', $ip->id);
+            })
+            ->orWhere(function($query) use ($ip) {
+                $query
+                    ->where('resource_type', Permission::RESOURCE_TYPE_IP_CATEGORY)
+                    ->where('resource_id', $ip->category_id);
+            })
+            ->get();
+    }
+
+    /**
      * Create a new subnet
      *
      * @param string $subnet
      * @param int    $categoryId
      * @param int    $createdBy
+     * @throws SubnetTooLargeException
      */
     public static function createSubnet($subnet, $categoryId, int $createdBy = null)
     {

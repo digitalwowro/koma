@@ -47,16 +47,4 @@ class DeviceSectionComposer
         $view->with('deviceSections', $this->deviceSection->getAll());
     }
 
-    /**
-     * Get Device Sections for permission management
-     *
-     * @param View $view
-     */
-    public function getForPermission(View $view)
-    {
-        $deviceSections = $this->deviceSection->orderBy('title')->get();
-
-        $view->with('deviceSections', $deviceSections);
-    }
-
 }

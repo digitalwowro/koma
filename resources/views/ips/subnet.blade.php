@@ -32,14 +32,14 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @forelse ($ips as $ip)
+                    @foreach ($ips as $ip)
                         <tr>
                             <td>
                                 {{ $ip->ip }}
                             </td>
                             <td>
                                 @if ($ip->assigned())
-                                    assigned to <a href="{{ route('device.edit', ['type' => $ip->device->section_id, 'id' => $ip->device->id]) }}">{{ $ip->device->present()->humanIdField }}</a>
+                                    assigned to <a href="{{ route('device.edit', $ip->device->id) }}">{{ $ip->device->present()->humanIdField }}</a>
                                 @else
                                     <span class="label label-danger">Unassigned</span>
                                 @endif
@@ -50,18 +50,43 @@
                             </td>
                             @endforeach
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="{{ 2 + count($ipFields) }}" style="text-align:center;">
-                                There are currently no Subnets added. How about <a href="{{ route('ip.create', $ipCategory->id) }}">creating one</a> now?
-                            </td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
-    </section>
 
-    @include('ips._add-subnet-modal')
+        @can('owner', $ips->first())
+            <div class="box box-danger">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Shared with</h3>
+                </div>
+
+                <div class="box-body">
+                    <ul>
+                        @forelse ($ips->first()->sharedWith() as $share)
+                            <li>
+                                <a href="{{ route('users.edit', $share->user_id) }}">{{ $share->user->name }}</a>
+
+                                ({!! $share->present()->grantThrough !!})
+
+                                {!! Form::open(['route' => ['ip.share', $ips->first()->id], 'method' => 'POST', 'style' => 'display: inline;']) !!}
+                                {!! Form::hidden('user_id', $share->user_id) !!}
+
+                                <a href="#" style="color: red;" onclick="$(this).closest('form').submit(); return false;">
+                                    <i class="fa fa-times"></i>
+                                    Revoke
+                                </a>
+                                {!! Form::close() !!}
+                            </li>
+                        @empty
+                            <li>IP Subnet is not shared</li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+        @endcan
+
+        <a href="{{ route('ip.index', $ipCategory->id) }}" class="btn btn-primary">Go Back</a>
+    </section>
 @stop

@@ -20,7 +20,7 @@ class ComposerServiceProvider extends ServiceProvider
             [
                 'layout',
                 'ip-fields._form',
-                'users._personalization',
+                //'users._personalization',
             ],
             'App\Composers\DeviceSectionComposer@all'
         );
@@ -28,8 +28,6 @@ class ComposerServiceProvider extends ServiceProvider
         view()->composer(
             'device-section.index', 'App\Composers\DeviceSectionComposer@admin'
         );
-
-        view()->composer('users._form', 'App\Composers\DeviceSectionComposer@getForPermission');
 
         /**
          * IP Categories
@@ -44,8 +42,6 @@ class ComposerServiceProvider extends ServiceProvider
         view()->composer(
             'ip-category.index', 'App\Composers\IpCategoryComposer@admin'
         );
-
-        view()->composer('users._form', 'App\Composers\IpCategoryComposer@getForPermission');
 
         /**
          * Users

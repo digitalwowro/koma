@@ -51,6 +51,21 @@ class DeviceSectionController extends Controller
         return view('device-section.index');
     }
 
+    public function show($id)
+    {
+        try {
+            $deviceSection = DeviceSection::findOrFail($id);
+
+            $this->authorize('view', $deviceSection);
+
+            return view('device-section.show', compact('deviceSection'));
+        } catch (Exception $e) {
+            return redirect()
+                ->route('device-section.index')
+                ->withError('Could not find device section');
+        }
+    }
+
     public function create()
     {
         return view('device-section.create');
@@ -168,13 +183,15 @@ class DeviceSectionController extends Controller
             $this->authorize('share', $section);
 
             $user = User::findOrFail($request->input('user_id'));
-            $grantType = $request->input('grant_type');
+            $grantType = $request->input('grant_type', []);
 
             app('share')->share($user, $section, $grantType);
 
-            return response()->json([
-                'success' => true,
-            ]);
+            if ($request->isXmlHttpRequest()) {
+                return response()->json(['success' => true]);
+            } else {
+                return redirect()->back();
+            }
         } catch (AlreadyHasPermissionException $e) {
             return response()->json([
                 'error' => 'User already has access to this device section',

@@ -26,16 +26,16 @@ Route::group(['middleware' => 'auth'], function() {
 
     Route::get   ('/device/{type}/create',      ['as' => 'device.create',  'uses' => 'DeviceController@create']);
     Route::get   ('/device/{type}/{category?}', ['as' => 'device.index',   'uses' => 'DeviceController@index'])->where('category', '\w{8}');
-    Route::get   ('/device/{type}/{id}',        ['as' => 'device.show',    'uses' => 'DeviceController@show']);
+    Route::get   ('/device/{id}/show',          ['as' => 'device.show',    'uses' => 'DeviceController@show']);
     Route::post  ('/device/{type}',             ['as' => 'device.store',   'uses' => 'DeviceController@store']);
-    Route::get   ('/device/{type}/{id}/edit',   ['as' => 'device.edit',    'uses' => 'DeviceController@edit']);
+    Route::get   ('/device/{id}/edit',          ['as' => 'device.edit',    'uses' => 'DeviceController@edit']);
     Route::put   ('/device/{id}',               ['as' => 'device.update',  'uses' => 'DeviceController@update']);
     Route::delete('/device/{id}',               ['as' => 'device.destroy', 'uses' => 'DeviceController@destroy']);
 
     Route::get   ('/ip/subnet/{subnet}/list', ['as' => 'ip.subnet-list', 'uses' => 'IpController@subnetList']);
     Route::get   ('/ip/subnet/{subnet}',      ['as' => 'ip.subnet',      'uses' => 'IpController@subnet']);
     Route::get   ('/ip/{category}/create',    ['as' => 'ip.create',      'uses' => 'IpController@create']);
-    Route::get   ('/ip/{category}/{id}',      ['as' => 'ip.show',        'uses' => 'IpController@show']);
+    Route::get   ('/ip/{id}/show',            ['as' => 'ip.show',        'uses' => 'IpController@show']);
     Route::get   ('/ip/{category}',           ['as' => 'ip.index',       'uses' => 'IpController@index']);
     Route::post  ('/ip/{category}',           ['as' => 'ip.store',       'uses' => 'IpController@store']);
     Route::get   ('/ip/{category}/{id}/edit', ['as' => 'ip.edit',        'uses' => 'IpController@edit']);
@@ -45,5 +45,5 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/device-section/{id}/share', ['as' => 'device-section.share', 'uses' => 'DeviceSectionController@share']);
     Route::post('/device/{id}/share',         ['as' => 'device.share',         'uses' => 'DeviceController@share']);
     Route::post('/ip-category/{id}/share',    ['as' => 'ip-category.share',    'uses' => 'IpCategoryController@share']);
-    Route::post('/ip/{category}/{id}/share',  ['as' => 'ip.share',             'uses' => 'IpController@share']);
+    Route::post('/ip/{id}/share',             ['as' => 'ip.share',             'uses' => 'IpController@share']);
 });

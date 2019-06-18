@@ -35,7 +35,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @forelse ($subnets as $subnet)
+                    @php $displayed = 0 @endphp
+                    @foreach ($subnets as $subnet)
+                        @php $displayed++ @endphp
                         <tr>
                             <td>
                                 <a href="{{ route('ip.subnet', ['subnet' => str_replace('/', '-', $subnet->subnet)]) }}">
@@ -74,13 +76,15 @@
                                 @endcan
                             </td>
                         </tr>
-                    @empty
+                    @endforeach
+
+                    @if (!$displayed)
                         <tr>
                             <td colspan="3" style="text-align:center;">
                                 There are currently no Subnets added. How about <a data-toggle="modal" href="#addSubnetModal">creating one</a> now?
                             </td>
                         </tr>
-                    @endforelse
+                    @endif
                     </tbody>
                 </table>
             </div>

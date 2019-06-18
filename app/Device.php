@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Presenters\DevicePresenter;
+use App\Scopes\DeviceTenant;
 use Illuminate\Database\Eloquent\Model;
 use Laracasts\Presenter\PresentableTrait;
 
@@ -23,6 +24,18 @@ class Device extends Model
     protected $fillable = ['section_id', 'data', 'created_by'];
 
     private $decrypted;
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new DeviceTenant);
+    }
 
     /**
      * Relationship with DeviceSection
@@ -58,6 +71,11 @@ class Device extends Model
         return $this->decrypted;
     }
 
+    /**
+     * Returns all permissions referring to this resource
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
     public function sharedWith()
     {
         return Permission::with('user')

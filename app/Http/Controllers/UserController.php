@@ -25,7 +25,7 @@ class UserController extends Controller
      */
     public function __construct(User $model)
     {
-        $this->authorize('superadmin');
+        $this->authorize('admin');
 
         $this->model = $model;
     }
