@@ -16,27 +16,14 @@ class UserController extends Controller
     use ManagesUserProfiles;
 
     /**
-     * @var \App\User
-     */
-    private $model;
-
-    /**
-     * @param \App\User $model
-     */
-    public function __construct(User $model)
-    {
-        $this->authorize('admin');
-
-        $this->model = $model;
-    }
-
-    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
+        $this->authorize('admin');
+
         return view('users.index');
     }
 
@@ -47,11 +34,15 @@ class UserController extends Controller
      */
     public function create()
     {
+        $this->authorize('admin');
+
         return view('users.create');
     }
 
     protected function validator($data, $updateId = 0)
     {
+        $this->authorize('admin');
+
         $updateSelf = intval($updateId) === auth()->id();
 
         return Validator::make($data, [
@@ -77,6 +68,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('admin');
+
         $data = $request->only(['name', 'email', 'password', 'role']);
 
         $permissions = $request->input('permissions');
@@ -119,7 +112,9 @@ class UserController extends Controller
     public function edit($id)
     {
         try {
-            $user = $this->model->findOrFail($id)->load('permissions');
+            $this->authorize('admin');
+
+            $user = User::findOrFail($id)->load('permissions');
 
             return view('users.edit', compact('user'));
         } catch (\Exception $e) {
@@ -139,6 +134,8 @@ class UserController extends Controller
     public function update($id, Request $request)
     {
         try {
+            $this->authorize('admin');
+
             $user = User::findOrFail($id);
             $data = $request->only(['name', 'email', 'role']);
             $permissions = $request->input('permissions');
@@ -188,6 +185,8 @@ class UserController extends Controller
     public function destroy($id)
     {
         try {
+            $this->authorize('admin');
+
             if ($id == auth()->id()) {
                 throw new \Exception('You can\'t delete yourself');
             }

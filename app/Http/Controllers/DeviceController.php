@@ -163,7 +163,7 @@ class DeviceController extends Controller
 
     public function store($type, Request $request)
     {
-        //try {
+        try {
             $section = DeviceSection::findOrFail($type);
 
             $this->authorize('create', $section);
@@ -205,12 +205,12 @@ class DeviceController extends Controller
             return redirect()
                 ->route('device.index', $type)
                 ->withSuccess('Device has been added');
-        //} catch (Exception $e) {
-        //    return redirect()
-        //        ->back()
-        //        ->withInput()
-        //        ->withError('Error saving device');
-        //}
+        } catch (Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withError('Error saving device');
+        }
     }
 
     public function edit($id)

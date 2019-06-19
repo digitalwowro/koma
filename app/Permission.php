@@ -4,7 +4,7 @@ namespace App;
 
 use App\Presenters\PermissionPresenter;
 use Illuminate\Database\Eloquent\Model;
-use Cache, Exception;
+use Exception;
 use Laracasts\Presenter\PresentableTrait;
 
 class Permission extends Model
@@ -65,6 +65,8 @@ class Permission extends Model
      */
     public static function boot()
     {
+        parent::boot();
+
         Permission::created(function() {
             Permission::flushCache();
         });
@@ -203,7 +205,7 @@ class Permission extends Model
     public static function flushCache()
     {
         self::$cachedPermissions = null;
-        Cache::forget('permissions');
+        cache()->forget('permissions');
     }
 
     public static function getCached()
@@ -212,12 +214,12 @@ class Permission extends Model
             return self::$cachedPermissions;
         }
 
-        self::$cachedPermissions = Cache::get('permissions');
+        self::$cachedPermissions = cache('permissions');
 
         if (!self::$cachedPermissions) {
             self::$cachedPermissions = self::all()->toArray();
 
-            Cache::put('permissions', self::$cachedPermissions, 30);
+            cache()->put('permissions', self::$cachedPermissions, 1800);
         }
 
         return self::$cachedPermissions;
