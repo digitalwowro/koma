@@ -12,7 +12,7 @@ class CreateEncryptedStoreTable extends Migration
      */
     public function up()
     {
-        Schema::create('encrypted_shares', function (Blueprint $table) {
+        Schema::create('encrypted_store', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned()->index();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
@@ -30,6 +30,6 @@ class CreateEncryptedStoreTable extends Migration
      */
     public function down()
     {
-        Schema::drop('encrypted_shares');
+        Schema::drop('encrypted_store');
     }
 }

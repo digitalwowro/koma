@@ -64,7 +64,7 @@
                                     </a>
                                 @endcan
 
-                                @can('owner', $subnet)
+                                @can('delete', $subnet)
                                     {!! Form::open(['route' => ['ip.destroy', $subnet->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
                                     <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this subnet?')) $(this).closest('form').submit();">
                                         <span class="fa-stack">
