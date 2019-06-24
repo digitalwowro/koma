@@ -44,6 +44,16 @@ class IpAddressTenant implements Scope
                 ->toArray();
         }
 
-        $builder->whereIn('id', $accessibleIds);
+        $builder->where(function($query) use ($accessibleIds) {
+            $query
+                ->where(function($query) {
+                    $accessibleDevices = Device::pluck('id');
+
+                    $query
+                        ->whereNull('subnet')
+                        ->whereIn('device_id', $accessibleDevices);
+                })
+                ->orWhereIn('id', $accessibleIds);
+        });
     }
 }

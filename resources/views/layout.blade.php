@@ -131,7 +131,7 @@
                                     @if (count($deviceSection->categories))
                                         <ul class="treeview-menu">
                                             @foreach ($deviceSection->categories as $categoryId => $categoryName)
-                                            <li class="{{ $isActive && request()->route()->getParameter('category') === $categoryId ? 'active' : '' }}">
+                                            <li class="{{ $isActive && request()->route()->parameter('category') === $categoryId ? 'active' : '' }}">
                                                 <a href="{{ route('device.index', [$deviceSection->id, $categoryId]) }}">
                                                     <i class="fa fa-circle-o"></i>
                                                     {{ $categoryName }}
@@ -139,7 +139,7 @@
                                             </li>
                                             @endforeach
 
-                                            <li class="{{ $isActive && !request()->route()->getParameter('category') ? 'active' : '' }}">
+                                            <li class="{{ $isActive && !request()->route()->parameter('category') ? 'active' : '' }}">
                                                 <a href="{{ route('device.index', $deviceSection->id) }}">
                                                     <i class="fa fa-circle"></i>
                                                     show all
@@ -167,7 +167,7 @@
                     <ul class="treeview-menu">
                         @foreach ($ipCategories as $ipCategory)
                             @if (auth()->user()->ipCategoryVisible($ipCategory->id))
-                                <li class="{{ $isActive && request()->route()->getParameter('category') == $ipCategory->id ? 'active' : '' }}">
+                                <li class="{{ $isActive && request()->route()->parameter('category') == $ipCategory->id ? 'active' : '' }}">
                                     <a href="{{ route('ip.index', $ipCategory->id) }}" {!! is_route('ip.index', true, ['category' => $ipCategory->id]) !!}>
                                         {{ $ipCategory->title }}
                                     </a>

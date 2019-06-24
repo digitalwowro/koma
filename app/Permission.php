@@ -133,7 +133,7 @@ class Permission extends Model
             $userIds[] = self::where(function($query) use ($section) {
                 $query
                     ->where('resource_type', self::RESOURCE_TYPE_DEVICE)
-                    ->whereIn('resource_id', function ($query) use ($section) {
+                    ->whereIn('resource_id', function($query) use ($section) {
                         $query
                             ->select('id')
                             ->where('section_id', $section->id)
@@ -250,6 +250,11 @@ class Permission extends Model
             return false;
         }
 
+        // allow custom IPs
+        if ($resource instanceof IpAddress && !$resource->subnet) {
+            $resource = $resource->device;
+        }
+
         if ($resource->isOwner($user)) {
             return true;
         }
@@ -260,8 +265,6 @@ class Permission extends Model
             }
 
             if ($resource instanceof DeviceSection) {
-
-
                 if ($permission['resource_type'] === self::RESOURCE_TYPE_DEVICE_SECTION && $permission['resource_id'] == $resource->id) {
                     return true;
                 }

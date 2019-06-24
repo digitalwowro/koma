@@ -10,17 +10,17 @@
         "laravelcollective/html": "5.8.*",
         "fideloper/proxy": "^4.0",
         "laracasts/presenter": "^0.2.1",
-        "cviebrock/eloquent-sluggable": "^3.1",
         "ext-json": "*",
         "paragonie/halite": "^4",
         "laravel/tinker": "^1.0"
     },
     "require-dev": {
+        "beyondcode/laravel-dump-server": "^1.0",
         "filp/whoops": "^2.0",
         "fzaninotto/faker": "^1.4",
         "mockery/mockery": "^1.0",
         "nunomaduro/collision": "^3.0",
-        "phpunit/phpunit": "^7.0"
+        "phpunit/phpunit": "^7.5"
     },
     "autoload": {
         "classmap": [

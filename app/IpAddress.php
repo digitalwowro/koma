@@ -214,6 +214,10 @@ class IpAddress extends Model
     public function firstInSubnet()
     {
         try {
+            if (!$this->subnet) {
+                return $this; // custom IP
+            }
+
             $subnetParts = explode('/', $this->subnet);
 
             if (array_shift($subnetParts) === $this->ip) {
@@ -283,6 +287,10 @@ class IpAddress extends Model
     public function isOwner(User $user)
     {
         $first = $this->firstInSubnet();
+
+        if (!$first->category) {
+            return false;
+        }
 
         return $first->category->owner_id === $user->id;
     }
