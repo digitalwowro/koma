@@ -49,16 +49,6 @@ class IpAddress extends Model
     }
 
     /**
-     * Auto encode the data field
-     *
-     * @param string $value
-     */
-    public function setDataAttribute($value)
-    {
-        $this->attributes['data'] = app('encrypt')->encrypt(json_encode($value));
-    }
-
-    /**
      * Decode the data field
      *
      * @param string $value
@@ -66,15 +56,11 @@ class IpAddress extends Model
      */
     public function getDataAttribute($value)
     {
-        try {
-            $return = @json_decode(app('encrypt')->decrypt($value), true);
-
-            if (!is_array($return)) return [];
-
-            return $return;
-        } catch (\Exception $e) {
-            return [];
+        if (is_null($this->decrypted)) {
+            $this->decrypted = EncryptedStore::pull($this);
         }
+
+        return $this->decrypted;
     }
 
     /**
