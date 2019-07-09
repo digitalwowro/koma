@@ -291,8 +291,10 @@ $(document).ready(function() {
         .find('option:not(:selected)').attr('selected', true);
 });
 
-function bindIcheck() {
-    $('div.icheck input, input.icheck').iCheck({
+function bindIcheck($elements) {
+    $elements = $elements || $('div.icheck input, input.icheck');
+
+    $elements.iCheck({
         checkboxClass: 'icheckbox_square-blue',
         radioClass: 'iradio_square-blue',
     });

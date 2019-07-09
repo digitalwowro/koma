@@ -40,4 +40,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/device/{id}/share',         ['as' => 'device.share',         'uses' => 'DeviceController@share']);
     Route::post('/ip-category/{id}/share',    ['as' => 'ip-category.share',    'uses' => 'IpCategoryController@share']);
     Route::post('/ip/{id}/share',             ['as' => 'ip.share',             'uses' => 'IpController@share']);
+
+    Route::post('/share/with', ['as' => 'share.with', 'uses' => 'ShareController@with']);
+    Route::post('/share/post', ['as' => 'share.post', 'uses' => 'ShareController@post']);
 });

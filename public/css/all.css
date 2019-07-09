@@ -10837,12 +10837,11 @@ div.table-responsive > div.dataTables_wrapper > div.row > div[class^="col-"]:las
 .ion-xbox:before { content: "\f30c"; }
 
 /*!
- * AdminLTE v2.4.12
- * 
- *   Author:  Colorlib
- *   Support: <https://github.com/ColorlibHQ/AdminLTE/issues>
- *   Repository: git://github.com/ColorlibHQ/AdminLTE.git
- *   License: MIT <http://opensource.org/licenses/MIT>
+ *   AdminLTE v2.4.8
+ *   Author: Almsaeed Studio
+ *	 Website: Almsaeed Studio <https://adminlte.io>
+ *   License: Open source - MIT
+ *           Please visit http://opensource.org/licenses/MIT for more information
  */
 /*
  * Core: General Layout Style
@@ -10925,7 +10924,7 @@ body {
   }
 }
 .content-wrapper {
-  min-height: calc(100% - 102px);
+  min-height: 100%;
   background-color: #ecf0f5;
   z-index: 800;
 }
@@ -13935,16 +13934,6 @@ table.text-center th {
 .treeview-menu > li > a > .fa-angle-down {
   width: auto;
 }
-.treeview > ul.treeview-menu {
-  overflow: hidden;
-  height: auto;
-  padding-top: 0px !important;
-  padding-bottom: 0px !important;
-}
-.treeview.menu-open > ul.treeview-menu {
-  overflow: visible;
-  height: auto;
-}
 /*
  * Page: Mailbox
  * -------------
@@ -14097,7 +14086,6 @@ table.text-center th {
 }
 .login-page,
 .register-page {
-  height: auto;
   background: #d2d6de;
 }
 .login-box,
@@ -15783,9 +15771,6 @@ table.text-center th {
 .chart canvas {
   width: 100% !important;
 }
-hr {
-  border-top: 1px solid #555555;
-}
 /*
  * Misc: print
  * -----------
@@ -16719,7 +16704,6 @@ hr {
         background-size: 240px 24px;
     }
 }
-
 @media (max-width: 760px) {
     /* Force table to not be like tables anymore */
     table.table-responsive,
@@ -16870,5 +16854,51 @@ div.icheck > label {
 span.select2 {
     min-width: 200px;
 }
+
+.modal .modal-body.loader {
+    text-align: center;
+    font-size: 24px;
+    padding: 100px 0;
+}
+    .modal .modal-body.loader.error {
+        color: red;
+    }
+
+#shareModal h4 {
+    margin: 0;
+    font-weight: 600;
+    line-height: 30px;
+}
+#shareModal table td {
+    height: 40px;
+    vertical-align: middle;
+    font-size: 17px;
+}
+    #shareModal table td:first-child {
+        width: 50px;
+        text-align: center;
+    }
+    #shareModal table td.not-shared {
+        text-align: center !important;
+        color: grey;
+        font-style: italic;
+    }
+    #shareModal table tbody td:last-child {
+        text-align: right;
+    }
+        #shareModal table tbody td:last-child i.fa-remove {
+            padding: 10px;
+            cursor: pointer;
+        }
+    #shareModal table thead td:last-child,
+    #shareModal table tfoot td:last-child {
+        text-align: left;
+    }
+    #shareModal table td .form-group {
+        margin: 0;
+    }
+        #shareModal table td .form-group label {
+            font-weight: 400;
+        }
 
 /*# sourceMappingURL=all.css.map */
