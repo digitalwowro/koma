@@ -41,10 +41,10 @@
         <div class="col-xs-10">
             <div class="radio icheck">
                 <label>
-                    {!! Form::radio('role', App\User::ROLE_SYSADMIN, null, [
+                    {!! Form::radio('role', App\User::ROLE_USER, null, [
                         'required' => true,
                     ]) !!}
-                    Sysadmin
+                    User
                 </label>
             </div>
 
@@ -53,7 +53,7 @@
                     {!! Form::radio('role', App\User::ROLE_ADMIN, null, [
                         'required' => true,
                     ]) !!}
-                    Admin
+                    Administrator
                 </label>
             </div>
         </div>

@@ -12,7 +12,7 @@
 <body class="hold-transition login-page">
 <div class="login-box">
     <div class="login-logo">
-        <b>Neutral</b>ADMIN
+        <b>Koma</b>ADMIN
     </div>
 
     <div class="login-box-body">
