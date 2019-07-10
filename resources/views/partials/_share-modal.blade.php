@@ -48,10 +48,10 @@
                                         </label>
                                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         <label>
-                                            {!! Form::checkbox('permission', App\Permission::GRANT_TYPE_WRITE, null, [
+                                            {!! Form::checkbox('permission', App\Permission::GRANT_TYPE_EDIT, null, [
                                                 'class' => 'form-control icheck',
                                             ]) !!}
-                                            Write
+                                            Edit
                                         </label>
                                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         <label>

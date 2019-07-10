@@ -194,7 +194,7 @@ class DeviceController extends Controller
                     'resource_id' => $device->id,
                     'grant_type' => [
                         Permission::GRANT_TYPE_READ,
-                        Permission::GRANT_TYPE_WRITE,
+                        Permission::GRANT_TYPE_EDIT,
                         Permission::GRANT_TYPE_DELETE,
                     ],
                 ]);

@@ -21,7 +21,7 @@ class DevicePresenter extends Presenter
 
         foreach ($section->fields as $field) {
             if ($field->getType() === 'Text') {
-                $firstField = $device->data[$field->getKey()];
+                $firstField = $device->data[$field->getKey()] ?? '';
                 break;
             }
         }

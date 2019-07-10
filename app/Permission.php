@@ -12,7 +12,7 @@ class Permission extends Model
     use PresentableTrait;
 
     const GRANT_TYPE_READ   = 1;
-    const GRANT_TYPE_WRITE  = 2;
+    const GRANT_TYPE_EDIT   = 2;
     const GRANT_TYPE_DELETE = 4;
     const GRANT_TYPE_CREATE = 8;
 
@@ -37,7 +37,7 @@ class Permission extends Model
 
     private static $acl = [
         'view' => self::GRANT_TYPE_READ,
-        'edit' => self::GRANT_TYPE_WRITE,
+        'edit' => self::GRANT_TYPE_EDIT,
         'delete' => self::GRANT_TYPE_DELETE,
         'create' => self::GRANT_TYPE_CREATE,
     ];
@@ -103,7 +103,7 @@ class Permission extends Model
         $permissions = [
             $this::GRANT_TYPE_CREATE,
             $this::GRANT_TYPE_DELETE,
-            $this::GRANT_TYPE_WRITE,
+            $this::GRANT_TYPE_EDIT,
             $this::GRANT_TYPE_READ,
         ];
 
