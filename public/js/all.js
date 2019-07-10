@@ -43062,7 +43062,7 @@ var sharerUtil = {
 
         result += '<label> ' +
             '<input class="form-control icheck" name="permission" type="checkbox" value="2"' + (permissions.includes(2) ? ' checked' : '') + '>' +
-            ' Write ' +
+            ' Edit ' +
             '</label>' +
             '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 

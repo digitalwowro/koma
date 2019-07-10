@@ -21,7 +21,7 @@ class PermissionPresenter extends Presenter
                 case $this->entity::GRANT_TYPE_READ:
                     $results[] = 'view';
                     break;
-                case $this->entity::GRANT_TYPE_WRITE:
+                case $this->entity::GRANT_TYPE_EDIT:
                     $results[] = 'edit';
                     break;
                 case $this->entity::GRANT_TYPE_CREATE:

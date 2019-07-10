@@ -112,7 +112,7 @@ class ShareController extends Controller
                 $old[$permission['user_id']] = $permission['grant_type'];
             });
 
-            foreach ($request->input('permissions') as $permission) {
+            foreach ((array) $request->input('permissions', []) as $permission) {
                 $sanitized = $permission['permissions'];
                 $sanitized = array_map('intval', $sanitized);
                 $new[$permission['id']] = $sanitized;
