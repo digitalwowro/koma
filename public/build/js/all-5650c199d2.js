@@ -14271,10 +14271,11 @@ if (typeof jQuery === 'undefined') {
 * should be included in all pages. It controls some layout
 * options and implements exclusive AdminLTE plugins.
 *
-* @author Colorlib
-* @support <https://github.com/ColorlibHQ/AdminLTE/issues>
-* @version 2.4.12
-* @repository git://github.com/ColorlibHQ/AdminLTE.git
+* @Author  Almsaeed Studio
+* @Support <https://www.almsaeedstudio.com>
+* @Email   <abdullah@almsaeedstudio.com>
+* @version 2.4.8
+* @repository git://github.com/almasaeed2010/AdminLTE.git
 * @license MIT <http://opensource.org/licenses/MIT>
 */
 
@@ -14507,7 +14508,7 @@ throw new Error('AdminLTE requires jQuery')
         $(this.element).addClass(ClassName.collapsed);
         $(this.element).trigger(collapsedEvent);
       }.bind(this))
-      .trigger(collapsingEvent);
+      .trigger(expandingEvent);
   };
 
   BoxWidget.prototype.remove = function () {
@@ -14655,20 +14656,17 @@ throw new Error('AdminLTE requires jQuery')
   };
 
   ControlSidebar.prototype.expand = function () {
-    $(Selector.sidebar).show();
     if (!this.options.slide) {
       $('body').addClass(ClassName.open);
     } else {
       $(Selector.sidebar).addClass(ClassName.open);
     }
 
-
     $(this.element).trigger($.Event(Event.expanded));
   };
 
   ControlSidebar.prototype.collapse = function () {
     $('body, ' + Selector.sidebar).removeClass(ClassName.open);
-    $(Selector.sidebar).fadeOut();
     $(this.element).trigger($.Event(Event.collapsed));
   };
 
@@ -14790,6 +14788,186 @@ throw new Error('AdminLTE requires jQuery')
     Plugin.call($(this), 'toggle');
   });
 
+}(jQuery);
+
+
+/* Layout()
+ * ========
+ * Implements AdminLTE layout.
+ * Fixes the layout height in case min-height fails.
+ *
+ * @usage activated automatically upon window load.
+ *        Configure any options by passing data-option="value"
+ *        to the body tag.
+ */
++function ($) {
+  'use strict';
+
+  var DataKey = 'lte.layout';
+
+  var Default = {
+    slimscroll : true,
+    resetHeight: true
+  };
+
+  var Selector = {
+    wrapper       : '.wrapper',
+    contentWrapper: '.content-wrapper',
+    layoutBoxed   : '.layout-boxed',
+    mainFooter    : '.main-footer',
+    mainHeader    : '.main-header',
+    sidebar       : '.sidebar',
+    controlSidebar: '.control-sidebar',
+    fixed         : '.fixed',
+    sidebarMenu   : '.sidebar-menu',
+    logo          : '.main-header .logo'
+  };
+
+  var ClassName = {
+    fixed         : 'fixed',
+    holdTransition: 'hold-transition'
+  };
+
+  var Layout = function (options) {
+    this.options      = options;
+    this.bindedResize = false;
+    this.activate();
+  };
+
+  Layout.prototype.activate = function () {
+    this.fix();
+    this.fixSidebar();
+
+    $('body').removeClass(ClassName.holdTransition);
+
+    if (this.options.resetHeight) {
+      $('body, html, ' + Selector.wrapper).css({
+        'height'    : 'auto',
+        'min-height': '100%'
+      });
+    }
+
+    if (!this.bindedResize) {
+      $(window).resize(function () {
+        this.fix();
+        this.fixSidebar();
+
+        $(Selector.logo + ', ' + Selector.sidebar).one('webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend', function () {
+          this.fix();
+          this.fixSidebar();
+        }.bind(this));
+      }.bind(this));
+
+      this.bindedResize = true;
+    }
+
+    $(Selector.sidebarMenu).on('expanded.tree', function () {
+      this.fix();
+      this.fixSidebar();
+    }.bind(this));
+
+    $(Selector.sidebarMenu).on('collapsed.tree', function () {
+      this.fix();
+      this.fixSidebar();
+    }.bind(this));
+  };
+
+  Layout.prototype.fix = function () {
+    // Remove overflow from .wrapper if layout-boxed exists
+    $(Selector.layoutBoxed + ' > ' + Selector.wrapper).css('overflow', 'hidden');
+
+    // Get window height and the wrapper height
+    var footerHeight = $(Selector.mainFooter).outerHeight() || 0;
+    var headerHeight  = $(Selector.mainHeader).outerHeight() || 0;
+    var neg           = headerHeight + footerHeight;
+    var windowHeight  = $(window).height();
+    var sidebarHeight = $(Selector.sidebar).height() || 0;
+
+    // Set the min-height of the content and sidebar based on
+    // the height of the document.
+    if ($('body').hasClass(ClassName.fixed)) {
+      $(Selector.contentWrapper).css('min-height', windowHeight - footerHeight);
+    } else {
+      var postSetHeight;
+
+      if (windowHeight >= sidebarHeight + headerHeight) {
+        $(Selector.contentWrapper).css('min-height', windowHeight - neg);
+        postSetHeight = windowHeight - neg;
+      } else {
+        $(Selector.contentWrapper).css('min-height', sidebarHeight);
+        postSetHeight = sidebarHeight;
+      }
+
+      // Fix for the control sidebar height
+      var $controlSidebar = $(Selector.controlSidebar);
+      if (typeof $controlSidebar !== 'undefined') {
+        if ($controlSidebar.height() > postSetHeight)
+          $(Selector.contentWrapper).css('min-height', $controlSidebar.height());
+      }
+    }
+  };
+
+  Layout.prototype.fixSidebar = function () {
+    // Make sure the body tag has the .fixed class
+    if (!$('body').hasClass(ClassName.fixed)) {
+      if (typeof $.fn.slimScroll !== 'undefined') {
+        $(Selector.sidebar).slimScroll({ destroy: true }).height('auto');
+      }
+      return;
+    }
+
+    // Enable slimscroll for fixed layout
+    if (this.options.slimscroll) {
+      if (typeof $.fn.slimScroll !== 'undefined') {
+        // Destroy if it exists
+        // $(Selector.sidebar).slimScroll({ destroy: true }).height('auto')
+
+        // Add slimscroll
+        $(Selector.sidebar).slimScroll({
+          height: ($(window).height() - $(Selector.mainHeader).height()) + 'px'
+        });
+      }
+    }
+  };
+
+  // Plugin Definition
+  // =================
+  function Plugin(option) {
+    return this.each(function () {
+      var $this = $(this);
+      var data  = $this.data(DataKey);
+
+      if (!data) {
+        var options = $.extend({}, Default, $this.data(), typeof option === 'object' && option);
+        $this.data(DataKey, (data = new Layout(options)));
+      }
+
+      if (typeof option === 'string') {
+        if (typeof data[option] === 'undefined') {
+          throw new Error('No method named ' + option);
+        }
+        data[option]();
+      }
+    });
+  }
+
+  var old = $.fn.layout;
+
+  $.fn.layout            = Plugin;
+  $.fn.layout.Constuctor = Layout;
+
+  // No conflict mode
+  // ================
+  $.fn.layout.noConflict = function () {
+    $.fn.layout = old;
+    return this;
+  };
+
+  // Layout DATA-API
+  // ===============
+  $(window).on('load', function () {
+    Plugin.call($('body'));
+  });
 }(jQuery);
 
 
@@ -15225,186 +15403,6 @@ throw new Error('AdminLTE requires jQuery')
     });
   });
 
-}(jQuery);
-
-
-/* Layout()
- * ========
- * Implements AdminLTE layout.
- * Fixes the layout height in case min-height fails.
- *
- * @usage activated automatically upon window load.
- *        Configure any options by passing data-option="value"
- *        to the body tag.
- */
-+function ($) {
-  'use strict';
-
-  var DataKey = 'lte.layout';
-
-  var Default = {
-    slimscroll : true,
-    resetHeight: true
-  };
-
-  var Selector = {
-    wrapper       : '.wrapper',
-    contentWrapper: '.content-wrapper',
-    layoutBoxed   : '.layout-boxed',
-    mainFooter    : '.main-footer',
-    mainHeader    : '.main-header',
-    sidebar       : '.sidebar',
-    controlSidebar: '.control-sidebar',
-    fixed         : '.fixed',
-    sidebarMenu   : '.sidebar-menu',
-    logo          : '.main-header .logo'
-  };
-
-  var ClassName = {
-    fixed         : 'fixed',
-    holdTransition: 'hold-transition'
-  };
-
-  var Layout = function (options) {
-    this.options      = options;
-    this.bindedResize = false;
-    this.activate();
-  };
-
-  Layout.prototype.activate = function () {
-    this.fix();
-    this.fixSidebar();
-
-    $('body').removeClass(ClassName.holdTransition);
-
-    if (this.options.resetHeight) {
-      $('body, html, ' + Selector.wrapper).css({
-        'height'    : 'auto',
-        'min-height': '100%'
-      });
-    }
-
-    if (!this.bindedResize) {
-      $(window).resize(function () {
-        this.fix();
-        this.fixSidebar();
-
-        $(Selector.logo + ', ' + Selector.sidebar).one('webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend', function () {
-          this.fix();
-          this.fixSidebar();
-        }.bind(this));
-      }.bind(this));
-
-      this.bindedResize = true;
-    }
-
-    $(Selector.sidebarMenu).on('expanded.tree', function () {
-      this.fix();
-      this.fixSidebar();
-    }.bind(this));
-
-    $(Selector.sidebarMenu).on('collapsed.tree', function () {
-      this.fix();
-      this.fixSidebar();
-    }.bind(this));
-  };
-
-  Layout.prototype.fix = function () {
-    // Remove overflow from .wrapper if layout-boxed exists
-    $(Selector.layoutBoxed + ' > ' + Selector.wrapper).css('overflow', 'hidden');
-
-    // Get window height and the wrapper height
-    var footerHeight = $(Selector.mainFooter).outerHeight() || 0;
-    var headerHeight  = $(Selector.mainHeader).outerHeight() || 0;
-    var neg           = headerHeight + footerHeight;
-    var windowHeight  = $(window).height();
-    var sidebarHeight = $(Selector.sidebar).height() || 0;
-
-    // Set the min-height of the content and sidebar based on
-    // the height of the document.
-    if ($('body').hasClass(ClassName.fixed)) {
-      $(Selector.contentWrapper).css('min-height', windowHeight - footerHeight);
-    } else {
-      var postSetHeight;
-
-      if (windowHeight >= sidebarHeight + headerHeight) {
-        $(Selector.contentWrapper).css('min-height', windowHeight - neg);
-        postSetHeight = windowHeight - neg;
-      } else {
-        $(Selector.contentWrapper).css('min-height', sidebarHeight);
-        postSetHeight = sidebarHeight;
-      }
-
-      // Fix for the control sidebar height
-      var $controlSidebar = $(Selector.controlSidebar);
-      if (typeof $controlSidebar !== 'undefined') {
-        if ($controlSidebar.height() > postSetHeight)
-          $(Selector.contentWrapper).css('min-height', $controlSidebar.height());
-      }
-    }
-  };
-
-  Layout.prototype.fixSidebar = function () {
-    // Make sure the body tag has the .fixed class
-    if (!$('body').hasClass(ClassName.fixed)) {
-      if (typeof $.fn.slimScroll !== 'undefined') {
-        $(Selector.sidebar).slimScroll({ destroy: true }).height('auto');
-      }
-      return;
-    }
-
-    // Enable slimscroll for fixed layout
-    if (this.options.slimscroll) {
-      if (typeof $.fn.slimScroll !== 'undefined') {
-        // Destroy if it exists
-        // $(Selector.sidebar).slimScroll({ destroy: true }).height('auto')
-
-        // Add slimscroll
-        $(Selector.sidebar).slimScroll({
-          height: ($(window).height() - $(Selector.mainHeader).height()) + 'px'
-        });
-      }
-    }
-  };
-
-  // Plugin Definition
-  // =================
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this);
-      var data  = $this.data(DataKey);
-
-      if (!data) {
-        var options = $.extend({}, Default, $this.data(), typeof option === 'object' && option);
-        $this.data(DataKey, (data = new Layout(options)));
-      }
-
-      if (typeof option === 'string') {
-        if (typeof data[option] === 'undefined') {
-          throw new Error('No method named ' + option);
-        }
-        data[option]();
-      }
-    });
-  }
-
-  var old = $.fn.layout;
-
-  $.fn.layout            = Plugin;
-  $.fn.layout.Constuctor = Layout;
-
-  // No conflict mode
-  // ================
-  $.fn.layout.noConflict = function () {
-    $.fn.layout = old;
-    return this;
-  };
-
-  // Layout DATA-API
-  // ===============
-  $(window).on('load', function () {
-    Plugin.call($('body'));
-  });
 }(jQuery);
 
 /*! jQuery UI - v1.10.3 - 2014-01-06
@@ -42803,6 +42801,11 @@ $(document).ready(function() {
         format: 'yyyy-mm-dd'
     });
 
+    // prevent datatable init on empty tables
+    $('.datatable tr.norows').each(function() {
+        $(this).closest('.datatable').removeClass('datatable');
+    });
+
     // init data tables
     if ($('.datatable').length) {
         $.tableFixed = $('.datatable').dataTable({
@@ -42899,8 +42902,10 @@ $(document).ready(function() {
         .find('option:not(:selected)').attr('selected', true);
 });
 
-function bindIcheck() {
-    $('div.icheck input, input.icheck').iCheck({
+function bindIcheck($elements) {
+    $elements = $elements || $('div.icheck input, input.icheck');
+
+    $elements.iCheck({
         checkboxClass: 'icheckbox_square-blue',
         radioClass: 'iradio_square-blue',
     });
@@ -42912,8 +42917,9 @@ var sharerUtil = {
     options: {},
     $button: null,
     $modal: null,
-    url: null,
     devId: null,
+    id: null,
+    permissions: [],
 
     init: function(options) {
         var that = this;
@@ -42923,42 +42929,104 @@ var sharerUtil = {
         this.$modal = $('#shareModal');
 
         $('a.share-item').click(function(e) {
+            var $this = $(this);
+
             e.preventDefault();
 
-            that.url = $(this).attr('href');
-            that.devId = $(this).data('human-id');
+            that.devId = $this.data('human-id');
+            that.id = $this.data('id');
 
+            // (re)set modal state
             that.$modal.find('.modal-title').html('Share ' + that.options.type + ' <u>' + that.devId + '</u>');
 
+            that.$modal.find('.modal-body:not(.loader)').addClass('hidden');
+            that.$modal.find('.modal-body.loader').removeClass('hidden error');
+
+            that.$modal.find('.do-share-item').addClass('hidden');
+
             that.$modal.modal('show');
+
+            that.loadPermissions();
+        });
+
+        this.$modal.on('ifToggled', 'table tbody input[type=checkbox]', function() {
+            var $tr = $(this).closest('tr'),
+                id = parseInt($tr.data('id')),
+                newPermissions = [];
+
+            $.each($tr.find('input[type=checkbox]:checked'), function (i, item) {
+                newPermissions.push(parseInt(item.value));
+            });
+
+            that.permissions[id].permissions = newPermissions;
+        });
+
+        this.$modal.find('.btn-add-permission').click(function() {
+            var userId = that.$modal.find('select.user-add').val(),
+                permissions = [],
+                $tr = that.$modal.find('table tfoot tr');
+
+            $.each($tr.find('input[type=checkbox]:checked'), function (i, item) {
+                permissions.push(parseInt(item.value));
+            });
+
+            var user = null;
+
+            $.each(that.options.users, function (i, item) {
+                if (parseInt(item.id) === parseInt(userId)) {
+                    user = item;
+                    return false;
+                }
+            });
+
+            if (!user) {
+                alert('Please select a user');
+
+                return false;
+            }
+
+            that.permissions.push({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                avatar: user.avatar,
+                permissions: permissions,
+            });
+
+            // reset
+            $tr.find('input[type=checkbox]').iCheck('uncheck');
+
+            // redraw
+            that.renderPermissions();
+        });
+
+        this.$modal.on('click', '.btn-remove-permission', function() {
+            var $tr = $(this).closest('tr'),
+                id = $tr.data('id');
+
+            that.permissions.splice(id, 1);
+
+            that.renderPermissions();
         });
 
         this.$modal.find('.do-share-item').click(function(e) {
             e.preventDefault();
 
             var $moreinfo = that.$modal.find('.modal-footer .more-info'),
-                grantType = [];
-
-            $('[name=permission]:checked').each(function(i, el) {
-                grantType.push(el.value);
-            });
-
-            var params = {
-                user_id: that.$modal.find('#user-select').val(),
-                grant_type: grantType,
-            };
+                url = that.options.postRoute,
+                params = {
+                    type: that.options.type.split(' ').pop(),
+                    id: that.id,
+                    permissions: that.permissions,
+                };
 
             that.$modal.find('button').attr('disabled', true);
 
             $moreinfo.html('<i class="fa fa-spinner fa-spin"></i> Please Wait...')
                 .removeClass('hidden');
 
-            $.post(that.url, params, function(r) {
+            $.post(url, params, function(r) {
                 that.$modal.find('button').removeAttr('disabled');
-
-                if (r.error) {
-                    $moreinfo.html('<span style="color:darkred;">' + r.error + '</span>');
-                }
 
                 if (r.success) {
                     $moreinfo.addClass('hidden');
@@ -42966,6 +43034,10 @@ var sharerUtil = {
                     that.$modal.modal('hide');
 
                     $.growl.notice({message: ucfirst(that.options.type) + ' has been shared'});
+                } else if (r.error) {
+                    $moreinfo.html('<span style="color:darkred;">' + r.error + '</span>');
+                } else {
+                    $moreinfo.html('<span style="color:darkred;">Could not share ' + that.options.type + '</span>');
                 }
             }).fail(function() {
                 that.$modal.find('button').removeAttr('disabled');
@@ -42979,7 +43051,120 @@ var sharerUtil = {
 
     ucfirst: function (string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
-    }
+    },
+
+    checkboxes: function (permissions) {
+        var result = '<div class="form-group"><label> ' +
+            '<input class="form-control icheck" name="permission" type="checkbox" value="1"' + (permissions.includes(1) ? ' checked' : '') + '>' +
+            ' Read ' +
+            '</label>' +
+            '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+
+        result += '<label> ' +
+            '<input class="form-control icheck" name="permission" type="checkbox" value="2"' + (permissions.includes(2) ? ' checked' : '') + '>' +
+            ' Write ' +
+            '</label>' +
+            '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+
+        result += '<label> ' +
+            '<input class="form-control icheck" name="permission" type="checkbox" value="4"' + (permissions.includes(4) ? ' checked' : '') + '>' +
+            ' Delete ' +
+            '</label>';
+
+        if (this.options.createPermission) {
+            result += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+                '<label> ' +
+                '<input class="form-control icheck" name="permission" type="checkbox" value="8"' + (permissions.includes(8) ? ' checked' : '') + '>' +
+                ' Create ' +
+                '</label>';
+        }
+
+        result += '</div>';
+
+        return result;
+    },
+
+    renderPermissions: function () {
+        var that = this,
+            html = '',
+            $body = this.$modal.find('.modal-body:not(.loader)'),
+            usersWithPermission = [];
+
+        $.each(this.permissions, function (i, data) {
+            html += '<tr data-id="' + i + '">';
+            html += '<td><img src="' + data.avatar + '" width="40" height="40"></td>';
+            html += '<td>' + data.name + '</td>';
+            html += '<td>' + data.email + '</td>';
+            html += '<td>' + that.checkboxes(data.permissions) + '</td>';
+            html += '<td><i class="fa fa-remove btn-remove-permission" title="Remove permission"></i></td>';
+            html += '</tr>';
+
+            usersWithPermission.push(parseInt(data.id));
+        });
+
+        if (!html) {
+            html = '<tr><td colspan="5" class="not-shared">- this ' + this.options.type + ' is not shared with anyone -</td></tr>';
+        }
+
+        $body.find('table > tbody').html(html);
+
+        if (typeof bindIcheck === 'function') {
+            bindIcheck($body.find('table > tbody .icheck'));
+        }
+
+        // refresh user list
+        var $userSelect = this.$modal.find('select.user-add'),
+            oldVal = parseInt($userSelect.val()),
+            hasVal = false,
+            userOptions = '<option value="">- select user -</option>';
+
+        $.each(this.options.users, function (i, user) {
+            if (!usersWithPermission.includes(parseInt(user.id))) {
+                var option = document.createElement('option');
+
+                option.value = user.id;
+                option.innerHTML = user.name;
+
+                userOptions += option.outerHTML;
+
+                if (oldVal === parseInt(user.id)) {
+                    hasVal = true;
+                }
+            }
+        });
+
+        $userSelect.html(userOptions);
+
+        if (hasVal) {
+            $userSelect.val(oldVal);
+        }
+    },
+
+    loadPermissionsError: function () {
+        this.$modal.find('.modal-body.loader')
+            .addClass('error')
+            .html('<i class="fa fa-warning"></i> Error loading permissions');
+    },
+
+    loadPermissions: function () {
+        var that = this,
+            $body = this.$modal.find('.modal-body:not(.loader)'),
+            params = {
+                type: this.options.type.split(' ').pop(),
+                id: this.id,
+            };
+
+        $.post(this.options.permissionsRoute, params, function (r) {
+            that.permissions = r;
+            that.renderPermissions();
+
+            $body.removeClass('hidden');
+            that.$modal.find('.modal-body.loader').addClass('hidden');
+            that.$modal.find('.do-share-item').removeClass('hidden');
+        }).fail(function () {
+            that.loadPermissionsError();
+        });
+    },
 };
 
 //# sourceMappingURL=all.js.map

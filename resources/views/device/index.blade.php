@@ -108,7 +108,7 @@
                                     </a>
 
                                     @can('share', $device)
-                                    <a href="{{ route('device.share', $device->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $device->present()->humanIdField($deviceSection) }}">
+                                    <a href="#" class="table-link share-item" title="Share" data-id="{{ $device->id }}" data-human-id="{{ $device->present()->humanIdField($deviceSection) }}">
                                         <span class="fa-stack">
                                             <i class="fa fa-square fa-stack-2x"></i>
                                             <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
@@ -141,7 +141,7 @@
                     @endforeach
 
                     @if (!$displayed)
-                        <tr>
+                        <tr class="norows">
                             <td colspan="{{ $colspan }}" style="text-align:center;">
                                 There are currently no devices added. How about
 
@@ -162,15 +162,7 @@
     </section>
 
     @include('partials._share-modal', [
-        'resource_type' => App\Permission::RESOURCE_TYPE_DEVICE,
+        'resource_type' => 'device',
         'create_permissions' => false,
     ])
 @stop
-
-@section('footer')
-    <script>
-        $.sharer = sharerUtil.init({
-            type: 'device',
-        });
-    </script>
-@append

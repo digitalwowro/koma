@@ -48,7 +48,7 @@
                                         <li class="item">
                                             <a href="{{ route('device.create', $deviceSection->id) }}">
                                                 {!! $deviceSection->present()->icon !!}
-                                                Add {{ str_singular($deviceSection->title) }}
+                                                Add {{ Str::singular($deviceSection->title) }}
                                             </a>
                                         </li>
                                     @endif

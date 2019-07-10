@@ -73,16 +73,8 @@ class IpAddress extends Model
         $ip = $this->firstInSubnet();
 
         return Permission::with('user')
-            ->orWhere(function($query) use ($ip) {
-                $query
-                    ->where('resource_type', Permission::RESOURCE_TYPE_IP_SUBNET)
-                    ->where('resource_id', $ip->id);
-            })
-            ->orWhere(function($query) use ($ip) {
-                $query
-                    ->where('resource_type', Permission::RESOURCE_TYPE_IP_CATEGORY)
-                    ->where('resource_id', $ip->category_id);
-            })
+            ->where('resource_type', Permission::RESOURCE_TYPE_IP_SUBNET)
+            ->where('resource_id', $ip->id)
             ->get();
     }
 

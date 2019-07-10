@@ -8,30 +8,31 @@ use App\User;
 class UserComposer
 {
     /**
-     * The User model
-     *
-     * @var User
-     */
-    protected $user;
-
-    /**
-     * Create a new composer.
-     *
-     * @param User $user
-     */
-    public function __construct(User $user)
-    {
-        $this->user = $user;
-    }
-
-    /**
      * Bind data to the view.
      *
      * @param View $view
      */
     public function admin(View $view)
     {
-        $view->with('users', $this->user->pagedForAdmin());
+        $view->with('users', User::pagedForAdmin());
+    }
+
+    public function shareModal(View $view)
+    {
+        $users = User::where('id', '!=', auth()->id())
+            ->orderBy('name')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'avatar' => gravatar($user->email, 40),
+                ];
+            })
+            ->toJson();
+
+        $view->with('users', $users);
     }
 
 }

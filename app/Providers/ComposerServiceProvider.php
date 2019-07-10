@@ -49,6 +49,10 @@ class ComposerServiceProvider extends ServiceProvider
         view()->composer(
             'users.index', 'App\Composers\UserComposer@admin'
         );
+
+        view()->composer(
+            'partials._share-modal', 'App\Composers\UserComposer@shareModal'
+        );
     }
 
     /**

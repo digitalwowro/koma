@@ -2,7 +2,7 @@
 
 @section('content')
     <section class="content-header">
-        <h1>Devices<small>Add New {{ str_singular($deviceSection->title) }} Device</small></h1>
+        <h1>Devices<small>Add New {{ Str::singular($deviceSection->title) }} Device</small></h1>
 
         <ol class="breadcrumb">
             <li><a href="{{ route('home') }}">Home</a></li>
@@ -17,7 +17,7 @@
 
         <div class="box box-info">
             <div class="box-header with-border">
-                <h3 class="box-title">Enter {{ str_singular($deviceSection->title) }} Device Details</h3>
+                <h3 class="box-title">Enter {{ Str::singular($deviceSection->title) }} Device Details</h3>
             </div>
 
             <div class="box-body">

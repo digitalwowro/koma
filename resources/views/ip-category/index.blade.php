@@ -60,20 +60,20 @@
                                         </span>
                                     </a>
 
+                                    @can('share', $ipCategory)
+                                    <a href="#" class="table-link share-item" title="Share" data-id="{{ $ipCategory->id }}" data-human-id="{{ $ipCategory->title }}">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                    @endcan
+
                                     @can('owner', $ipCategory)
                                     <a href="{{ route('ip-category.edit', $ipCategory->id) }}" class="table-link">
                                         <span class="fa-stack">
                                             <i class="fa fa-square fa-stack-2x"></i>
                                             <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
-                                        </span>
-                                    </a>
-                                    @endcan
-
-                                    @can('share', $ipCategory)
-                                    <a href="{{ route('ip-category.share', $ipCategory->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $ipCategory->title }}">
-                                        <span class="fa-stack">
-                                            <i class="fa fa-square fa-stack-2x"></i>
-                                            <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
                                         </span>
                                     </a>
                                     @endcan
@@ -93,7 +93,7 @@
                         @endforeach
 
                         @if (!$displayed)
-                            <tr>
+                            <tr class="norows">
                                 <td colspan="3" style="text-align:center;">
                                     There are currently no categories added. How about <a href="{{ route('ip-category.create') }}">creating one</a> now?
                                 </td>
@@ -108,15 +108,7 @@
     </section>
 
     @include('partials._share-modal', [
-        'resource_type' => App\Permission::RESOURCE_TYPE_IP_CATEGORY,
+        'resource_type' => 'IP category',
         'create_permissions' => true,
     ])
 @stop
-
-@section('footer')
-    <script>
-        $.sharer = sharerUtil.init({
-            type: 'IP category',
-        });
-    </script>
-@append

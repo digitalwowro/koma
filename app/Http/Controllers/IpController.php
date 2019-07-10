@@ -4,17 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Device;
 use App\EncryptedStore;
-use App\Exceptions\AlreadyHasPermissionException;
 use App\Exceptions\SubnetTooLargeException;
 use App\IpCategory;
 use App\IpAddress;
 use App\IpField;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use App\Permission;
-use App\User;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 
 class IpController extends Controller
@@ -167,44 +163,5 @@ class IpController extends Controller
         }
 
         return response()->json($return);
-    }
-
-    /**
-     * @param int $category
-     * @param int $id
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function share($id, Request $request)
-    {
-        try {
-            $ip = IpAddress::findOrFail($id);
-
-
-            if ($ip->id !== $ip->firstInSubnet()->id) {
-                throw new Exception('Invalid subnet');
-            }
-
-            $this->authorize('share', $ip);
-
-            $user = User::findOrFail($request->input('user_id'));
-            $grantType = $request->input('grant_type', []);
-
-            app('share')->share($user, $ip, $grantType);
-
-            if ($request->isXmlHttpRequest()) {
-                return response()->json(['success' => true]);
-            } else {
-                return redirect()->back();
-            }
-        } catch (AlreadyHasPermissionException $e) {
-            return response()->json([
-                'error' => 'User already has access to this IP subnet',
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'error' => 'Could not share IP subnet',
-            ]);
-        }
     }
 }

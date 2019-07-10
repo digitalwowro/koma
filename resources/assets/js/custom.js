@@ -195,6 +195,11 @@ $(document).ready(function() {
         format: 'yyyy-mm-dd'
     });
 
+    // prevent datatable init on empty tables
+    $('.datatable tr.norows').each(function() {
+        $(this).closest('.datatable').removeClass('datatable');
+    });
+
     // init data tables
     if ($('.datatable').length) {
         $.tableFixed = $('.datatable').dataTable({
@@ -291,8 +296,10 @@ $(document).ready(function() {
         .find('option:not(:selected)').attr('selected', true);
 });
 
-function bindIcheck() {
-    $('div.icheck input, input.icheck').iCheck({
+function bindIcheck($elements) {
+    $elements = $elements || $('div.icheck input, input.icheck');
+
+    $elements.iCheck({
         checkboxClass: 'icheckbox_square-blue',
         radioClass: 'iradio_square-blue',
     });

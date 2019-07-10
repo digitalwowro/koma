@@ -5,12 +5,10 @@ namespace App\Http\Controllers;
 use App\Device;
 use App\DeviceSection;
 use App\EncryptedStore;
-use App\Exceptions\AlreadyHasPermissionException;
 use App\IpAddress;
 use App\Permission;
 use App\User;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -307,38 +305,4 @@ class DeviceController extends Controller
                 ->withError('Could not find device');
         }
     }
-
-    /**
-     * @param int     $deviceId
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function share($deviceId, Request $request)
-    {
-        try {
-            $device = Device::findOrFail($deviceId);
-
-            $this->authorize('share', $device);
-
-            $user = User::findOrFail($request->input('user_id'));
-            $grantType = $request->input('grant_type', []);
-
-            app('share')->share($user, $device, $grantType);
-
-            if ($request->isXmlHttpRequest()) {
-                return response()->json(['success' => true]);
-            } else {
-                return redirect()->back();
-            }
-        } catch (AlreadyHasPermissionException $e) {
-            return response()->json([
-                'error' => 'User already has access to this device',
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'error' => 'Could not share device',
-            ]);
-        }
-    }
-
 }

@@ -79,16 +79,8 @@ class Device extends Model
     public function sharedWith()
     {
         return Permission::with('user')
-            ->orWhere(function($query) {
-                $query
-                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE)
-                    ->where('resource_id', $this->id);
-            })
-            ->orWhere(function($query) {
-                $query
-                    ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE_SECTION)
-                    ->where('resource_id', $this->section_id);
-            })
+            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE)
+            ->where('resource_id', $this->id)
             ->get();
     }
 
