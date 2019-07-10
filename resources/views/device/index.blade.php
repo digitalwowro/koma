@@ -141,7 +141,7 @@
                     @endforeach
 
                     @if (!$displayed)
-                        <tr>
+                        <tr class="norows">
                             <td colspan="{{ $colspan }}" style="text-align:center;">
                                 There are currently no devices added. How about
 

@@ -195,6 +195,11 @@ $(document).ready(function() {
         format: 'yyyy-mm-dd'
     });
 
+    // prevent datatable init on empty tables
+    $('.datatable tr.norows').each(function() {
+        $(this).closest('.datatable').removeClass('datatable');
+    });
+
     // init data tables
     if ($('.datatable').length) {
         $.tableFixed = $('.datatable').dataTable({

@@ -36,15 +36,6 @@
                                 <a href="{{ route('users.edit', $share->user_id) }}">{{ $share->user->name }}</a>
 
                                 ({!! $share->present()->grantThrough !!})
-
-                                {!! Form::open(['route' => ['ip-category.share', $category->id], 'method' => 'POST', 'style' => 'display: inline;']) !!}
-                                {!! Form::hidden('user_id', $share->user_id) !!}
-
-                                <a href="#" style="color: red;" onclick="$(this).closest('form').submit(); return false;">
-                                    <i class="fa fa-times"></i>
-                                    Revoke
-                                </a>
-                                {!! Form::close() !!}
                             </li>
                         @empty
                             <li>IP Category is not shared</li>

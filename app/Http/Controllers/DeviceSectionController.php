@@ -4,16 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Device;
 use App\DeviceSection;
-use App\Exceptions\AlreadyHasPermissionException;
 use App\Fields\Factory;
-use App\Permission;
-use App\User;
-use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\Request;
-
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Exception;
+use Illuminate\Http\Request;
 
 class DeviceSectionController extends Controller
 {
@@ -167,39 +162,6 @@ class DeviceSectionController extends Controller
             return $field->renderOptions($index);
         } catch (Exception $e) {
             //
-        }
-    }
-
-    /**
-     * @param int $sectionId
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function share($sectionId, Request $request)
-    {
-        try {
-            $section = DeviceSection::findOrFail($sectionId);
-
-            $this->authorize('share', $section);
-
-            $user = User::findOrFail($request->input('user_id'));
-            $grantType = $request->input('grant_type', []);
-
-            app('share')->share($user, $section, $grantType);
-
-            if ($request->isXmlHttpRequest()) {
-                return response()->json(['success' => true]);
-            } else {
-                return redirect()->back();
-            }
-        } catch (AlreadyHasPermissionException $e) {
-            return response()->json([
-                'error' => 'User already has access to this device section',
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'error' => 'Could not share device section',
-            ]);
         }
     }
 }

@@ -56,7 +56,7 @@
                                 </a>
 
                                 @can('share', $subnet)
-                                    <a href="{{ route('ip.share', ['category' => $subnet->category_id, 'id' => $subnet->id]) }}" class="table-link share-item" title="Share" data-human-id="{{ $subnet->subnet }}">
+                                    <a href="#" class="table-link share-item" title="Share" data-id="{{ $subnet->id }}" data-human-id="{{ $subnet->subnet }}">
                                         <span class="fa-stack">
                                             <i class="fa fa-square fa-stack-2x"></i>
                                             <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
@@ -79,7 +79,7 @@
                     @endforeach
 
                     @if (!$displayed)
-                        <tr>
+                        <tr class="norows">
                             <td colspan="3" style="text-align:center;">
                                 There are currently no Subnets added. How about <a data-toggle="modal" href="#addSubnetModal">creating one</a> now?
                             </td>
@@ -92,8 +92,9 @@
     </section>
 
     @include('ips._add-subnet-modal')
+
     @include('partials._share-modal', [
-        'resource_type' => App\Permission::RESOURCE_TYPE_IP_SUBNET,
+        'resource_type' => 'IP subnet',
         'create_permissions' => false,
     ])
 @stop

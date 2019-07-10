@@ -2,16 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\AlreadyHasPermissionException;
-use App\IpCategory;
-use App\Permission;
-use App\User;
-use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\Request;
-
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\IpCategory;
+use Exception;
+use Illuminate\Http\Request;
 
 class IpCategoryController extends Controller
 {
@@ -116,39 +111,6 @@ class IpCategoryController extends Controller
             return redirect()
                 ->back()
                 ->withError('Could not find IP Category');
-        }
-    }
-
-    /**
-     * @param int $id
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function share($id, Request $request)
-    {
-        try {
-            $category = IpCategory::findOrFail($id);
-
-            $this->authorize('share', $category);
-
-            $user = User::findOrFail($request->input('user_id'));
-            $grantType = $request->input('grant_type', []);
-
-            app('share')->share($user, $category, $grantType);
-
-            if ($request->isXmlHttpRequest()) {
-                return response()->json(['success' => true]);
-            } else {
-                return redirect()->back();
-            }
-        } catch (AlreadyHasPermissionException $e) {
-            return response()->json([
-                'error' => 'User already has access to this IP category',
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'error' => 'Could not share IP category',
-            ]);
         }
     }
 }

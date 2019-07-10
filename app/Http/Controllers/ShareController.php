@@ -8,6 +8,7 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\IpAddress;
 use App\IpCategory;
+use App\User;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -54,6 +55,44 @@ class ShareController extends Controller
     }
 
     /**
+     * Permissions diff
+     *
+     * @param array $old
+     * @param array $new
+     * @return array
+     */
+    private function diff(array $old, array $new): array
+    {
+        $toDelete = [];
+        $toRefresh = [];
+        $toAdd = [];
+
+        foreach ($old as $key => $value) {
+            if (!isset($new[$key])) {
+                $toDelete[] = $key;
+            } else {
+                $a = $new[$key];
+                $b = $old[$key];
+
+                sort($a);
+                sort($b);
+
+                if ($a !== $b) {
+                    $toRefresh[] = $key;
+                }
+            }
+        }
+
+        foreach($new as $key => $value) {
+            if (!isset($old[$key])) {
+                $toAdd[] = $key;
+            }
+        }
+
+        return [$toDelete, $toRefresh, $toAdd];
+    }
+
+    /**
      * Save share settings
      *
      * @param Request $request
@@ -66,7 +105,42 @@ class ShareController extends Controller
 
             $this->authorize('share', $resource);
 
-            $permissions = $request->input('permissions');
+            $old = [];
+            $new = [];
+
+            $resource->sharedWith()->each(function ($permission) use (&$old) {
+                $old[$permission['user_id']] = $permission['grant_type'];
+            });
+
+            foreach ($request->input('permissions') as $permission) {
+                $sanitized = $permission['permissions'];
+                $sanitized = array_map('intval', $sanitized);
+                $new[$permission['id']] = $sanitized;
+            }
+
+            list($toDelete, $toRefresh, $toAdd) = $this->diff($old, $new);
+
+            $userIds = array_unique(array_merge($toDelete, $toRefresh, $toAdd));
+            $users = User::whereIn('id', $userIds)->get()->keyBy('id');
+            $sharer = app('share');
+
+            foreach ($toDelete as $key) {
+                if (isset($users[$key])) {
+                    $sharer->share($users[$key], $resource);
+                }
+            }
+
+            foreach ($toRefresh as $key) {
+                if (isset($users[$key])) {
+                    $sharer->share($users[$key], $resource, $new[$key]);
+                }
+            }
+
+            foreach ($toAdd as $key) {
+                if (isset($users[$key])) {
+                    $sharer->share($users[$key], $resource, $new[$key]);
+                }
+            }
 
             return response()->json(['success' => true]);
         } catch (Exception $e) {

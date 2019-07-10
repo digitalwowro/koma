@@ -64,20 +64,20 @@
                                         </span>
                                     </a>
 
+                                    @can('share', $deviceSection)
+                                    <a href="#" class="table-link share-item" title="Share" data-id="{{ $deviceSection->id }}" data-human-id="{{ $deviceSection->title }}">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                    @endcan
+
                                     @can('manage', $deviceSection)
                                     <a href="{{ route('device-section.edit', $deviceSection->id) }}" class="table-link">
                                         <span class="fa-stack">
                                             <i class="fa fa-square fa-stack-2x"></i>
                                             <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
-                                        </span>
-                                    </a>
-                                    @endcan
-
-                                    @can('share', $deviceSection)
-                                    <a href="{{ route('device-section.share', $deviceSection->id) }}" class="table-link share-item" title="Share" data-human-id="{{ $deviceSection->title }}">
-                                        <span class="fa-stack">
-                                            <i class="fa fa-square fa-stack-2x"></i>
-                                            <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
                                         </span>
                                     </a>
                                     @endcan
@@ -97,7 +97,7 @@
                         @endforeach
 
                         @if (!$displayed)
-                            <tr>
+                            <tr class="norows">
                                 <td colspan="4" style="text-align:center;">
                                     There are currently no device sections added. How about <a href="{{ route('device-section.create') }}">creating one</a> now?
                                 </td>
@@ -112,15 +112,7 @@
     </section>
 
     @include('partials._share-modal', [
-        'resource_type' => App\Permission::RESOURCE_TYPE_DEVICE_SECTION,
+        'resource_type' => 'device section',
         'create_permissions' => true,
     ])
 @stop
-
-@section('footer')
-    <script>
-        $.sharer = sharerUtil.init({
-            type: 'device section',
-        });
-    </script>
-@append
