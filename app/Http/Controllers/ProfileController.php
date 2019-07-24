@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ValidationException;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\ManagesUserProfiles;
+use App\Http\Requests;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
 
 class ProfileController extends Controller
 {
@@ -29,6 +30,10 @@ class ProfileController extends Controller
             if (empty($data['password'])) {
                 unset($data['password']);
             } else {
+                if ($data['password'] !== $request->input('password_confirmed')) {
+                    throw new ValidationException('Passwords do not match');
+                }
+
                 DB::beginTransaction();
                 $user->public_key = app('encrypt')->changePassword($data['password']);
             }
@@ -44,6 +49,8 @@ class ProfileController extends Controller
             } else {
                 DB::commit();
 
+                auth()->logoutOtherDevices($data['password']);
+
                 return redirect()
                     ->back()
                     ->withSuccess('Your profile has been updated')
@@ -58,7 +65,13 @@ class ProfileController extends Controller
 
             return redirect()
                 ->back()
+                ->withInput()
                 ->withError($error);
+        } catch (ValidationException $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withError($e->getMessage());
         }
     }
 

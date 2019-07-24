@@ -22,17 +22,31 @@
 </div>
 
 @if (!isset($user) || isset($profile))
-<div class="form-group">
-    <label for="password" class="col-xs-2 control-label">Password</label>
-    <div class="col-xs-10">
-        {!! Form::password('password', [
-            'id' => 'password',
-            'class' => 'form-control',
-            'style' => 'font-style:italic;',
-            'placeholder' => 'leave blank if you don\'t want to change the password',
-        ]) !!}
+    <div class="form-group">
+        <label for="password" class="col-xs-2 control-label">Password</label>
+        <div class="col-xs-10">
+            {!! Form::password('password', [
+                'id' => 'password',
+                'class' => 'form-control',
+                'style' => 'font-style:italic;',
+                'placeholder' => 'leave blank if you don\'t want to change the password',
+            ]) !!}
+        </div>
     </div>
-</div>
+
+    @if (isset($user))
+        <div class="form-group">
+            <label for="password_confirmed" class="col-xs-2 control-label">Password Confirmation</label>
+            <div class="col-xs-10">
+                {!! Form::password('password_confirmed', [
+                    'id' => 'password_confirmed',
+                    'class' => 'form-control',
+                    'style' => 'font-style:italic;',
+                    'placeholder' => 'leave blank if you don\'t want to change the password',
+                ]) !!}
+            </div>
+        </div>
+    @endif
 @endif
 
 @if (!isset($user) || auth()->id() != $user->id)
