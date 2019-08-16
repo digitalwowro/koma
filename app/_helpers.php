@@ -6,7 +6,6 @@ use App\Exceptions\InvalidResourceException;
 use App\IpAddress;
 use App\IpCategory;
 use App\Permission;
-use Illuminate\Contracts\Encryption\DecryptException;
 
 /**
  * Check if a the current route is the one given
@@ -59,12 +58,14 @@ function is_route($name, $wrapped = true, array $extraParams = []) {
 /**
  * Get the gravatar for a particular email
  *
- * @param  string  $email
- * @param  int $size
+ * @param string $email
+ * @param int    $size
+ * @param string $default
+ * @param string $rating
  * @return string
  */
-function gravatar($email, $size = 24) {
-    return 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($email))) . '?s=' . $size . '&d=mm&r=r';
+function gravatar($email, $size = 24, $default = 'mp', $rating = 'pg') {
+    return 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($email))) . "?s={$size}&d={$default}&r={$rating}";
 }
 
 /**

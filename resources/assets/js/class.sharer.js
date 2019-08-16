@@ -47,7 +47,8 @@ var sharerUtil = {
         });
 
         this.$modal.find('.btn-add-permission').click(function() {
-            var userId = that.$modal.find('select.user-add').val(),
+            var selected = that.$modal.find('select.user-add').val(),
+                selectedId = parseInt(selected.substr(2)),
                 permissions = [],
                 $tr = that.$modal.find('table tfoot tr');
 
@@ -55,28 +56,39 @@ var sharerUtil = {
                 permissions.push(parseInt(item.value));
             });
 
-            var user = null;
-
-            $.each(that.options.users, function (i, item) {
-                if (parseInt(item.id) === parseInt(userId)) {
-                    user = item;
-                    return false;
-                }
-            });
-
-            if (!user) {
-                alert('Please select a user');
+            if (!selected || !selectedId) {
+                alert('Please select a user or a group');
 
                 return false;
-            }
+            } else if (selected.substr(0, 2) === 'u_') {
+                $.each(that.options.users, function (i, user) {
+                    if (parseInt(user.id) === selectedId) {
+                        that.permissions.push({
+                            user_id: user.id,
+                            name: user.name,
+                            email: user.email,
+                            avatar: user.avatar,
+                            permissions: permissions,
+                        });
 
-            that.permissions.push({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                avatar: user.avatar,
-                permissions: permissions,
-            });
+                        return false;
+                    }
+                });
+            } else if (selected.substr(0, 2) === 'g_') {
+                $.each(that.options.groups, function (i, group) {
+                    if (parseInt(group.id) === selectedId) {
+                        that.permissions.push({
+                            group_id: group.id,
+                            name: group.name,
+                            email: group.email,
+                            avatar: group.avatar,
+                            permissions: permissions,
+                        });
+
+                        return false;
+                    }
+                });
+            }
 
             // reset
             $tr.find('input[type=checkbox]').iCheck('uncheck');
@@ -118,7 +130,7 @@ var sharerUtil = {
 
                     that.$modal.modal('hide');
 
-                    $.growl.notice({message: ucfirst(that.options.type) + ' has been shared'});
+                    $.growl.notice({message: that.ucfirst(that.options.type) + ' has been shared'});
                 } else if (r.error) {
                     $moreinfo.html('<span style="color:darkred;">' + r.error + '</span>');
                 } else {
@@ -173,18 +185,29 @@ var sharerUtil = {
         var that = this,
             html = '',
             $body = this.$modal.find('.modal-body:not(.loader)'),
-            usersWithPermission = [];
+            usersWithPermission = [],
+            groupsWithPermission = [];
 
         $.each(this.permissions, function (i, data) {
             html += '<tr data-id="' + i + '">';
             html += '<td><img src="' + data.avatar + '" width="40" height="40"></td>';
             html += '<td>' + data.name + '</td>';
-            html += '<td>' + data.email + '</td>';
+
+            if (data.user_id) {
+                html += '<td>' + data.email + '</td>';
+            } else {
+                html += '<td><i style="color: grey;">' + data.email + '</i></td>';
+            }
+
             html += '<td>' + that.checkboxes(data.permissions) + '</td>';
             html += '<td><i class="fa fa-remove btn-remove-permission" title="Remove permission"></i></td>';
             html += '</tr>';
 
-            usersWithPermission.push(parseInt(data.id));
+            if (data.user_id) {
+                usersWithPermission.push(parseInt(data.user_id));
+            } else if (data.group_id) {
+                groupsWithPermission.push(parseInt(data.group_id));
+            }
         });
 
         if (!html) {
@@ -201,22 +224,51 @@ var sharerUtil = {
         var $userSelect = this.$modal.find('select.user-add'),
             oldVal = parseInt($userSelect.val()),
             hasVal = false,
-            userOptions = '<option value="">- select user -</option>';
+            userOptions = '<option value="">- select user or group -</option>',
+            userList = '',
+            groupList = '';
 
         $.each(this.options.users, function (i, user) {
-            if (!usersWithPermission.includes(parseInt(user.id))) {
-                var option = document.createElement('option');
+            if (usersWithPermission.includes(parseInt(user.id))) {
+                return;
+            }
 
-                option.value = user.id;
-                option.innerHTML = user.name;
+            var option = document.createElement('option');
 
-                userOptions += option.outerHTML;
+            option.value = 'u_' + user.id;
+            option.innerHTML = user.name;
 
-                if (oldVal === parseInt(user.id)) {
-                    hasVal = true;
-                }
+            userList += option.outerHTML;
+
+            if (oldVal === parseInt(user.id)) {
+                hasVal = true;
             }
         });
+
+        $.each(this.options.groups, function (i, group) {
+            if (groupsWithPermission.includes(parseInt(group.id))) {
+                return;
+            }
+
+            var option = document.createElement('option');
+
+            option.value = 'g_' + group.id;
+            option.innerHTML = group.name;
+
+            groupList += option.outerHTML;
+
+            if (oldVal === parseInt(group.id)) {
+                hasVal = true;
+            }
+        });
+
+        if (userList.length) {
+            userOptions += '<optgroup label="Users">' + userList + '</optgroup>';
+        }
+
+        if (groupList.length) {
+            userOptions += '<optgroup label="Groups">' + groupList + '</optgroup>';
+        }
 
         $userSelect.html(userOptions);
 

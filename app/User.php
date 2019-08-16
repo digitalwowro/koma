@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Presenters\UserPresenter;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Passwords\CanResetPassword;
@@ -9,15 +10,21 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Laracasts\Presenter\PresentableTrait;
 
 class User extends Model implements AuthenticatableContract,
                                     AuthorizableContract,
                                     CanResetPasswordContract
 {
-    use Authenticatable, Authorizable, CanResetPassword;
+    use Authenticatable, Authorizable, CanResetPassword, PresentableTrait;
 
     const ROLE_ADMIN = 1;
     const ROLE_USER = 2;
+
+    /**
+     * @var string
+     */
+    protected $presenter = UserPresenter::class;
 
     /**
      * The database table used by the model.
@@ -102,7 +109,15 @@ class User extends Model implements AuthenticatableContract,
      */
     public function permissions()
     {
-        return $this->hasMany('App\Permission');
+        return $this->hasMany(Permission::class);
+    }
+
+    /**
+     * The groups that belong to the user.
+     */
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class);
     }
 
     /**

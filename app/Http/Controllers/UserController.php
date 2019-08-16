@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Group;
 use App\Http\Controllers\Traits\ManagesUserProfiles;
 use Validator;
 use App\User;
@@ -92,6 +93,13 @@ class UserController extends Controller
 
         $user->save();
 
+        $groups = $request->user()
+            ->groups()
+            ->whereIn('groups.id', $request->input('groups'))
+            ->get();
+
+        $user->groups()->sync($groups);
+
         if (!is_array($permissions)) {
             $permissions = [];
         }
@@ -138,6 +146,14 @@ class UserController extends Controller
 
             $user = User::findOrFail($id);
             $data = $request->only(['name', 'email', 'role']);
+
+            $groups = $request->user()
+                ->groups()
+                ->whereIn('groups.id', $request->input('groups'))
+                ->get();
+
+            $user->groups()->sync($groups);
+
             $permissions = $request->input('permissions');
             $validator = $this->validator($data, $id);
 

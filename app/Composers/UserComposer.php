@@ -27,7 +27,7 @@ class UserComposer
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'avatar' => gravatar($user->email, 40),
+                    'avatar' => gravatar($user->email, 40, 'retro'),
                 ];
             })
             ->toJson();

@@ -203,11 +203,29 @@
                 </li>
 
                 @can('admin')
-                    <li {!! is_route('users.*') !!}>
-                        <a href="{{ route('users.index') }}">
+                    <li class="treeview {!! is_route(['users.*', 'groups.*'], false) !!}">
+                        <a href="#">
                             <i class="fa fa-users"></i>
                             <span>User Management</span>
+                            <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
                         </a>
+                        <ul class="treeview-menu">
+                            <li {!! is_route('users.*') !!}>
+                                <a href="{{ route('users.index') }}">
+                                    <i class="fa fa-user"></i>
+                                    <span>User Accounts</span>
+                                </a>
+                            </li>
+
+                            <li {!! is_route('groups.*') !!}">
+                                <a href="{{ route('groups.index') }}">
+                                    <i class="fa fa-users"></i>
+                                    <span>Groups</span>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 @endcan
             </ul>

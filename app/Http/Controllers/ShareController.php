@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Device;
 use App\DeviceSection;
+use App\Group;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\IpAddress;
@@ -11,6 +12,7 @@ use App\IpCategory;
 use App\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ShareController extends Controller
 {
@@ -42,13 +44,25 @@ class ShareController extends Controller
         $data = $resource
             ->sharedWith()
             ->map(function($permission) {
-                return [
-                    'id' => $permission['user']['id'] ?? '',
-                    'name' => $permission['user']['name'] ?? '',
-                    'email' => $permission['user']['email'] ?? '',
-                    'permissions' => $permission['grant_type'] ?? [],
-                    'avatar' => gravatar($permission['user']['email'] ?? '', 40),
-                ];
+                if ($user = $permission->user) {
+                    return [
+                        'user_id' => $user->id ?? '',
+                        'name' => $user->name ?? '',
+                        'email' => $user->email ?? '',
+                        'permissions' => $permission['grant_type'] ?? [],
+                        'avatar' => gravatar($user->email ?? '', 40, 'retro'),
+                    ];
+                } elseif ($group = $permission->group) {
+                    $memberCount = $group->users()->count();
+
+                    return [
+                        'group_id' => $group->id ?? '',
+                        'name' => $group->name ?? '',
+                        'email' => $memberCount . ' group '. Str::plural('member', $memberCount),
+                        'permissions' => $permission['grant_type'] ?? [],
+                        'avatar' => gravatar("group_id_{$group->id}", 40, 'retro'),
+                    ];
+                }
             });
 
         return response()->json($data);
@@ -109,43 +123,79 @@ class ShareController extends Controller
             $new = [];
 
             $resource->sharedWith()->each(function ($permission) use (&$old) {
-                $old[$permission['user_id']] = $permission['grant_type'];
+                if ($permission['user_id']) {
+                    $old["u_{$permission['user_id']}"] = $permission['grant_type'];
+                } elseif ($permission['group_id']) {
+                    $old["g_{$permission['group_id']}"] = $permission['grant_type'];
+                }
             });
 
             foreach ((array) $request->input('permissions', []) as $permission) {
                 $sanitized = $permission['permissions'];
                 $sanitized = array_map('intval', $sanitized);
-                $new[$permission['id']] = $sanitized;
+
+                if (!empty($permission['user_id'])) {
+                    $new["u_{$permission['user_id']}"] = $sanitized;
+                } elseif (!empty($permission['group_id'])) {
+                    $new["g_{$permission['group_id']}"] = $sanitized;
+                }
             }
 
             list($toDelete, $toRefresh, $toAdd) = $this->diff($old, $new);
 
-            $userIds = array_unique(array_merge($toDelete, $toRefresh, $toAdd));
+            $allIds = array_unique(array_merge($toDelete, $toRefresh, $toAdd));
+
+            $userIds = array_map(function ($item) {
+                return substr($item, 2);
+            }, array_filter($allIds, function ($item) {
+                return substr($item, 0, 2) === 'u_';
+            }));
+
+            $groupIds = array_map(function ($item) {
+                return substr($item, 2);
+            }, array_filter($allIds, function ($item) {
+                return substr($item, 0, 2) === 'g_';
+            }));
+
             $users = User::whereIn('id', $userIds)->get()->keyBy('id');
+            $groups = Group::whereIn('id', $groupIds)->get()->keyBy('id');
+
             $sharer = app('share');
 
             foreach ($toDelete as $key) {
-                if (isset($users[$key])) {
-                    $sharer->share($users[$key], $resource);
+                $id = intval(substr($key, 2));
+
+                if ($key{0} === 'u' && isset($users[$id])) {
+                    $sharer->share($users[$id], $resource);
+                } elseif ($key{0} === 'g' && isset($groups[$id])) {
+                    $sharer->share($groups[$id], $resource);
                 }
             }
 
             foreach ($toRefresh as $key) {
-                if (isset($users[$key])) {
-                    $sharer->share($users[$key], $resource, $new[$key]);
+                $id = intval(substr($key, 2));
+
+                if ($key{0} === 'u' && isset($users[$id])) {
+                    $sharer->share($users[$id], $resource, $new[$key]);
+                } elseif ($key{0} === 'g' && isset($groups[$id])) {
+                    $sharer->share($groups[$id], $resource, $new[$key]);
                 }
             }
 
             foreach ($toAdd as $key) {
-                if (isset($users[$key])) {
-                    $sharer->share($users[$key], $resource, $new[$key]);
+                $id = intval(substr($key, 2));
+
+                if ($key{0} === 'u' && isset($users[$id])) {
+                    $sharer->share($users[$id], $resource, $new[$key]);
+                } elseif ($key{0} === 'g' && isset($groups[$id])) {
+                    $sharer->share($groups[$id], $resource, $new[$key]);
                 }
             }
 
             return response()->json(['success' => true]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Could not share device',
+                'error' => 'Could not share resource',
             ]);
         }
     }

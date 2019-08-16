@@ -53,6 +53,21 @@ class ComposerServiceProvider extends ServiceProvider
         view()->composer(
             'partials._share-modal', 'App\Composers\UserComposer@shareModal'
         );
+
+        /**
+         * Groups
+         */
+        view()->composer(
+            'groups.index', 'App\Composers\GroupComposer@admin'
+        );
+
+        view()->composer(
+            'partials._share-modal', 'App\Composers\GroupComposer@shareModal'
+        );
+
+        view()->composer(
+            'users._form', 'App\Composers\GroupComposer@keyValue'
+        );
     }
 
     /**

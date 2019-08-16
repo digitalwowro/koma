@@ -38,7 +38,7 @@
                                 {{ $ip->ip }}
                             </td>
                             <td>
-                                @if ($ip->assigned())
+                                @if ($ip->assigned() && $ip->device)
                                     assigned to <a href="{{ route('device.edit', $ip->device->id) }}">{{ $ip->device->present()->humanIdField }}</a>
                                 @else
                                     <span class="label label-danger">Unassigned</span>

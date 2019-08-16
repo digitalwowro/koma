@@ -73,3 +73,21 @@
         </div>
     </div>
 @endif
+
+<div class="form-group">
+    <label class="col-xs-2 control-label">Permission Groups</label>
+    <div class="col-xs-10">
+        {!! Form::select('groups[]', $groups, isset($user) ? $user->groups->pluck('id') : [], [
+            'class' => 'form-control select2',
+            'multiple' => true,
+        ]) !!}
+    </div>
+</div>
+
+@section('footer')
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2();
+        });
+    </script>
+@append

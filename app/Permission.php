@@ -5,21 +5,22 @@ namespace App;
 use App\Presenters\PermissionPresenter;
 use Illuminate\Database\Eloquent\Model;
 use Exception;
+use Illuminate\Support\Arr;
 use Laracasts\Presenter\PresentableTrait;
 
 class Permission extends Model
 {
     use PresentableTrait;
 
-    const GRANT_TYPE_READ   = 1;
-    const GRANT_TYPE_EDIT   = 2;
+    const GRANT_TYPE_READ = 1;
+    const GRANT_TYPE_EDIT = 2;
     const GRANT_TYPE_DELETE = 4;
     const GRANT_TYPE_CREATE = 8;
 
     const RESOURCE_TYPE_DEVICE_SECTION = 1;
-    const RESOURCE_TYPE_DEVICE         = 2;
-    const RESOURCE_TYPE_IP_CATEGORY    = 3;
-    const RESOURCE_TYPE_IP_SUBNET      = 4;
+    const RESOURCE_TYPE_DEVICE = 2;
+    const RESOURCE_TYPE_IP_CATEGORY = 3;
+    const RESOURCE_TYPE_IP_SUBNET = 4;
 
     private static $cachedPermissions;
 
@@ -33,7 +34,10 @@ class Permission extends Model
      *
      * @var array
      */
-    protected $fillable = ['resource_type', 'resource_id', 'resource_type', 'grant_type', 'user_id'];
+    protected $fillable = [
+        'resource_type', 'resource_id', 'resource_type', 'grant_type',
+        'user_id', 'group_id',
+    ];
 
     private static $acl = [
         'view' => self::GRANT_TYPE_READ,
@@ -53,9 +57,22 @@ class Permission extends Model
      */
     public function user()
     {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo(User::class);
     }
 
+    /**
+     * Relationship with Group
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+    /**
+     * @var mixed
+     */
     public $resource;
 
     /**
@@ -117,6 +134,42 @@ class Permission extends Model
         return $results;
     }
 
+    /**
+     * @param array $list
+     * @return array
+     */
+    private static function userIdsFromPermissionList(array $list)
+    {
+        $userIds = [];
+        $groupIds = [];
+
+        foreach ($list as $data) {
+            if (!empty($data['user_id'])) {
+                $userIds[] = $data['user_id'];
+            }
+
+            if (!empty($data['group_id'])) {
+                $groupIds[] = $data['group_id'];
+            }
+        }
+
+        if (count($groupIds)) {
+            Group::with('users')
+                ->whereIn('id', $groupIds)
+                ->each(function ($group) use (&$userIds) {
+                    $userIds = array_merge($userIds, $group->users->pluck('id')->toArray());
+                });
+
+            $userIds = array_unique($userIds);
+        }
+
+        return $userIds;
+    }
+
+    /**
+     * @param mixed $resource
+     * @return array
+     */
     public static function userIdsHavingPermission($resource)
     {
         $userIds = [];
@@ -130,21 +183,27 @@ class Permission extends Model
                 $userIds[] = $section->owner_id;
             }
 
-            $userIds[] = self::where(function($query) use ($section) {
-                $query
-                    ->where('resource_type', self::RESOURCE_TYPE_DEVICE)
-                    ->whereIn('resource_id', function($query) use ($section) {
-                        $query
-                            ->select('id')
-                            ->where('section_id', $section->id)
-                            ->from('devices');
-                    });
-            })->orWhere(function($query) use ($section) {
-                $query->where([
-                    'resource_type' => self::RESOURCE_TYPE_DEVICE_SECTION,
-                    'resource_id' => $section->id,
-                ]);
-            })->pluck('user_id')->toArray();
+            $list = self::select('user_id', 'group_id')
+                ->where(function($query) use ($section) {
+                    $query
+                        ->where('resource_type', self::RESOURCE_TYPE_DEVICE)
+                        ->whereIn('resource_id', function($query) use ($section) {
+                            $query
+                                ->select('id')
+                                ->where('section_id', $section->id)
+                                ->from('devices');
+                        });
+                })
+                ->orWhere(function($query) use ($section) {
+                    $query->where([
+                        'resource_type' => self::RESOURCE_TYPE_DEVICE_SECTION,
+                        'resource_id' => $section->id,
+                    ]);
+                })
+                ->get()
+                ->toArray();
+
+            $userIds[] = self::userIdsFromPermissionList($list);
         } elseif ($resource instanceof IpAddress || $resource instanceof IpCategory) {
             $category = $resource instanceof Device
                 ? $resource->category
@@ -154,21 +213,27 @@ class Permission extends Model
                 $userIds[] = $category->owner_id;
             }
 
-            $userIds[] = self::where(function($query) use ($category) {
-                $subnetIds = IpAddress::getSubnetsFor($category->id)->pluck('id');
+            $list = self::select('user_id', 'group_id')
+                ->where(function($query) use ($category) {
+                    $subnetIds = IpAddress::getSubnetsFor($category->id)->pluck('id');
 
-                $query
-                    ->where('resource_type', self::RESOURCE_TYPE_IP_SUBNET)
-                    ->whereIn('resource_id', $subnetIds);
-            })->orWhere(function($query) use ($category) {
-                $query->where([
-                    'resource_type' => self::RESOURCE_TYPE_IP_CATEGORY,
-                    'resource_id' => $category->id,
-                ]);
-            })->pluck('user_id')->toArray();
+                    $query
+                        ->where('resource_type', self::RESOURCE_TYPE_IP_SUBNET)
+                        ->whereIn('resource_id', $subnetIds);
+                })
+                ->orWhere(function($query) use ($category) {
+                    $query->where([
+                        'resource_type' => self::RESOURCE_TYPE_IP_CATEGORY,
+                        'resource_id' => $category->id,
+                    ]);
+                })
+                ->get()
+                ->toArray();
+
+            $userIds[] = self::userIdsFromPermissionList($list);
         }
 
-        return array_unique(array_flatten($userIds));
+        return array_unique(Arr::flatten($userIds));
     }
 
     /**
@@ -231,8 +296,20 @@ class Permission extends Model
      */
     public static function allForUser(User $user)
     {
-        return array_filter(self::getCached(), function ($permission) use ($user) {
-            return $permission['user_id'] === $user->id;
+        $groupIds = $user->groups
+            ->pluck('id')
+            ->toArray();
+
+        return array_filter(self::getCached(), function ($permission) use ($user, $groupIds) {
+            if (!empty($permission['user_id']) && $permission['user_id'] === $user->id) {
+                return true;
+            }
+
+            if (!empty($permission['group_id']) && in_array($permission['group_id'], $groupIds)) {
+                return true;
+            }
+
+            return false;
         });
     }
 

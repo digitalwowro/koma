@@ -104,6 +104,7 @@
             permissionsRoute: '{{ route('share.with') }}',
             postRoute: '{{ route('share.post') }}',
             users: {!! $users !!},
+            groups: {!! $groups !!},
         });
     </script>
 @append

@@ -229,7 +229,7 @@ class IpAddress extends Model
      */
     public function getFieldValue(IpField $field)
     {
-        if ($this->device_id) {
+        if ($this->device_id && $this->device) {
             $deviceType = $this->device->section_id;
 
             if (isset($field->bindings[$deviceType])) {

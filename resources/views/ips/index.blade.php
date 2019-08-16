@@ -98,11 +98,3 @@
         'create_permissions' => false,
     ])
 @stop
-
-@section('footer')
-    <script>
-        $.sharer = sharerUtil.init({
-            type: 'IP subnet',
-        });
-    </script>
-@append

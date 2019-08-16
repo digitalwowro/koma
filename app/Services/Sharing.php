@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Device;
 use App\DeviceSection;
 use App\EncryptedStore;
-use App\Exceptions\AlreadyHasPermissionException;
+use App\Group;
 use App\IpAddress;
 use App\IpCategory;
 use App\Permission;
@@ -23,31 +23,37 @@ class Sharing
         if ($resource instanceof Device) {
             $data = json_encode($resource->data);
 
-            EncryptedStore::create([
+            EncryptedStore::updateOrCreate([
                 'user_id' => $user->id,
                 'resource_type' => Permission::RESOURCE_TYPE_DEVICE,
                 'resource_id' => $resource->id,
+            ], [
                 'data' => app('encrypt')->encryptForUser($data, $user),
             ]);
         } elseif ($resource instanceof IpAddress) {
             $data = json_encode($resource->data);
 
-            EncryptedStore::create([
+            EncryptedStore::updateOrCreate([
                 'user_id' => $user->id,
                 'resource_type' => Permission::RESOURCE_TYPE_IP_SUBNET,
                 'resource_id' => $resource->id,
+            ], [
                 'data' => app('encrypt')->encryptForUser($data, $user),
             ]);
         }
     }
 
     /**
-     * @param User $user
+     * @param User|Group $grantee
      * @param Device|DeviceSection|IpAddress|IpCategory $resource
      * @param array $grantType
-     * @throws AlreadyHasPermissionException
+     * @throws Exception
      */
-    public function share(User $user, $resource, array $grantType = []) {
+    public function share($grantee, $resource, array $grantType = []) {
+        if (!$grantee instanceof User && !$grantee instanceof Group) {
+            throw new Exception('Invalid grantee');
+        }
+
         if ($resource instanceof Device) {
             $resourceType = Permission::RESOURCE_TYPE_DEVICE;
         } elseif ($resource instanceof DeviceSection) {
@@ -61,21 +67,34 @@ class Sharing
         }
 
         if (!count($grantType)) {
-            $user->permissions()->where([
+            $grantee->permissions()->where([
                 'resource_type' => $resourceType,
                 'resource_id' => $resource->id,
             ])->delete();
         } else { // upsert
-            Permission::updateOrCreate([
+            $fields = [
                 'resource_type' => $resourceType,
                 'resource_id' => $resource->id,
-                'user_id' => $user->id,
-            ], [
+            ];
+
+            if ($grantee instanceof User) {
+                $fields['user_id'] = $grantee->id;
+            } elseif ($grantee instanceof Group) {
+                $fields['group_id'] = $grantee->id;
+            }
+
+            Permission::updateOrCreate($fields, [
                 'grant_type' => $grantType,
             ]);
         }
 
-        $this->ensureEncryptedShares($user, $resource);
+        if ($grantee instanceof User) {
+            $this->ensureEncryptedShares($grantee, $resource);
+        } elseif ($grantee instanceof Group) {
+            foreach ($grantee->users as $user) {
+                $this->ensureEncryptedShares($user, $resource);
+            }
+        }
 
         Permission::flushCache();
     }

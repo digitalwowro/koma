@@ -12,6 +12,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/profile', ['as' => 'profile.update', 'uses' => 'ProfileController@update']);
 
     Route::resource('users',          'UserController');
+    Route::resource('groups',         'GroupController');
     Route::resource('device-section', 'DeviceSectionController');
     Route::resource('ip-category',    'IpCategoryController');
     Route::resource('ip-fields',      'IpFieldController');
