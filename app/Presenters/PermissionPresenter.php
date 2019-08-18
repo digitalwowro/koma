@@ -83,4 +83,21 @@ class PermissionPresenter extends Presenter
                 return '-';
         }
     }
+
+    public function sharedWith()
+    {
+        $share = $this->entity;
+
+        if ($share->user) {
+            $url = route('users.edit', $share->user_id);
+            $name = $share->user->name;
+        } elseif ($share->group) {
+            $url = route('groups.edit', $share->group_id);
+            $name = $share->group->name;
+        } else {
+            return '-';
+        }
+
+        return '<a href="' . $url . '">' . $name . '</a>';
+    }
 }

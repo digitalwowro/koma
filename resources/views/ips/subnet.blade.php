@@ -66,7 +66,7 @@
                     <ul>
                         @forelse ($ips->first()->sharedWith() as $share)
                             <li>
-                                <a href="{{ route('users.edit', $share->user_id) }}">{{ $share->user->name }}</a>
+                                {!! $share->present()->sharedWith !!}
 
                                 ({!! $share->present()->grantThrough !!})
                             </li>
