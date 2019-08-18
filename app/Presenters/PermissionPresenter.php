@@ -89,15 +89,17 @@ class PermissionPresenter extends Presenter
         $share = $this->entity;
 
         if ($share->user) {
+            $icon = 'fa-user';
             $url = route('users.edit', $share->user_id);
             $name = $share->user->name;
         } elseif ($share->group) {
+            $icon = 'fa-users';
             $url = route('groups.edit', $share->group_id);
             $name = $share->group->name;
         } else {
             return '-';
         }
 
-        return '<a href="' . $url . '">' . $name . '</a>';
+        return '<i class="fa ' . $icon . '"></i> <a href="' . $url . '">' . $name . '</a>';
     }
 }
