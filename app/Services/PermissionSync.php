@@ -71,6 +71,7 @@ class PermissionSync
         return $queries;
     }
 
+    // @todo remove obsolete function
     public function sync(User $user, array $permissions)
     {
         $permissions = $this->sanitize($permissions);

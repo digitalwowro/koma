@@ -20,6 +20,11 @@ class IpCategoryTenant implements Scope
     public function apply(Builder $builder, Model $model)
     {
         $user = auth()->user();
+
+        if (!$user) {
+            return;
+        }
+
         $accessibleIds = [];
         $subnets = [];
 

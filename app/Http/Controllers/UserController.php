@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Group;
 use App\Http\Controllers\Traits\ManagesUserProfiles;
 use Validator;
 use App\User;
@@ -15,6 +14,27 @@ use App\Http\Controllers\Controller;
 class UserController extends Controller
 {
     use ManagesUserProfiles;
+
+    protected function ensureGroups(Request $request, User $user)
+    {
+        // get desired groups from request
+        $groups = $request->input('groups', []);
+
+        if (!is_array($groups)) {
+            $groups = [];
+        }
+
+        // I can only grant access to groups I belong to
+        $groups = $request->user()
+            ->groups()
+            ->whereIn('groups.id', $groups)
+            ->get();
+
+        $user->groups()->sync($groups);
+
+        // update encrypted store
+        app('share')->refreshUserPermissions($user);
+    }
 
     /**
      * Display a listing of the resource.
@@ -73,8 +93,6 @@ class UserController extends Controller
 
         $data = $request->only(['name', 'email', 'password', 'role']);
 
-        $permissions = $request->input('permissions');
-
         $validator = $this->validator($data);
 
         if ($validator->fails()) {
@@ -93,18 +111,7 @@ class UserController extends Controller
 
         $user->save();
 
-        $groups = $request->user()
-            ->groups()
-            ->whereIn('groups.id', $request->input('groups'))
-            ->get();
-
-        $user->groups()->sync($groups);
-
-        if (!is_array($permissions)) {
-            $permissions = [];
-        }
-
-        app('permissionSync')->sync($user, $permissions);
+        $this->ensureGroups($request, $user);
 
         return redirect()
             ->route('users.index')
@@ -147,14 +154,8 @@ class UserController extends Controller
             $user = User::findOrFail($id);
             $data = $request->only(['name', 'email', 'role']);
 
-            $groups = $request->user()
-                ->groups()
-                ->whereIn('groups.id', $request->input('groups'))
-                ->get();
+            $this->ensureGroups($request, $user);
 
-            $user->groups()->sync($groups);
-
-            $permissions = $request->input('permissions');
             $validator = $this->validator($data, $id);
 
             if ($validator->fails()) {
@@ -169,12 +170,6 @@ class UserController extends Controller
             }
 
             $user->update($data);
-
-            if (!is_array($permissions)) {
-                $permissions = [];
-            }
-
-            app('permissionSync')->sync($user, $permissions);
 
             return redirect()
                 ->route('users.index')

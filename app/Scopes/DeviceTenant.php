@@ -21,6 +21,11 @@ class DeviceTenant implements Scope
     public function apply(Builder $builder, Model $model)
     {
         $user = auth()->user();
+
+        if (!$user) {
+            return;
+        }
+
         $accessibleIds = [];
         $sections = DeviceSection::where('owner_id', $user->id)
             ->pluck('id')

@@ -17,29 +17,34 @@ class Sharing
     /**
      * @param User $user
      * @param mixed $resource
+     * @return int
      */
     protected function ensureEncryptedShares(User $user, $resource)
     {
         if ($resource instanceof Device) {
             $data = json_encode($resource->data);
 
-            EncryptedStore::updateOrCreate([
+            $store = EncryptedStore::updateOrCreate([
                 'user_id' => $user->id,
                 'resource_type' => Permission::RESOURCE_TYPE_DEVICE,
                 'resource_id' => $resource->id,
             ], [
                 'data' => app('encrypt')->encryptForUser($data, $user),
             ]);
+
+            return $store->id;
         } elseif ($resource instanceof IpAddress) {
             $data = json_encode($resource->data);
 
-            EncryptedStore::updateOrCreate([
+            $store = EncryptedStore::updateOrCreate([
                 'user_id' => $user->id,
                 'resource_type' => Permission::RESOURCE_TYPE_IP_SUBNET,
                 'resource_id' => $resource->id,
             ], [
                 'data' => app('encrypt')->encryptForUser($data, $user),
             ]);
+
+            return $store->id;
         }
     }
 
@@ -97,5 +102,49 @@ class Sharing
         }
 
         Permission::flushCache();
+    }
+
+    public function refreshUserPermissions(User $user)
+    {
+        $allIds = [];
+        $permissions = Permission::allForUser($user);
+        $groups = $user->groups;
+
+        foreach ($permissions as $permission) {
+            $resource = null;
+
+            try {
+                switch ($permission['resource_type']) {
+                    case Permission::RESOURCE_TYPE_DEVICE_SECTION:
+                        $resource = DeviceSection::findOrFail($permission['resource_id']);
+                        break;
+                    case Permission::RESOURCE_TYPE_DEVICE:
+                        $resource = Device::findOrFail($permission['resource_id']);
+                        break;
+                    case Permission::RESOURCE_TYPE_IP_CATEGORY:
+                        $resource = IpCategory::findOrFail($permission['resource_id']);
+                        break;
+                    case Permission::RESOURCE_TYPE_IP_SUBNET:
+                        $resource = IpAddress::findOrFail($permission['resource_id']);
+                        break;
+                    default:
+                        throw new Exception('Invalid resource type');
+                }
+            } catch (Exception $e) {
+                continue;
+            }
+
+            if ($resource) {
+                $storeId = $this->ensureEncryptedShares($user, $resource);
+
+                if ($storeId) {
+                    $allIds[] = $storeId;
+                }
+            }
+        }
+
+        EncryptedStore::where('user_id', $user->id)
+            ->whereNotIn('id', $allIds)
+            ->get();
     }
 }
