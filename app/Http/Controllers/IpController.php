@@ -139,15 +139,19 @@ class IpController extends Controller
                 'name' => $request->input('name') ?: null,
             ]);
 
-            IpAddress::where('subnet', $first->subnet)
-                ->where('category_id', $first->category_id)
-                ->whereIn('id', $request->input('reserved'))
-                ->update(['is_reserved' => true]);
+            $reserved = $request->input('reserved');
 
-            IpAddress::where('subnet', $first->subnet)
-                ->where('category_id', $first->category_id)
-                ->whereNotIn('id', $request->input('reserved'))
-                ->update(['is_reserved' => false]);
+            if (is_array($reserved)) {
+                IpAddress::where('subnet', $first->subnet)
+                    ->where('category_id', $first->category_id)
+                    ->whereIn('id', $request->input('reserved'))
+                    ->update(['is_reserved' => true]);
+
+                IpAddress::where('subnet', $first->subnet)
+                    ->where('category_id', $first->category_id)
+                    ->whereNotIn('id', $request->input('reserved'))
+                    ->update(['is_reserved' => false]);
+            }
 
             return redirect()
                 ->route('ip.index', $first->category_id)
