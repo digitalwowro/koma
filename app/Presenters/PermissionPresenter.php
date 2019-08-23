@@ -62,18 +62,48 @@ class PermissionPresenter extends Presenter
         return '<a href="' . $url . '">' . htmlentities($category->title) . '</a>';
     }
 
-    public function grantThrough()
+    public function grantThrough($full = false)
     {
         switch ($this->entity->resource_type) {
             case $this->entity::RESOURCE_TYPE_DEVICE:
-                return '<u>' . $this->grantType() . '</u> access to this device';
+                $identifier = 'this device';
+
+                if ($full) {
+                    $resource = $this->entity->getResource();
+                    $url = route('device.show', $this->entity->resource_id);
+
+                    if ($resource) {
+                        $identifier = htmlentities($resource->present()->humanIdField);
+                    }
+
+                    $identifier = '<a href="' . $url . '">' . $identifier . '</a>';
+                }
+
+                return '<u>' . $this->grantType() . '</u> access to ' . $identifier;
             case $this->entity::RESOURCE_TYPE_DEVICE_SECTION:
                 return '<u>' .
                     $this->grantType() .
                     '</u> access to section ' .
                     $this->sectionUrl();
             case $this->entity::RESOURCE_TYPE_IP_SUBNET:
-                return '<u>' . $this->grantType() . '</u> access to this subnet';
+                $identifier = 'this subnet';
+
+                if ($full) {
+                    $resource = $this->entity->getResource();
+
+                    if ($resource) {
+                        $url = route('ip.edit', ['category' => $resource->category_id, 'id' => $resource->id]);
+
+                        $identifier = isset($resource->data['name'])
+                            ? $resource->data['name']
+                            : $resource->subnet;
+
+                        $identifier = '<a href="' . $url . '">' . htmlentities($identifier) . '</a>';
+                    }
+
+                }
+
+                return '<u>' . $this->grantType() . '</u> access to ' . $identifier;
             case $this->entity::RESOURCE_TYPE_IP_CATEGORY:
                 return '<u>' .
                     $this->grantType() .

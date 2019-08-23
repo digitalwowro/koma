@@ -142,6 +142,19 @@ class DeviceSection extends Model
     }
 
     /**
+     * Returns all permissions granted for devices in this section
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function devicesSharedWith()
+    {
+        return Permission::with('user')
+            ->where('resource_type', Permission::RESOURCE_TYPE_DEVICE)
+            ->whereIn('resource_id', $this->devices()->pluck('id'))
+            ->get();
+    }
+
+    /**
      * Get all device sections paged for admin
      *
      * @param false|array $ids

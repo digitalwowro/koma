@@ -205,7 +205,7 @@ class Permission extends Model
 
             $userIds[] = self::userIdsFromPermissionList($list);
         } elseif ($resource instanceof IpAddress || $resource instanceof IpCategory) {
-            $category = $resource instanceof Device
+            $category = $resource instanceof IpAddress
                 ? $resource->category
                 : $resource;
 
@@ -237,33 +237,19 @@ class Permission extends Model
     }
 
     /**
-     * @return bool
+     * @return mixed
      */
-    public function preloadResource()
+    public function getResource()
     {
-        try {
-            switch ($this->resource_type) {
-                case self::RESOURCE_TYPE_DEVICE_SECTION:
-                    $this->resource = DeviceSection::findOrFail($this->resource_id);
-                    break;
-                case self::RESOURCE_TYPE_DEVICE:
-                    $this->resource = Device::findOrFail($this->resource_id);
-                    break;
-                case self::RESOURCE_TYPE_IP_CATEGORY:
-                    $this->resource = IpCategory::findOrFail($this->resource_id);
-                    break;
-                case self::RESOURCE_TYPE_IP_SUBNET:
-                    $this->resource = IpAddress::findOrFail($this->resource_id);
-                    break;
-            }
-
-            return true;
-        } catch (Exception $e) {
-            $this->delete();
-
-            $this->flushCache();
-
-            return false;
+        switch ($this->resource_type) {
+            case self::RESOURCE_TYPE_DEVICE_SECTION:
+                return DeviceSection::find($this->resource_id);
+            case self::RESOURCE_TYPE_DEVICE:
+                return Device::find($this->resource_id);
+            case self::RESOURCE_TYPE_IP_CATEGORY:
+                return IpCategory::find($this->resource_id);
+            case self::RESOURCE_TYPE_IP_SUBNET:
+                return IpAddress::find($this->resource_id);
         }
     }
 

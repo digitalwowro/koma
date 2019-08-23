@@ -63,7 +63,7 @@ class IP extends AbstractField
 
         foreach ($subnets as $subnet) {
             $selected = in_array($subnet->subnet, $value) ? ' selected' : '';
-            $output .= '<option value="' . htmlentities($subnet->subnet) . '"'. $selected .'>' . htmlentities($subnet->category->title) . ':' . htmlentities($subnet->subnet) . '</option>';
+            $output .= '<option value="' . htmlentities($subnet->subnet) . '"'. $selected .'>' . htmlentities($subnet->category->title) . ': ' . htmlentities($subnet->data['name'] ?? $subnet->subnet) . '</option>';
         }
 
         $custom  = in_array('c', $value) ? ' selected' : '';

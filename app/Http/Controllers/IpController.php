@@ -48,12 +48,17 @@ class IpController extends Controller
                     return $request->user()->can('view', $subnet);
                 });
 
-            return view('ips.index', compact('ipCategory', 'subnets'));
+            return view('ip.index', compact('ipCategory', 'subnets'));
         } catch (Exception $e) {
             return redirect()
                 ->home()
                 ->withError('Could not find IP Address');
         }
+    }
+
+    public function create($category)
+    {
+        return view('ip.create', compact('category'));
     }
 
     public function store($category, Request $request)
@@ -63,7 +68,11 @@ class IpController extends Controller
 
             $this->authorize('create', $ipCategory);
 
-            $this->model->createSubnet($request->input('subnet'), $category, $request->user()->id);
+            $first = $this->model->createSubnet($request->input('subnet'), $category, $request->user()->id);
+
+            EncryptedStore::upsert($first, [
+                'name' => $request->input('name') ?: null,
+            ]);
 
             return redirect()
                 ->route('ip.index', $category)
@@ -78,6 +87,76 @@ class IpController extends Controller
                 ->back()
                 ->withInput()
                 ->withError('Error saving IP Address');
+        }
+    }
+
+    public function edit($category, $id)
+    {
+        try {
+            $subnet = IpAddress::where('category_id', $category)
+                ->where('id', $id)
+                ->firstOrFail();
+
+            $first = $subnet->firstInSubnet();
+
+            $data = $first->data;
+            $name = $data['name'] ?? '';
+
+            $allInSubnet = IpAddress::where('subnet', $first->subnet)
+                ->where('category_id', $category)
+                ->pluck('ip', 'id')
+                ->toArray();
+
+            $allReserved = IpAddress::where('subnet', $first->subnet)
+                ->where('category_id', $category)
+                ->where('is_reserved', true)
+                ->whereNull('device_id')
+                ->pluck('id')
+                ->toArray();
+
+            return view('ip.edit', [
+                'ip' => $first,
+                'category' => $category,
+                'allInSubnet' => $allInSubnet,
+                'allReserved' => $allReserved,
+                'name' => $name,
+            ]);
+        } catch (Exception $e) {
+            return redirect()
+                ->route('ip.index', $category)
+                ->withError('Invalid IP subnet');
+        }
+    }
+
+    public function update($id, Request $request)
+    {
+        try {
+            $ip = IpAddress::findOrFail($id);
+
+            $first = $ip->firstInSubnet();
+
+            EncryptedStore::upsert($first, [
+                'name' => $request->input('name') ?: null,
+            ]);
+
+            IpAddress::where('subnet', $first->subnet)
+                ->where('category_id', $first->category_id)
+                ->whereIn('id', $request->input('reserved'))
+                ->update(['is_reserved' => true]);
+
+            IpAddress::where('subnet', $first->subnet)
+                ->where('category_id', $first->category_id)
+                ->whereNotIn('id', $request->input('reserved'))
+                ->update(['is_reserved' => false]);
+
+            return redirect()
+                ->route('ip.index', $first->category_id)
+                ->withSuccess('Subnet has been saved');
+        } catch (Exception $e) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->withError('Error saving IP Subnet');
         }
     }
 
@@ -128,7 +207,7 @@ class IpController extends Controller
                 $allDevices[$device->section->title][] = $device->title;
             }
 
-            return view('ips.subnet', compact('subnet', 'ips', 'ipCategory', 'allDevices', 'ipFields'));
+            return view('ip.subnet', compact('subnet', 'ips', 'ipCategory', 'allDevices', 'ipFields'));
         } catch (Exception $e) {
           return redirect()
               ->home()
@@ -143,6 +222,7 @@ class IpController extends Controller
         $rows = $this->model
             ->where('subnet', $subnet)
             ->whereNull('device_id')
+            ->where('is_reserved', false)
             ->orderBy('id')
             ->get();
 

@@ -51,10 +51,9 @@ class IpAddress extends Model
     /**
      * Decode the data field
      *
-     * @param string $value
      * @return array
      */
-    public function getDataAttribute($value)
+    public function getDataAttribute()
     {
         if (is_null($this->decrypted)) {
             $this->decrypted = EncryptedStore::pull($this);
@@ -62,6 +61,8 @@ class IpAddress extends Model
 
         return $this->decrypted;
     }
+
+
 
     /**
      * Returns all permissions referring to this resource
@@ -84,6 +85,7 @@ class IpAddress extends Model
      * @param string $subnet
      * @param int    $categoryId
      * @param int    $createdBy
+     * @return IpAddress
      * @throws SubnetTooLargeException
      */
     public static function createSubnet($subnet, $categoryId, int $createdBy = null)
@@ -91,6 +93,7 @@ class IpAddress extends Model
         list($ip, $mask) = explode('/', $subnet);
 
         $ipEnc = ip2long($ip);
+        $first = null;
 
         // convert last (32-$mask) bits to zeroes
         $currentIp = $ipEnc | pow(2, (32 - $mask)) - pow(2, (32 - $mask));
@@ -101,13 +104,19 @@ class IpAddress extends Model
         }
 
         for ($pos = 0; $pos < $ipsCount; ++$pos) {
-            self::create([
+            $created = self::create([
                 'ip' => long2ip($currentIp + $pos),
                 'subnet' => $subnet,
                 'category_id' => $categoryId,
                 'created_by' => $createdBy,
             ]);
+
+            if (is_null($first)) {
+                $first = $created;
+            }
         }
+
+        return $first;
     }
 
     /**

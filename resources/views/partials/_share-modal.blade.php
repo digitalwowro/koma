@@ -44,21 +44,21 @@
                                             {!! Form::checkbox('permission', App\Permission::GRANT_TYPE_READ, null, [
                                                 'class' => 'form-control icheck',
                                             ]) !!}
-                                            Read
+                                            Read{{ $create_permissions ? ' all' : '' }}
                                         </label>
                                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         <label>
                                             {!! Form::checkbox('permission', App\Permission::GRANT_TYPE_EDIT, null, [
                                                 'class' => 'form-control icheck',
                                             ]) !!}
-                                            Edit
+                                            Edit{{ $create_permissions ? ' all' : '' }}
                                         </label>
                                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         <label>
                                             {!! Form::checkbox('permission', App\Permission::GRANT_TYPE_DELETE, null, [
                                                 'class' => 'form-control icheck',
                                             ]) !!}
-                                            Delete
+                                            Delete{{ $create_permissions ? ' all' : '' }}
                                         </label>
 
                                         @if ($create_permissions)

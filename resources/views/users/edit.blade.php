@@ -25,5 +25,25 @@
                 {!! Form::close() !!}
             </div>
         </div>
+
+        <div class="box box-danger">
+            <div class="box-header with-border">
+                <h3 class="box-title">Permissions Audit</h3>
+            </div>
+
+            <div class="box-body">
+                <ul>
+                    @forelse (\App\Permission::whereIn('id', collect(\App\Permission::allForUser($user))->pluck('id'))->get() as $share)
+                        <li>
+                            {!! $share->present()->sharedWith !!}
+
+                            ({!! $share->present()->grantThrough(true) !!})
+                        </li>
+                    @empty
+                        <li>User does not have any permissions</li>
+                    @endforelse
+                </ul>
+            </div>
+        </div>
     </section>
 @stop

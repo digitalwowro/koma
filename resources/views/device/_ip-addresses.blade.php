@@ -37,7 +37,7 @@
                                 <select id="subnet-select" class="form-control">
                                 @foreach(App\IpAddress::getSubnetsFor() as $subnet)
                                     @can('edit', $subnet)
-                                        <option value="{{ $subnet->subnet }}">{{ $subnet->category->title }}: {{ $subnet->subnet }}</option>
+                                        <option value="{{ $subnet->subnet }}">{{ $subnet->category->title }}: {{ $subnet->data['name'] ?? $subnet->subnet }}</option>
                                     @endcan
                                 @endforeach
                                 </select>

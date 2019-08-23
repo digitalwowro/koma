@@ -18,7 +18,7 @@
 
                 @can('create', $ipCategory)
                 <div class="filter-block pull-right">
-                    <a class="btn btn-primary pull-right" data-toggle="modal" href="#addSubnetModal">
+                    <a class="btn btn-primary pull-right" href="{{ route('ip.create', $ipCategory->id) }}">
                         <i class="fa fa-plus-circle fa-lg"></i> Add Subnet
                     </a>
                 </div>
@@ -29,6 +29,7 @@
                 <table class="table table-responsive table-hover table-striped{{ $subnets->count() ? ' datatable' : '' }}">
                     <thead>
                     <tr>
+                        <th>Name</th>
                         <th>Subnet</th>
                         <th>Free IPs</th>
                         <th>&nbsp;</th>
@@ -39,6 +40,9 @@
                     @foreach ($subnets as $subnet)
                         @php $displayed++ @endphp
                         <tr>
+                            <td>
+                                {{ $subnet->data['name'] ?? '' }}
+                            </td>
                             <td>
                                 <a href="{{ route('ip.subnet', ['subnet' => str_replace('/', '-', $subnet->subnet)]) }}">
                                     {{ $subnet->subnet }}
@@ -64,6 +68,15 @@
                                     </a>
                                 @endcan
 
+                                @can('edit', $subnet)
+                                    <a href="{{ route('ip.edit', ['category' => $ipCategory->id, 'id' => $subnet->id]) }}" class="table-link" title="Edit">
+                                        <span class="fa-stack">
+                                            <i class="fa fa-square fa-stack-2x"></i>
+                                            <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                @endcan
+
                                 @can('delete', $subnet)
                                     {!! Form::open(['route' => ['ip.destroy', $subnet->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
                                     <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this subnet?')) $(this).closest('form').submit();">
@@ -81,7 +94,7 @@
                     @if (!$displayed)
                         <tr class="norows">
                             <td colspan="3" style="text-align:center;">
-                                There are currently no Subnets added. How about <a data-toggle="modal" href="#addSubnetModal">creating one</a> now?
+                                There are currently no Subnets added. How about <a href="{{ route('ip.create', $ipCategory->id) }}">creating one</a> now?
                             </td>
                         </tr>
                     @endif
@@ -90,8 +103,6 @@
             </div>
         </div>
     </section>
-
-    @include('ips._add-subnet-modal')
 
     @include('partials._share-modal', [
         'resource_type' => 'IP subnet',

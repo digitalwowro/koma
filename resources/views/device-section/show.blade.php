@@ -59,6 +59,26 @@
                     </ul>
                 </div>
             </div>
+
+            <div class="box box-danger">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Device sharing audit</h3>
+                </div>
+
+                <div class="box-body">
+                    <ul>
+                        @forelse ($deviceSection->devicesSharedWith() as $share)
+                            <li>
+                                {!! $share->present()->sharedWith !!}
+
+                                ({!! $share->present()->grantThrough(true) !!})
+                            </li>
+                        @empty
+                            <li>No devices in this section have been shared</li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
         @endcan
 
         <a href="{{ route('device-section.index') }}" class="btn btn-primary">Go Back</a>
