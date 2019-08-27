@@ -43,6 +43,8 @@ class DeviceSectionController extends Controller
 
     public function index()
     {
+        app('encrypt')->disableExceptions();
+
         return view('device-section.index');
     }
 

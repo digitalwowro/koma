@@ -21,6 +21,8 @@ class IpCategoryController extends Controller
 
     public function index()
     {
+        app('encrypt')->disableExceptions();
+
         return view('ip-category.index');
     }
 

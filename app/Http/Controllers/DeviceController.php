@@ -19,6 +19,8 @@ class DeviceController extends Controller
     public function index($type, $category = null)
     {
         try {
+            app('encrypt')->disableExceptions();
+
             $deviceSection = DeviceSection::findOrFail($type);
             $devices = $deviceSection->devices;
 

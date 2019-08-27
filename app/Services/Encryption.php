@@ -15,6 +15,23 @@ use ParagonIE\Halite\Asymmetric\Crypto as Asymmetric;
 class Encryption
 {
     private $keyPair;
+    private $throwException = true;
+
+    /**
+     * Disable throwing exception on decryption failure
+     */
+    public function disableExceptions()
+    {
+        $this->throwException = false;
+    }
+
+    /**
+     * Enable throwing exception on decryption failure
+     */
+    public function enableExceptions()
+    {
+        $this->throwException = true;
+    }
 
     /**
      * @return string
@@ -69,9 +86,27 @@ class Encryption
         return Asymmetric::seal($str, $publicKey);
     }
 
+    /**
+     * Decrypt String
+     *
+     * @param string $str
+     * @return bool|string
+     * @throws \ParagonIE\Halite\Alerts\InvalidKey
+     * @throws \ParagonIE\Halite\Alerts\InvalidMessage
+     * @throws \ParagonIE\Halite\Alerts\InvalidSalt
+     * @throws \ParagonIE\Halite\Alerts\InvalidType
+     */
     public function decrypt($str)
     {
-        return Asymmetric::unseal($str, $this->getKeyPair()->getSecretKey())->getString();
+        if ($this->throwException) {
+            return Asymmetric::unseal($str, $this->getKeyPair()->getSecretKey())->getString();
+        }
+
+        try {
+            return Asymmetric::unseal($str, $this->getKeyPair()->getSecretKey())->getString();
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     /**

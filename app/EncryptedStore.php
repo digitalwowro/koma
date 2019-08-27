@@ -66,22 +66,20 @@ class EncryptedStore extends Model
     /**
      * @param Device|IpAddress $resource
      * @return array
+     * @throws InvalidResourceException
+     * @throws Exception
      */
     public static function pull($resource) : array
     {
-        try {
-            $encrypted = EncryptedStore::where([
-                'user_id' => auth()->id(),
-                'resource_type' => getResourceType($resource),
-                'resource_id' => $resource->id,
-            ])->firstOrFail();
+        $encrypted = EncryptedStore::where([
+            'user_id' => auth()->id(),
+            'resource_type' => getResourceType($resource),
+            'resource_id' => $resource->id,
+        ])->firstOrFail();
 
-            $return = @json_decode(app('encrypt')->decrypt($encrypted->data), true);
+        $return = @json_decode(app('encrypt')->decrypt($encrypted->data), true);
 
-            return is_array($return) ? $return : [];
-        } catch (\Exception $e) {
-            return [];
-        }
+        return is_array($return) ? $return : [];
     }
 
     /**

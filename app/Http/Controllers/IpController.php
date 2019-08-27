@@ -40,6 +40,8 @@ class IpController extends Controller
     public function index($category, Request $request)
     {
         try {
+            app('encrypt')->disableExceptions();
+
             $ipCategory = $this->ipCategory->findOrFail($category);
 
             $subnets = $this->model
