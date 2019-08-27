@@ -25,37 +25,36 @@ class ProfileController extends Controller
     {
         try {
             $user = auth()->user();
+            $password = $request->input('password');
             $data = $request->only(['password', 'name', 'email']);
-
-            if (empty($data['password'])) {
-                unset($data['password']);
-            } else {
-                if ($data['password'] !== $request->input('password_confirmed')) {
-                    throw new ValidationException('Passwords do not match');
-                }
-
-                DB::beginTransaction();
-                $user->public_key = app('encrypt')->changePassword($data['password']);
-            }
 
             $data['profile'] = $this->profileSettings($request, $user->profile);
 
             $user->update($data);
 
-            if (empty($data['password'])) {
+            if (!$password) {
                 return redirect()
                     ->back()
                     ->withSuccess('Your profile has been updated');
-            } else {
-                DB::commit();
-
-                auth()->logoutOtherDevices($data['password']);
-
-                return redirect()
-                    ->back()
-                    ->withSuccess('Your profile has been updated')
-                    ->withCookie(cookie()->forever('key', $data['password']));
             }
+
+            // update password below
+            if ($password !== $request->input('password_confirmed')) {
+                throw new ValidationException('Passwords do not match');
+            }
+
+            DB::beginTransaction();
+
+            $user->public_key = app('encrypt')->changePassword($data['password']);
+
+            auth()->logoutOtherDevices($data['password']);
+
+            DB::commit();
+
+            return redirect()
+                ->back()
+                ->withSuccess('Your profile has been updated')
+                ->withCookie(cookie()->forever('key', $data['password']));
         } catch (QueryException $e) {
             $error = $e->getMessage();
 

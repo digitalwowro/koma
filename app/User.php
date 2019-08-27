@@ -52,16 +52,6 @@ class User extends Model implements AuthenticatableContract,
      *
      * @param string $value
      */
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['password'] = bcrypt($value);
-    }
-
-    /**
-     * Auto encode the data field
-     *
-     * @param string $value
-     */
     public function setProfileAttribute($value)
     {
         $this->attributes['profile'] = json_encode($value);
