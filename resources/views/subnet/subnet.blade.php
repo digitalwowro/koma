@@ -41,11 +41,11 @@
                                 @if (isset($ipData['reserved']) && $ipData['reserved'] === true)
                                     <span class="label label-danger">Reserved</span>
                                 @elseif (!empty($ipData['device_id']) && !empty($ipData['device']))
-                                    assigned to <a href="{{ route('device.edit', $ipData['device']->id) }}">{{ $ipData['device']->present()->humanIdField }}</a>
+                                    <span class="label label-warning">assigned</span> to <a href="{{ route('device.edit', $ipData['device']->id) }}">{{ $ipData['device']->present()->humanIdField }}</a>
                                 @elseif (!empty($ipData['device_id']))
-                                    assigned to <i class="fa fa-question-circle"></i>
+                                    <span class="label label-warning">assigned</span> to <i class="fa fa-question-circle"></i>
                                 @else
-                                    <span class="label label-warning">Unassigned</span>
+                                    <span class="label label-success">Unassigned</span>
                                 @endif
                             </td>
                             @foreach ($ipFields as $ipField)
