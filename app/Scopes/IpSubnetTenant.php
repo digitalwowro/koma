@@ -3,14 +3,14 @@
 namespace App\Scopes;
 
 use App\Device;
-use App\IpAddress;
+use App\IpSubnet;
 use App\IpCategory;
 use App\Permission;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
-class IpAddressTenant implements Scope
+class IpSubnetTenant implements Scope
 {
     /**
      * Apply the scope to a given Eloquent query builder.
@@ -21,9 +21,7 @@ class IpAddressTenant implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $user = auth()->user();
-
-        if (!$user) {
+        if (!$user = auth()->user()) {
             return;
         }
 
@@ -41,7 +39,7 @@ class IpAddressTenant implements Scope
         }
 
         if (count($categories)) {
-            $accessibleIds = IpAddress::withoutGlobalScope(IpAddressTenant::class)
+            $accessibleIds = IpSubnet::withoutGlobalScope(IpSubnetTenant::class)
                 ->whereIn('category_id', $categories)
                 ->pluck('id')
                 ->merge($accessibleIds)
@@ -49,16 +47,6 @@ class IpAddressTenant implements Scope
                 ->toArray();
         }
 
-        $builder->where(function($query) use ($accessibleIds) {
-            $query
-                ->where(function($query) {
-                    $accessibleDevices = Device::pluck('id');
-
-                    $query
-                        ->whereNull('subnet')
-                        ->whereIn('device_id', $accessibleDevices);
-                })
-                ->orWhereIn('id', $accessibleIds);
-        });
+        $builder->whereIn('id', $accessibleIds);
     }
 }

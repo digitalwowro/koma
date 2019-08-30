@@ -48,7 +48,7 @@
                                     </span>
                                 </a>
                                 {!! Form::open(['route' => ['ip-fields.destroy', $field->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
-                                <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this category?')) $(this).closest('form').submit();">
+                                <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this category?')) $(this).closest('form').submit(); return false;">
                                     <span class="fa-stack">
                                         <i class="fa fa-square fa-stack-2x"></i>
                                         <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>

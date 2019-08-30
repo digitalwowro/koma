@@ -34,6 +34,16 @@ class Encryption
     }
 
     /**
+     * Returns whether exception throwing is enabled
+     *
+     * @return bool
+     */
+    public function getExceptions()
+    {
+        return $this->throwException;
+    }
+
+    /**
      * @return string
      */
     public function securityLevel()

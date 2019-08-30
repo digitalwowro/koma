@@ -27,16 +27,6 @@ class IpCategory extends Model
     }
 
     /**
-     * Relationship with IpAddress
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function ips()
-    {
-        return $this->hasMany('App\IpAddress', 'category_id');
-    }
-
-    /**
      * Relationship with User
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

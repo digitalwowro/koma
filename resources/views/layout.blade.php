@@ -154,7 +154,7 @@
                 </li>
 
                 @php
-                    $isActive = !!is_route('ip.*');
+                    $isActive = !!is_route('subnet.*');
                 @endphp
                 <li class="treeview{{ $isActive ? ' active' : '' }}">
                     <a href="#">
@@ -168,7 +168,7 @@
                         @foreach ($ipCategories as $ipCategory)
                             @if (auth()->user()->ipCategoryVisible($ipCategory->id))
                                 <li class="{{ $isActive && request()->route()->parameter('category') == $ipCategory->id ? 'active' : '' }}">
-                                    <a href="{{ route('ip.index', $ipCategory->id) }}" {!! is_route('ip.index', true, ['category' => $ipCategory->id]) !!}>
+                                    <a href="{{ route('subnet.index', $ipCategory->id) }}" {!! is_route('subnet.index', true, ['category' => $ipCategory->id]) !!}>
                                         {{ $ipCategory->title }}
                                     </a>
                                 </li>

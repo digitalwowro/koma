@@ -6,8 +6,8 @@
             'class' => 'form-control',
             'id' => 'subnet',
             'placeholder' => '127.0.0.1/32',
-            'required' => empty($ip),
-            'disabled' => isset($ip),
+            'required' => empty($subnet),
+            'disabled' => isset($subnet),
         ]) !!}
     </div>
 </div>
@@ -16,7 +16,7 @@
     <label for="name" class="col-lg-2 control-label">Name (optional)</label>
 
     <div class="col-lg-10">
-        {!! Form::text('name', $name ?? null, [
+        {!! Form::text('name', $subnet->data['name'] ?? null, [
             'class' => 'form-control',
             'id' => 'name',
             'placeholder' => 'My first IP subnet',
@@ -42,8 +42,8 @@
 
 <div class="form-group">
     <div class="col-lg-10 col-lg-offset-2">
-        <button type="submit" class="btn btn-primary">{{ isset($ip) ? 'Save' : 'Add' }}</button>
-        <a href="{{ route('ip.index',  $category) }}" class="btn btn-default">Cancel</a>
+        <button type="submit" class="btn btn-primary">{{ isset($subnet) ? 'Save' : 'Add' }}</button>
+        <a href="{{ route('subnet.index',  $category) }}" class="btn btn-default">Cancel</a>
     </div>
 </div>
 

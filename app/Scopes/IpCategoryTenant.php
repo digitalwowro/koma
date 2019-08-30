@@ -2,7 +2,7 @@
 
 namespace App\Scopes;
 
-use App\IpAddress;
+use App\IpSubnet;
 use App\Permission;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Database\Eloquent\Model;
@@ -19,9 +19,7 @@ class IpCategoryTenant implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $user = auth()->user();
-
-        if (!$user) {
+        if (!$user = auth()->user()) {
             return;
         }
 
@@ -37,7 +35,7 @@ class IpCategoryTenant implements Scope
         }
 
         if (count($subnets)) {
-            $accessibleIds = IpAddress::withoutGlobalScope(IpAddressTenant::class)
+            $accessibleIds = IpSubnet::withoutGlobalScope(IpSubnetTenant::class)
                 ->whereIn('id', $subnets)
                 ->pluck('category_id')
                 ->merge($accessibleIds)

@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Device;
 use App\EncryptedStore;
-use App\IpAddress;
+use App\IpSubnet;
 use App\Permission;
 use App\User;
 use Exception;
@@ -57,11 +57,11 @@ class PermissionSync
             } elseif ($resourceType === Permission::RESOURCE_TYPE_DEVICE) {
                 $queries[] = Device::where('id', $resourceId);
             } elseif ($resourceType === Permission::RESOURCE_TYPE_IP_CATEGORY) {
-                $queries[] = IpAddress::where('category_id', $resourceId);
+                $queries[] = IpSubnet::where('category_id', $resourceId);
             } elseif ($resourceType === Permission::RESOURCE_TYPE_IP_SUBNET) {
-                $ip = IpAddress::find($resourceId);
+                $ip = IpSubnet::find($resourceId);
 
-                $queries[] = IpAddress::where([
+                $queries[] = IpSubnet::where([
                     'subnet' => $ip->subnet,
                     'category_id' => $ip->category_id,
                 ]);

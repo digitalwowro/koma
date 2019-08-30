@@ -19,9 +19,7 @@ class DeviceSectionTenant implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $user = auth()->user();
-
-        if (!$user) {
+        if (!$user = auth()->user()) {
             return;
         }
 
@@ -50,6 +48,5 @@ class DeviceSectionTenant implements Scope
                 ->where('owner_id', $user->id)
                 ->orWhereIn('id', $accessibleIds);
         });
-
     }
 }

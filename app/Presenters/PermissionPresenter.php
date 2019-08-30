@@ -92,7 +92,7 @@ class PermissionPresenter extends Presenter
                     $resource = $this->entity->getResource();
 
                     if ($resource) {
-                        $url = route('ip.edit', ['category' => $resource->category_id, 'id' => $resource->id]);
+                        $url = route('subnet.edit', ['category' => $resource->category_id, 'id' => $resource->id]);
 
                         $identifier = isset($resource->data['name'])
                             ? $resource->data['name']

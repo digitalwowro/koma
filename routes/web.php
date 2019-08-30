@@ -27,15 +27,15 @@ Route::group(['middleware' => 'auth'], function() {
     Route::put   ('/device/{id}',               ['as' => 'device.update',  'uses' => 'DeviceController@update']);
     Route::delete('/device/{id}',               ['as' => 'device.destroy', 'uses' => 'DeviceController@destroy']);
 
-    Route::get   ('/ip/subnet/{subnet}/list', ['as' => 'ip.subnet-list', 'uses' => 'IpController@subnetList']);
-    Route::get   ('/ip/subnet/{subnet}',      ['as' => 'ip.subnet',      'uses' => 'IpController@subnet']);
-    Route::get   ('/ip/{category}/create',    ['as' => 'ip.create',      'uses' => 'IpController@create']);
-    Route::get   ('/ip/{id}/show',            ['as' => 'ip.show',        'uses' => 'IpController@show']);
-    Route::get   ('/ip/{category}',           ['as' => 'ip.index',       'uses' => 'IpController@index']);
-    Route::post  ('/ip/{category}',           ['as' => 'ip.store',       'uses' => 'IpController@store']);
-    Route::get   ('/ip/{category}/{id}/edit', ['as' => 'ip.edit',        'uses' => 'IpController@edit']);
-    Route::put   ('/ip/{id}',                 ['as' => 'ip.update',      'uses' => 'IpController@update']);
-    Route::delete('/ip/{id}',                 ['as' => 'ip.destroy',     'uses' => 'IpController@destroy']);
+    Route::get   ('/subnet/subnet/{subnet}/list', ['as' => 'subnet.subnet-list', 'uses' => 'SubnetController@subnetList']);
+    Route::get   ('/subnet/subnet/{subnet}',      ['as' => 'subnet.subnet',      'uses' => 'SubnetController@subnet']);
+    Route::get   ('/subnet/{category}/create',    ['as' => 'subnet.create',      'uses' => 'SubnetController@create']);
+    Route::get   ('/subnet/{id}/show',            ['as' => 'subnet.show',        'uses' => 'SubnetController@show']);
+    Route::get   ('/subnet/{category}',           ['as' => 'subnet.index',       'uses' => 'SubnetController@index']);
+    Route::post  ('/subnet/{category}',           ['as' => 'subnet.store',       'uses' => 'SubnetController@store']);
+    Route::get   ('/subnet/{category}/{id}/edit', ['as' => 'subnet.edit',        'uses' => 'SubnetController@edit']);
+    Route::put   ('/subnet/{id}',                 ['as' => 'subnet.update',      'uses' => 'SubnetController@update']);
+    Route::delete('/subnet/{id}',                 ['as' => 'subnet.destroy',     'uses' => 'SubnetController@destroy']);
 
     Route::post('/share/with', ['as' => 'share.with', 'uses' => 'ShareController@with']);
     Route::post('/share/post', ['as' => 'share.post', 'uses' => 'ShareController@post']);

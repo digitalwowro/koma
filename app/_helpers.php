@@ -3,7 +3,7 @@
 use App\Device;
 use App\DeviceSection;
 use App\Exceptions\InvalidResourceException;
-use App\IpAddress;
+use App\IpSubnet;
 use App\IpCategory;
 use App\Permission;
 
@@ -115,7 +115,7 @@ function getResourceType($resource, $withCategories = false)
 {
     if ($resource instanceof Device) {
         return Permission::RESOURCE_TYPE_DEVICE;
-    } elseif ($resource instanceof IpAddress) {
+    } elseif ($resource instanceof IpSubnet) {
         return Permission::RESOURCE_TYPE_IP_SUBNET;
     } elseif ($withCategories && $resource instanceof DeviceSection) {
         return Permission::RESOURCE_TYPE_DEVICE_SECTION;

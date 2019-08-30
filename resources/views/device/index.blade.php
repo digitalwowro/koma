@@ -75,72 +75,65 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @php $displayed = 0 @endphp
-                    @foreach ($devices as $device)
-                        @can('view', $device)
-                            @php $displayed++ @endphp
-
-                            <tr>
-                                @foreach ($deviceSection->fields as $field)
-                                    @if ($field->showInDeviceList())
-                                        <td>
-                                            @if (method_exists($field, 'customDeviceListContent'))
-                                                {!! $field->customDeviceListContent($device) !!}
-                                            @elseif (isset($device->data[$field->getInputName()]))
-                                                @if (is_array($device->data[$field->getInputName()]))
-                                                    {!! urlify(implode(', ', $device->data[$field->getInputName()])) !!}
-                                                @else
-                                                    {!! urlify($device->data[$field->getInputName()]) !!}
-                                                @endif
+                    @forelse ($devices as $device)
+                        <tr>
+                            @foreach ($deviceSection->fields as $field)
+                                @if ($field->showInDeviceList())
+                                    <td>
+                                        @if (method_exists($field, 'customDeviceListContent'))
+                                            {!! $field->customDeviceListContent($device) !!}
+                                        @elseif (isset($device->data[$field->getInputName()]))
+                                            @if (is_array($device->data[$field->getInputName()]))
+                                                {!! urlify(implode(', ', $device->data[$field->getInputName()])) !!}
                                             @else
-                                                -
+                                                {!! urlify($device->data[$field->getInputName()]) !!}
                                             @endif
-                                        </td>
-                                    @endif
-                                @endforeach
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                @endif
+                            @endforeach
 
-                                <td style="width: 1%; white-space: nowrap;">
-                                    <a href="{{ route('device.show', $device->id) }}" class="table-link" title="View">
-                                        <span class="fa-stack">
-                                            <i class="fa fa-square fa-stack-2x"></i>
-                                            <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
-                                        </span>
-                                    </a>
+                            <td style="width: 1%; white-space: nowrap;">
+                                <a href="{{ route('device.show', $device->id) }}" class="table-link" title="View">
+                                    <span class="fa-stack">
+                                        <i class="fa fa-square fa-stack-2x"></i>
+                                        <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
 
-                                    @can('share', $device)
-                                    <a href="#" class="table-link share-item" title="Share" data-id="{{ $device->id }}" data-human-id="{{ $device->present()->humanIdField($deviceSection) }}">
-                                        <span class="fa-stack">
-                                            <i class="fa fa-square fa-stack-2x"></i>
-                                            <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
-                                        </span>
-                                    </a>
-                                    @endcan
+                                @can('share', $device)
+                                <a href="#" class="table-link share-item" title="Share" data-id="{{ $device->id }}" data-human-id="{{ $device->present()->humanIdField($deviceSection) }}">
+                                    <span class="fa-stack">
+                                        <i class="fa fa-square fa-stack-2x"></i>
+                                        <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                                @endcan
 
-                                    @can('edit', $device)
-                                    <a href="{{ route('device.edit', $device->id) }}" class="table-link" title="Edit">
-                                        <span class="fa-stack">
-                                            <i class="fa fa-square fa-stack-2x"></i>
-                                            <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
-                                        </span>
-                                    </a>
-                                    @endcan
+                                @can('edit', $device)
+                                <a href="{{ route('device.edit', $device->id) }}" class="table-link" title="Edit">
+                                    <span class="fa-stack">
+                                        <i class="fa fa-square fa-stack-2x"></i>
+                                        <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                                @endcan
 
-                                    @can('delete', $device)
-                                    {!! Form::open(['route' => ['device.destroy', $device->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
-                                    <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this device?')) $(this).closest('form').submit();" title="Delete">
-                                        <span class="fa-stack">
-                                            <i class="fa fa-square fa-stack-2x"></i>
-                                            <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
-                                        </span>
-                                    </a>
-                                    {!! Form::close() !!}
-                                    @endcan
-                                </td>
-                            </tr>
-                        @endcan
-                    @endforeach
-
-                    @if (!$displayed)
+                                @can('delete', $device)
+                                {!! Form::open(['route' => ['device.destroy', $device->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
+                                <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this device?')) $(this).closest('form').submit(); return false;" title="Delete">
+                                    <span class="fa-stack">
+                                        <i class="fa fa-square fa-stack-2x"></i>
+                                        <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                                {!! Form::close() !!}
+                                @endcan
+                            </td>
+                        </tr>
+                    @empty
                         <tr class="norows">
                             <td colspan="{{ $colspan }}" style="text-align:center;">
                                 There are currently no devices added. How about
@@ -154,7 +147,7 @@
                                 now?
                             </td>
                         </tr>
-                    @endif
+                    @endforelse
                     </tbody>
                 </table>
             </div>

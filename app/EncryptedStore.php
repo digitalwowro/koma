@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Exceptions\InvalidResourceException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EncryptedStore extends Model
 {
@@ -43,8 +44,8 @@ class EncryptedStore extends Model
     }
 
     /**
-     * @param Device|IpAddress $resource
-     * @param array            $data
+     * @param Device|IpSubnet $resource
+     * @param array           $data
      * @return void
      * @throws InvalidResourceException
      */
@@ -64,22 +65,32 @@ class EncryptedStore extends Model
     }
 
     /**
-     * @param Device|IpAddress $resource
+     * @param Device|IpSubnet $resource
      * @return array
      * @throws InvalidResourceException
-     * @throws Exception
+     * @throws ModelNotFoundException
      */
     public static function pull($resource) : array
     {
+        $encryption = app('encrypt');
+
         $encrypted = EncryptedStore::where([
             'user_id' => auth()->id(),
             'resource_type' => getResourceType($resource),
             'resource_id' => $resource->id,
-        ])->firstOrFail();
+        ])->first();
 
-        $return = @json_decode(app('encrypt')->decrypt($encrypted->data), true);
+        if ($encrypted) {
+            $return = @json_decode($encryption->decrypt($encrypted->data), true);
 
-        return is_array($return) ? $return : [];
+            return is_array($return) ? $return : [];
+        }
+
+        if ($encryption->getExceptions()) {
+            throw (new ModelNotFoundException)->setModel(EncryptedStore::class);
+        }
+
+        return [];
     }
 
     /**

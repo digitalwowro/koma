@@ -87,6 +87,8 @@ class DeviceSectionController extends Controller
     public function edit($id)
     {
         try {
+            app('encrypt')->disableExceptions();
+
             $deviceSection = DeviceSection::findOrFail($id);
 
             $this->authorize('manage', $deviceSection);
@@ -157,6 +159,8 @@ class DeviceSectionController extends Controller
     public function getOptions(Request $request)
     {
         try {
+            app('encrypt')->disableExceptions();
+
             $type = $request->input('type');
             $index = $request->input('index');
             $field = Factory::generate('', 'tmp', $type);

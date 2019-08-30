@@ -6,7 +6,7 @@ use App\Device;
 use App\DeviceSection;
 use App\EncryptedStore;
 use App\Group;
-use App\IpAddress;
+use App\IpSubnet;
 use App\IpCategory;
 use App\Permission;
 use App\User;
@@ -31,7 +31,7 @@ class Sharing
             ], [
                 'data' => app('encrypt')->encryptForUser($data, $user),
             ]);
-        } elseif ($resource instanceof IpAddress) {
+        } elseif ($resource instanceof IpSubnet) {
             $data = json_encode($resource->data);
 
             EncryptedStore::updateOrCreate([
@@ -45,9 +45,9 @@ class Sharing
     }
 
     /**
-     * @param User|Group $grantee
-     * @param Device|DeviceSection|IpAddress|IpCategory $resource
-     * @param array $grantType
+     * @param User|Group                               $grantee
+     * @param Device|DeviceSection|IpSubnet|IpCategory $resource
+     * @param array                                    $grantType
      * @throws Exception
      */
     public function share($grantee, $resource, array $grantType = []) {
@@ -59,7 +59,7 @@ class Sharing
             $resourceType = Permission::RESOURCE_TYPE_DEVICE;
         } elseif ($resource instanceof DeviceSection) {
             $resourceType = Permission::RESOURCE_TYPE_DEVICE_SECTION;
-        } elseif ($resource instanceof IpAddress) {
+        } elseif ($resource instanceof IpSubnet) {
             $resourceType = Permission::RESOURCE_TYPE_IP_SUBNET;
         } elseif ($resource instanceof IpCategory) {
             $resourceType = Permission::RESOURCE_TYPE_IP_CATEGORY;
@@ -118,7 +118,7 @@ class Sharing
                     $resource = IpCategory::find($permission['resource_id']);
                     break;
                 case Permission::RESOURCE_TYPE_IP_SUBNET:
-                    $resource = IpAddress::find($permission['resource_id']);
+                    $resource = IpSubnet::find($permission['resource_id']);
                     break;
             }
 

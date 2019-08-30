@@ -204,8 +204,8 @@ class Permission extends Model
                 ->toArray();
 
             $userIds[] = self::userIdsFromPermissionList($list);
-        } elseif ($resource instanceof IpAddress || $resource instanceof IpCategory) {
-            $category = $resource instanceof IpAddress
+        } elseif ($resource instanceof IpSubnet || $resource instanceof IpCategory) {
+            $category = $resource instanceof IpSubnet
                 ? $resource->category
                 : $resource;
 
@@ -215,11 +215,14 @@ class Permission extends Model
 
             $list = self::select('user_id', 'group_id')
                 ->where(function($query) use ($category) {
-                    $subnetIds = IpAddress::getSubnetsFor($category->id)->pluck('id');
-
                     $query
                         ->where('resource_type', self::RESOURCE_TYPE_IP_SUBNET)
-                        ->whereIn('resource_id', $subnetIds);
+                        ->whereIn('resource_id', function($query) use ($category) {
+                            $query
+                                ->select('id')
+                                ->where('category_id', $category->id)
+                                ->from('ip_subnets');
+                        });
                 })
                 ->orWhere(function($query) use ($category) {
                     $query->where([
@@ -249,7 +252,7 @@ class Permission extends Model
             case self::RESOURCE_TYPE_IP_CATEGORY:
                 return IpCategory::find($this->resource_id);
             case self::RESOURCE_TYPE_IP_SUBNET:
-                return IpAddress::find($this->resource_id);
+                return IpSubnet::find($this->resource_id);
         }
     }
 
@@ -313,10 +316,10 @@ class Permission extends Model
             return false;
         }
 
-        // allow custom IPs
-        if ($resource instanceof IpAddress && !$resource->subnet) {
-            $resource = $resource->device;
-        }
+        // @todo allow custom IPs
+        //if ($resource instanceof IpSubnet && !$resource->subnet) {
+        //    $resource = $resource->device;
+        //}
 
         if ($resource->isOwner($user)) {
             return true;
@@ -343,14 +346,12 @@ class Permission extends Model
                 if ($permission['resource_type'] === self::RESOURCE_TYPE_IP_CATEGORY && $permission['resource_id'] == $resource->id) {
                     return true;
                 }
-            } elseif ($resource instanceof IpAddress) {
-                $firstInSubnet = $resource->firstInSubnet();
-
-                if ($permission['resource_type'] === self::RESOURCE_TYPE_IP_CATEGORY && $permission['resource_id'] == $firstInSubnet->category_id) {
+            } elseif ($resource instanceof IpSubnet) {
+                if ($permission['resource_type'] === self::RESOURCE_TYPE_IP_CATEGORY && $permission['resource_id'] == $resource->category_id) {
                     return true;
                 }
 
-                if ($permission['resource_type'] === self::RESOURCE_TYPE_IP_SUBNET && $permission['resource_id'] === $firstInSubnet->id) {
+                if ($permission['resource_type'] === self::RESOURCE_TYPE_IP_SUBNET && $permission['resource_id'] === $resource->id) {
                     return true;
                 }
             }

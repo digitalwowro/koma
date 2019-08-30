@@ -48,16 +48,6 @@ class Device extends Model
     }
 
     /**
-     * Relationship with IpAddress
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function ips()
-    {
-        return $this->hasMany('App\IpAddress');
-    }
-
-    /**
      * Decode the data field
      *
      * @return array
@@ -93,5 +83,75 @@ class Device extends Model
     public function isOwner(User $user)
     {
         return $this->section->owner_id === $user->id;
+    }
+
+    public function ips() : array
+    {
+        $results = [];
+
+        IpSubnet::each(function($subnet) use (&$results) {
+            if (empty($subnet->data) || !isset($subnet->data['assigned']) || !is_array($subnet->data['assigned'])) {
+                return;
+            }
+
+            foreach ($subnet->data['assigned'] as $key => $assignment) {
+                if (!is_array($assignment) || empty($assignment['device_id'])) {
+                    continue;
+                }
+
+                if ($assignment['device_id'] === $this->id) {
+                    $results[] = [
+                        'ip' => $key,
+                        'subnet' => $subnet,
+                    ];
+                }
+            }
+        });
+
+        $customIps = $this->data['ips'] ?? [];
+
+        foreach ($customIps as $ip) {
+            if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+                continue;
+            }
+
+            $results[] = [
+                'ip' => $ip,
+                'custom' => true,
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
+     * @param IpField $field
+     * @return string
+     */
+    public function ipFieldValue(IpField $field)
+    {
+        $deviceType = $this->section_id;
+
+        if (isset($field->bindings[$deviceType])) {
+            $bindTo = $field->bindings[$deviceType];
+
+            foreach ($this->section->fields as $deviceField) {
+                if ($deviceField->getInputName() == $bindTo) {
+                    if (method_exists($deviceField, 'customDeviceListContent')) {
+                        return $deviceField->customDeviceListContent($this);
+                    } elseif (isset($this->data[$deviceField->getInputName()])) {
+                        if (is_array($this->data[$deviceField->getInputName()])) {
+                            return urlify(implode(', ', $this->data[$deviceField->getInputName()]));
+                        } else {
+                            return urlify($this->data[$deviceField->getInputName()]);
+                        }
+                    } else {
+                        return '-';
+                    }
+                }
+            }
+        }
+
+        return '-';
     }
 }

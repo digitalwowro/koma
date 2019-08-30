@@ -5,16 +5,16 @@
 
     <div class="box-body">
         <ul id="ip-list">
-            <li class="{{ isset($device) && $device->ips->count() ? 'hidden' : '' }}" style="font-size:.9em; color:grey; font-style: italic;">- no IP address currently assigned -</li>
+            <li class="{{ isset($device) && count($device->ips()) ? 'hidden' : '' }}" style="font-size:.9em; color:grey; font-style: italic;">- no IP address currently assigned -</li>
 
             @if (isset($device))
-                @foreach ($device->ips as $ip)
+                @foreach ($device->ips() as $ip)
                 <li>
-                    {{ $ip->ip }}
-                    @can('edit', $ip)
-                    <a href="#" data-action="unassign-ip" data-unassign-id="{{ $ip->id }}"><i class="fa fa-trash-o"></i></a>
-                    @endcan
-                    <input type="hidden" name="ips[]" value="{{ $ip->isCustom() ? $ip->ip : $ip->id }}">
+                    {{ $ip['ip'] }}
+                    @if (isset($ip['custom']) && $ip['custom'] === true || isset($ip['subnet']) && auth()->user()->can('edit', $ip['subnet']))
+                    <a href="#" data-action="unassign-ip" data-unassign-id="{{ isset($ip['subnet']) ? "{$ip['subnet']->id}|" : '' }}{{ $ip['ip'] }}"><i class="fa fa-trash-o"></i></a>
+                    @endif
+                    <input type="hidden" name="ips[]" value="{{ isset($ip['subnet']) ? "{$ip['subnet']->id}|" : '' }}{{ $ip['ip'] }}">
                 </li>
                 @endforeach
             @endif
@@ -35,10 +35,12 @@
                             <div class="col-xs-6">
                                 <h4>Search By Subnet</h4>
                                 <select id="subnet-select" class="form-control">
-                                @foreach(App\IpAddress::getSubnetsFor() as $subnet)
+                                @foreach(App\IpSubnet::all() as $subnet)
+                                    @if ($subnet->subnet)
                                     @can('edit', $subnet)
-                                        <option value="{{ $subnet->subnet }}">{{ $subnet->category->title }}: {{ $subnet->data['name'] ?? $subnet->subnet }}</option>
+                                        <option value="{{ $subnet->id }}">{{ $subnet->category->title }}: {{ $subnet->data['name'] ?? $subnet->subnet }}</option>
                                     @endcan
+                                    @endif
                                 @endforeach
                                 </select>
                             </div>
@@ -90,8 +92,8 @@
             $('#ip-select').select2();
 
             $('#subnet-select').select2().change(function() {
-                var val = $(this).val() ? $(this).val().replace('/', '-') : $(this).val(),
-                    url = '{{ route('ip.subnet-list', '_SUB_') }}'.replace('_SUB_', val),
+                var val = $(this).val(),
+                    url = '{{ route('subnet.subnet-list', '_SUB_') }}'.replace('_SUB_', val),
                     $select = $('#ip-select');
 
                 $select.find('option').remove();
@@ -99,7 +101,7 @@
 
                 $.get(url, function(r) {
                     $.each(r, function(i, ip) {
-                        $select.append('<option value="' + ip.id + '">' + ip.ip + '</option>');
+                        $select.append('<option value="' + val + '|' + ip + '">' + ip + '</option>');
                     });
 
                     $select.trigger('change');

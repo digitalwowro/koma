@@ -6,7 +6,7 @@
 
         <ol class="breadcrumb">
             <li><a href="{{ route('home') }}">Home</a></li>
-            <li><a href="{{ route('ip.index', $category) }}"><span>IP Subnets</span></a></li>
+            <li><a href="{{ route('subnet.index', $category) }}"><span>IP Subnets</span></a></li>
             <li class="active"><span>Edit Item</span></li>
         </ol>
     </section>
@@ -18,8 +18,8 @@
             </div>
 
             <div class="box-body">
-                {!! Form::model($ip, ['route' => ['ip.update', $ip->id], 'method' => 'PUT', 'class' => 'form-horizontal', 'role' => 'form']) !!}
-                @include('ip._form')
+                {!! Form::model($subnet, ['route' => ['subnet.update', $subnet->id], 'method' => 'PUT', 'class' => 'form-horizontal', 'role' => 'form']) !!}
+                @include('subnet._form')
                 {!! Form::close() !!}
             </div>
         </div>

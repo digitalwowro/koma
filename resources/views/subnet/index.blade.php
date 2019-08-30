@@ -18,7 +18,7 @@
 
                 @can('create', $ipCategory)
                 <div class="filter-block pull-right">
-                    <a class="btn btn-primary pull-right" href="{{ route('ip.create', $ipCategory->id) }}">
+                    <a class="btn btn-primary pull-right" href="{{ route('subnet.create', $ipCategory->id) }}">
                         <i class="fa fa-plus-circle fa-lg"></i> Add Subnet
                     </a>
                 </div>
@@ -36,23 +36,21 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @php $displayed = 0 @endphp
-                    @foreach ($subnets as $subnet)
-                        @php $displayed++ @endphp
+                    @forelse ($subnets as $subnet)
                         <tr>
                             <td>
                                 {{ $subnet->data['name'] ?? '' }}
                             </td>
                             <td>
-                                <a href="{{ route('ip.subnet', ['subnet' => str_replace('/', '-', $subnet->subnet)]) }}">
+                                <a href="{{ route('subnet.subnet', $subnet->id) }}">
                                     {{ $subnet->subnet }}
                                 </a>
                             </td>
                             <td>
-                                {{ App\IpAddress::getFreeForSubnet($subnet->subnet) }} / {{ $subnet->count }}
+                                {{ $subnet->present()->freeIps }}
                             </td>
                             <td style="width: 1%; white-space: nowrap;">
-                                <a href="{{ route('ip.subnet', ['subnet' => str_replace('/', '-', $subnet->subnet)]) }}" class="table-link">
+                                <a href="{{ route('subnet.subnet', $subnet->id) }}" class="table-link">
                                     <span class="fa-stack">
                                         <i class="fa fa-square fa-stack-2x"></i>
                                         <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
@@ -69,7 +67,7 @@
                                 @endcan
 
                                 @can('edit', $subnet)
-                                    <a href="{{ route('ip.edit', ['category' => $ipCategory->id, 'id' => $subnet->id]) }}" class="table-link" title="Edit">
+                                    <a href="{{ route('subnet.edit', ['category' => $ipCategory->id, 'id' => $subnet->id]) }}" class="table-link" title="Edit">
                                         <span class="fa-stack">
                                             <i class="fa fa-square fa-stack-2x"></i>
                                             <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
@@ -78,8 +76,8 @@
                                 @endcan
 
                                 @can('delete', $subnet)
-                                    {!! Form::open(['route' => ['ip.destroy', $subnet->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
-                                    <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this subnet?')) $(this).closest('form').submit();">
+                                    {!! Form::open(['route' => ['subnet.destroy', $subnet->id], 'method' => 'DELETE', 'style' => 'display: inline;']) !!}
+                                    <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to delete this subnet?')) $(this).closest('form').submit(); return false;">
                                         <span class="fa-stack">
                                             <i class="fa fa-square fa-stack-2x"></i>
                                             <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
@@ -89,15 +87,13 @@
                                 @endcan
                             </td>
                         </tr>
-                    @endforeach
-
-                    @if (!$displayed)
+                    @empty
                         <tr class="norows">
-                            <td colspan="3" style="text-align:center;">
-                                There are currently no Subnets added. How about <a href="{{ route('ip.create', $ipCategory->id) }}">creating one</a> now?
+                            <td colspan="4" style="text-align:center;">
+                                There are currently no subnets added. How about <a href="{{ route('subnet.create', $ipCategory->id) }}">creating one</a> now?
                             </td>
                         </tr>
-                    @endif
+                    @endforelse
                     </tbody>
                 </table>
             </div>

@@ -7,7 +7,7 @@ use App\DeviceSection;
 use App\Group;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use App\IpAddress;
+use App\IpSubnet;
 use App\IpCategory;
 use App\User;
 use Exception;
@@ -27,7 +27,7 @@ class ShareController extends Controller
             case 'section':
                 return DeviceSection::findOrFail($id);
             case 'subnet':
-                return IpAddress::findOrFail($id);
+                return IpSubnet::findOrFail($id);
             case 'category':
                 return IpCategory::findOrFail($id);
         }

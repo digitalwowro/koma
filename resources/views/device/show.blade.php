@@ -42,15 +42,15 @@
 
         <div class="box box-warning">
             <div class="box-header with-border">
-                <h3 class="box-title">Associated IP Addresses</h3>
+                <h3 class="box-title">Assigned IP Addresses</h3>
             </div>
 
             <div class="box-body">
                 <ul>
-                    @forelse ($device->ips as $ip)
-                        <li>{{ $ip->ip }}</li>
+                    @forelse ($device->ips() as $ipData)
+                        <li>{{ $ipData['ip'] }}</li>
                     @empty
-                        <li style="font-size:.9em; color:grey; font-style: italic;">there are no IP Addresses associated to this device</li>
+                        <li style="font-size:.9em; color:grey; font-style: italic;">there are no IP addresses assigned to this device</li>
                     @endforelse
                 </ul>
             </div>

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Device;
 use App\DeviceSection;
 use App\EncryptedStore;
-use App\IpAddress;
+use App\IpSubnet;
 use App\Permission;
 use App\User;
 use Exception;
@@ -78,61 +78,6 @@ class DeviceController extends Controller
             return redirect()
                 ->back()
                 ->withError('Could not find device section');
-        }
-    }
-
-    /**
-     * Assign list of IPs to given device
-     * Also creates single IPs as needed
-     *
-     * @param array       $ipArray
-     * @param \App\Device $device
-     * @param Uesr        $assignedBy
-     * @throws Exception
-     */
-    private function assignIpsToDevice(array $ipArray, Device $device, User $assignedBy)
-    {
-        $idArray = [];
-
-        foreach ($ipArray as $key => $ip) {
-            if (is_numeric($ip)) {
-                $idArray[] = $ip;
-                unset($ipArray[$key]);
-            } else {
-                if ($existingIp = IpAddress::where('ip', $ipArray)->first()) {
-                    $idArray[] = $existingIp->id;
-                    unset($ipArray[$key]);
-                }
-            }
-        }
-
-        $ips = IpAddress::whereIn('id', $idArray)->get();
-
-        // preset IPs
-        foreach ($ips as $ip) {
-            if ($ip->assigned()) {
-                continue;
-            }
-
-            if ($assignedBy->cannot('edit', $ip)) {
-                continue;
-            }
-
-            $ip->device_id = $device->id;
-            $ip->save();
-        }
-
-        // custom IPs
-        foreach ($ipArray as $customIp) {
-            if (!filter_var($customIp, FILTER_VALIDATE_IP)) {
-                throw new Exception("IP {$customIp} is not a valid IP address");
-            }
-
-            IpAddress::forceCreate([
-                'ip' => $customIp,
-                'device_id' => $device->id,
-                'created_by' => $assignedBy->id,
-            ]);
         }
     }
 
@@ -216,6 +161,8 @@ class DeviceController extends Controller
     public function edit($id)
     {
         try {
+            app('encrypt')->disableExceptions();
+
             $device = Device::findOrFail($id);
             $deviceSection = $device->section;
 
@@ -237,28 +184,20 @@ class DeviceController extends Controller
             $this->authorize('edit', $device);
 
             $data = $request->input();
+            if (isset($data['ips']) && is_array($data['ips'])) {
+                $data['ips'] = array_filter($data['ips'], function ($ip) {
+                    return filter_var($ip, FILTER_VALIDATE_IP);
+                });
+            }
 
             unset($data['_token']);
             unset($data['_method']);
-
             EncryptedStore::upsert($device, $data);
 
             $this->setCategory($device, $request);
 
-            $device->ips->each(function ($ip) use ($request) {
-                if ($request->user()->can('edit', $ip)) {
-                    if ($ip->subnet) {
-                        $ip->device_id = null;
-                        $ip->save();
-                    } else {
-                        $ip->delete();
-                    }
-                }
-            });
-
-            if (isset($data['ips']) && is_array($data['ips'])) {
-                $this->assignIpsToDevice($data['ips'], $device, request()->user());
-            }
+            $ips = (array) $request->input('ips');
+            IpSubnet::assignIps($device->id, $ips, $request->user());
 
             return redirect()
                 ->route('device.index', $device->section_id)
@@ -295,6 +234,8 @@ class DeviceController extends Controller
     public function show($id)
     {
         try {
+            app('encrypt')->disableExceptions();
+
             $device = Device::findOrFail($id);
             $deviceSection = $device->section;
 
