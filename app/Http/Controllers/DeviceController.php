@@ -69,6 +69,8 @@ class DeviceController extends Controller
     public function create($type)
     {
         try {
+            app('encrypt')->disableExceptions();
+
             $deviceSection = DeviceSection::findOrFail($type);
 
             $this->authorize('create', $deviceSection);
@@ -128,9 +130,8 @@ class DeviceController extends Controller
 
             $this->setCategory($device, $request);
 
-            if (isset($data['ips']) && is_array($data['ips'])) {
-                $this->assignIpsToDevice($data['ips'], $device, $request->user());
-            }
+            $ips = (array) $request->input('ips');
+            IpSubnet::assignIps($device->id, $ips, $request->user());
 
             if ($request->user()->cannot('edit', $section)) {
                 // if user has permission to create entries but not edit entries, he will no longer be
