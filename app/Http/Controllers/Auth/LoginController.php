@@ -70,4 +70,24 @@ class LoginController extends Controller
         return redirect('/')
             ->withCookie(cookie()->forget('key'));
     }
+
+    protected function validateLogin(Request $request)
+    {
+        $request->validate([
+            $this->username() => 'required|string',
+            'password' => 'required|string',
+            'session' => 'required|in:1h,1d,3d,7d',
+        ]);
+    }
+
+    /**
+     * Attempt to log the user into the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    protected function attemptLogin(Request $request)
+    {
+        return $this->guard()->attempt($this->credentials($request), true);
+    }
 }

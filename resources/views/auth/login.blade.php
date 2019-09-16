@@ -29,6 +29,7 @@
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
             </div>
 
+
             @if (count($errors) > 0)
             <div class="row">
                 <div class="col-xs-12">
@@ -40,14 +41,22 @@
             @endif
 
             <div class="row">
+                <div class="col-xs-12">
+                    <label>Keep me logged in for</label>
+                </div>
+            </div>
+
+            <div class="row">
                 <div class="col-xs-8">
-                    <div class="checkbox icheck">
-                        <label>
-                            <input type="checkbox" name="remember"> Remember Me
-                        </label>
+                    <div class="form group has-feedback">
+                        <select name="session" class="form-control">
+                            <option value="1h">1 hour</option>
+                            <option value="1d">1 day</option>
+                            <option value="3d">3 days</option>
+                            <option value="7d">7 days</option>
+                        </select>
                     </div>
                 </div>
-
                 <div class="col-xs-4">
                     <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
                 </div>
