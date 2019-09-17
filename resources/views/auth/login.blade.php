@@ -42,7 +42,7 @@
 
             <div class="row">
                 <div class="col-xs-12">
-                    <label>Keep me logged in for</label>
+                    <label style="font-weight: normal;">Keep me logged in for</label>
                 </div>
             </div>
 

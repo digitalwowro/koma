@@ -5,6 +5,7 @@ namespace App;
 use App\Exceptions\InvalidSubnetException;
 use App\Presenters\IpSubnetPresenter;
 use App\Scopes\IpSubnetTenant;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Laracasts\Presenter\PresentableTrait;
@@ -387,5 +388,31 @@ class IpSubnet extends Model
         }
 
         return [$allIps, $allReserved];
+    }
+
+    public static function deviceDestroyed($deviceId)
+    {
+        static::each(function($subnet) use ($deviceId) {
+            try {
+                $data = $subnet->data;
+                $assigned = $data['assigned'] ?? [];
+                $dirty = false;
+
+                foreach ($assigned as $key => $value) {
+                    if (isset($value['device_id']) && $value['device_id'] === (int) $deviceId) {
+                        unset($assigned[$key]);
+                        $dirty = true;
+                    }
+                }
+
+                if ($dirty) {
+                    $data['assigned'] = $assigned;
+
+                    EncryptedStore::upsert($subnet, $data);
+                }
+            } catch (Exception $e) {
+                // skip subnet
+            }
+        });
     }
 }

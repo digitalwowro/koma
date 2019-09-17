@@ -222,6 +222,8 @@ class DeviceController extends Controller
 
             $device->delete();
 
+            IpSubnet::deviceDestroyed($id);
+
             return redirect()
                 ->back()
                 ->withSuccess('Device has been deleted');

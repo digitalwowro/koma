@@ -178,4 +178,32 @@ class SubnetController extends Controller
 
         return response()->json($subnet->freeIps());
     }
+
+    public function unassign($id, Request $request)
+    {
+        try {
+            $subnet = IpSubnet::findOrFail($id);
+
+            $this->authorize('edit', $subnet);
+
+            $ip = $request->input('ip');
+            $data = $subnet->data;
+            $assigned = $data['assigned'] ?? [];
+
+            if ($ip && isset($assigned[$ip])) {
+                unset($assigned[$ip]);
+                $data['assigned'] = $assigned;
+
+                EncryptedStore::upsert($subnet, $data);
+            }
+
+            return redirect()
+                ->route('subnet.subnet', $id)
+                ->withSuccess('IP address was unassigned');
+        } catch (Exception $e) {
+            return redirect()
+                ->route('subnet.subnet', $id)
+                ->withError('Error unassigning IP address');
+        }
+    }
 }

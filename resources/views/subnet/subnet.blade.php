@@ -29,12 +29,13 @@
                             {{ $ipField->title }}
                         </th>
                         @endforeach
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
                     @foreach ($ips as $ipData)
                         <tr>
-                            <td>
+                            <td style="font-size: 16px;">
                                 {{ $ipData['ip'] }}
                             </td>
                             <td>
@@ -57,6 +58,22 @@
                                 @endif
                             </td>
                             @endforeach
+                            <td>
+                                @if (!empty($ipData['device_id']))
+                                @can('edit', $subnet)
+                                    {!! Form::open(['route' => ['subnet.unassign', $subnet->id], 'method' => 'POST', 'style' => 'display: inline;']) !!}
+                                        {!! Form::hidden('ip', $ipData['ip']) !!}
+
+                                        <a href="#" class="table-link danger" onclick="if (confirm('Are you sure you want to unassign this IP address?')) $(this).closest('form').submit(); return false;" title="Unassign">
+                                            <span class="fa-stack">
+                                                <i class="fa fa-square fa-stack-2x"></i>
+                                                <i class="fa fa-unlink fa-stack-1x fa-inverse"></i>
+                                            </span>
+                                        </a>
+                                    {!! Form::close() !!}
+                                @endcan
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                     </tbody>

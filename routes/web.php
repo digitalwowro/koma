@@ -36,6 +36,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get   ('/subnet/{category}/{id}/edit', ['as' => 'subnet.edit',        'uses' => 'SubnetController@edit']);
     Route::put   ('/subnet/{id}',                 ['as' => 'subnet.update',      'uses' => 'SubnetController@update']);
     Route::delete('/subnet/{id}',                 ['as' => 'subnet.destroy',     'uses' => 'SubnetController@destroy']);
+    Route::post  ('/subnet/{id}/unassign',        ['as' => 'subnet.unassign',    'uses' => 'SubnetController@unassign']);
 
     Route::post('/share/with', ['as' => 'share.with', 'uses' => 'ShareController@with']);
     Route::post('/share/post', ['as' => 'share.post', 'uses' => 'ShareController@post']);
