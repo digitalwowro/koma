@@ -47,7 +47,14 @@
                             <div class="col-xs-6">
                                 <h4>IP Addresses To Assign</h4>
 
-                                <select id="ip-select" multiple class="form-control"></select>
+                                <div id="ip-select-loader" style="font-size: 15px; margin-top: 15px;">
+                                    <i class="fa fa-spin fa-spinner"></i>
+                                    <span style="color: #777;">Loading available IP addresses</span>
+                                </div>
+
+                                <div id="ip-select-wrap">
+                                    <select id="ip-select" multiple class="form-control"></select>
+                                </div>
                             </div>
                         </div>
 
@@ -98,6 +105,8 @@
 
                 $select.find('option').remove();
                 $select.trigger('change');
+                $('#ip-select-loader').removeClass('hidden');
+                $('#ip-select-wrap').addClass('hidden');
 
                 $.get(url, function(r) {
                     $.each(r, function(i, ip) {
@@ -105,6 +114,8 @@
                     });
 
                     $select.trigger('change');
+                    $('#ip-select-loader').addClass('hidden');
+                    $('#ip-select-wrap').removeClass('hidden');
                 });
             }).trigger('change');
 
