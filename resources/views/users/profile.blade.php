@@ -8,6 +8,19 @@
     <section class="content">
         {!! Form::model($user, ['route' => 'profile.update', 'method' => 'POST', 'class' => 'form-horizontal', 'role' => 'form']) !!}
 
+        @if (session()->has('recovery_string'))
+        <div class="box box-danger">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="fa fa-lock"></i>
+                    One-Time Recovery String
+                </h3>
+            </div>
+
+            @include('partials._recovery-string-alert', ['recoveryString' => session('recovery_string')])
+        </div>
+        @endif
+
         <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">Account Details</h3>

@@ -1,3 +1,8 @@
+@media (min-width: 760px) {
+    .login-box.recovery-success {
+        width: 560px;
+    }
+}
 @media (max-width: 760px) {
     /* Force table to not be like tables anymore */
     table.table-responsive,

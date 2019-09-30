@@ -11,6 +11,7 @@ use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\KeyFactory;
 use Illuminate\Http\Request;
 use ParagonIE\Halite\Asymmetric\Crypto as Asymmetric;
+use ParagonIE\Halite\Symmetric\Crypto as Symmetric;
 
 class Encryption
 {
@@ -54,31 +55,37 @@ class Encryption
     /**
      * @param Request|null $request
      * @return EncryptionKeyPair
-     * @throws \ParagonIE\Halite\Alerts\InvalidKey
-     * @throws \ParagonIE\Halite\Alerts\InvalidSalt
-     * @throws \ParagonIE\Halite\Alerts\InvalidType
+     * @throws Exception
      */
     public function getKeyPair(Request $request = null) : EncryptionKeyPair
     {
         if (!$this->keyPair) {
             $request = $request ?: request();
 
-            if (!$request instanceof Request) {
-                throw new Exception('Invalid request');
-            }
-
             if (!$request->hasCookie('key')) {
                 throw new Exception('Missing key. Are cookies disabled in your browser?');
             }
 
-            $password = new HiddenString($request->cookie('key'));
-            $salt = base64_decode($request->user()->salt);
-            $security = $this->securityLevel();
-
-            $this->keyPair = KeyFactory::deriveEncryptionKeyPair($password, $salt, $security);
+            $this->setKeyPair($request->user(), $request->cookie('key'));
         }
 
         return $this->keyPair;
+    }
+
+    /**
+     * @param User $user
+     * @param string $password
+     * @throws \ParagonIE\Halite\Alerts\InvalidKey
+     * @throws \ParagonIE\Halite\Alerts\InvalidSalt
+     * @throws \ParagonIE\Halite\Alerts\InvalidType
+     */
+    public function setKeyPair(User $user, string $password)
+    {
+        $password = new HiddenString($password);
+        $salt = base64_decode($user->salt);
+        $security = $this->securityLevel();
+
+        $this->keyPair = KeyFactory::deriveEncryptionKeyPair($password, $salt, $security);
     }
 
     public function encrypt($str)
@@ -148,10 +155,14 @@ class Encryption
      * logged in user using a new provided password
      *
      * @param string $password
+     * @param User $user
+     * @return string
+     * @throws \ParagonIE\Halite\Alerts\InvalidKey
+     * @throws \ParagonIE\Halite\Alerts\InvalidSalt
+     * @throws \ParagonIE\Halite\Alerts\InvalidType
      */
-    public function changePassword(string $password)
+    public function changePassword(string $password, User $user) : string
     {
-        $user = auth()->user();
         $salt = base64_decode($user->salt);
         $password = new HiddenString($password);
         $security = $this->securityLevel();
@@ -159,7 +170,7 @@ class Encryption
         $newKeyPair = KeyFactory::deriveEncryptionKeyPair($password, $salt, $security);
         $publicKey = $newKeyPair->getPublicKey();
 
-        EncryptedStore::where('user_id', auth()->id())
+        EncryptedStore::where('user_id', $user->id)
             ->chunk(200, function($items) use ($password, $publicKey) {
                 foreach ($items as $item) {
                     try {
@@ -174,5 +185,59 @@ class Encryption
             });
 
         return base64_encode($publicKey->getRawKeyMaterial());
+    }
+
+    /**
+     * Encrypt password using recovery string
+     *
+     * @param string $recoveryString
+     * @param string $password
+     * @param User|string $userSalt
+     * @return string
+     * @throws \Exception
+     * @throws \ParagonIE\Halite\Alerts\CannotPerformOperation
+     * @throws \ParagonIE\Halite\Alerts\InvalidDigestLength
+     * @throws \ParagonIE\Halite\Alerts\InvalidKey
+     * @throws \ParagonIE\Halite\Alerts\InvalidMessage
+     * @throws \ParagonIE\Halite\Alerts\InvalidSalt
+     * @throws \ParagonIE\Halite\Alerts\InvalidType
+     */
+    public function recoveryString(string $recoveryString, string $password, $userSalt) : string
+    {
+        if ($userSalt instanceof User) {
+            $salt = base64_decode($userSalt->salt);
+        } elseif (is_string($userSalt)) {
+            $salt = $userSalt;
+        } else {
+            throw new Exception('Invalid user salt');
+        }
+
+        $key = new HiddenString($recoveryString);
+        $password = new HiddenString($password);
+        $encryptionKey = KeyFactory::deriveEncryptionKey($key, $salt);
+
+        return Symmetric::encrypt($password, $encryptionKey);
+    }
+
+    /**
+     * @param string $recoveryString
+     * @param User $user
+     * @return string
+     * @throws \ParagonIE\Halite\Alerts\CannotPerformOperation
+     * @throws \ParagonIE\Halite\Alerts\InvalidDigestLength
+     * @throws \ParagonIE\Halite\Alerts\InvalidKey
+     * @throws \ParagonIE\Halite\Alerts\InvalidMessage
+     * @throws \ParagonIE\Halite\Alerts\InvalidSalt
+     * @throws \ParagonIE\Halite\Alerts\InvalidSignature
+     * @throws \ParagonIE\Halite\Alerts\InvalidType
+     */
+    public function recoverPassword(string $recoveryString, User $user) : string
+    {
+        $recoveryString = preg_replace('/[^A-Za-z0-9]/', '', $recoveryString);
+        $salt = base64_decode($user->salt);
+        $key = new HiddenString($recoveryString);
+        $encryptionKey = KeyFactory::deriveEncryptionKey($key, $salt);
+
+        return Symmetric::decrypt($user->recovery_string, $encryptionKey);
     }
 }

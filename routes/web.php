@@ -2,9 +2,16 @@
 
 Route::pattern('type', '[0-9]+');
 
-Route::get ('/auth/login',  ['as' => 'login',      'uses' => 'Auth\LoginController@showLoginForm']);
-Route::post('/auth/login',  ['as' => 'login.post', 'uses' => 'Auth\LoginController@login']);
-Route::post('/auth/logout', ['as' => 'logout',     'uses' => 'Auth\LoginController@logout']);
+
+Route::get ('/auth/login',           ['as' => 'login',           'uses' => 'Auth\LoginController@showLoginForm']);
+Route::post('/auth/login',           ['as' => 'login.post',      'uses' => 'Auth\LoginController@login']);
+Route::post('/auth/logout',          ['as' => 'logout',          'uses' => 'Auth\LoginController@logout']);
+Route::get ('/auth/recover',         ['as' => 'recover',         'uses' => 'Auth\RecoverController@index']);
+Route::post('/auth/recover',         ['as' => 'recover.post',    'uses' => 'Auth\RecoverController@post']);
+Route::get ('/auth/recover/success', ['as' => 'recover.success', 'uses' => 'Auth\RecoverController@success']);
+Route::get ('/auth/register',        ['as' => 'register',        'uses' => 'Auth\RegisterController@index']);
+Route::post('/auth/register',        ['as' => 'register.post',   'uses' => 'Auth\RegisterController@post']);
+Route::get ('/auth/register/success',['as' => 'register.success','uses' => 'Auth\RegisterController@success']);
 
 Route::group(['middleware' => 'auth'], function() {
     Route::get ('/',        ['as' => 'home',           'uses' => 'DashboardController@index']);

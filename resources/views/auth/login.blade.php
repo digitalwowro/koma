@@ -18,7 +18,7 @@
     <div class="login-box-body">
         <p class="login-box-msg">Sign in to start your session</p>
 
-        {!! Form::open(['url' => '/auth/login', 'method' => 'POST']) !!}
+        {!! Form::open(['route' => 'login.post', 'method' => 'POST']) !!}
             <div class="form-group has-feedback">
                 <input type="email" name="email" class="form-control" placeholder="Email">
                 <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
@@ -28,7 +28,6 @@
                 <input type="password" name="password" class="form-control" placeholder="Password">
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
             </div>
-
 
             @if (count($errors) > 0)
             <div class="row">
@@ -63,9 +62,19 @@
             </div>
         {!! Form::close() !!}
     </div>
+
+    <br>
+
+    <div style="text-align: center; font-size: 16px;">
+        <a href="{{ route('recover') }}">Forgot Password</a>
+        &nbsp;&nbsp;&nbsp; | &nbsp;
+        <a href="{{ route('register') }}">Register New Account</a>
+    </div>
 </div>
 
 <script src="{{ elixir('js/all.js') }}"></script>
+
+@include('partials._growl-notifications')
 
 </body>
 </html>

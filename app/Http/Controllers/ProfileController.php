@@ -9,6 +9,7 @@ use App\Http\Requests;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
@@ -21,40 +22,56 @@ class ProfileController extends Controller
         return view('users.profile', compact('user'));
     }
 
+    /**
+     * Change user password
+     *
+     * @param Request $request
+     * @return mixed
+     * @throws ValidationException
+     */
+    protected function changePassword(Request $request)
+    {
+        $user = $request->user();
+        $password = $request->input('password');
+        $recoveryString = Str::random(32);
+
+        if ($password !== $request->input('password_confirmed')) {
+            throw new ValidationException('Passwords do not match');
+        }
+
+        DB::beginTransaction();
+
+        $user->public_key = app('encrypt')->changePassword($password, $request->user());
+        $user->recovery_string = app('encrypt')->recoveryString($recoveryString, $password, $user);
+
+        auth()->logoutOtherDevices($password);
+
+        DB::commit();
+
+        return redirect()
+            ->route('profile')
+            ->withSuccess('Your profile has been updated')
+            ->withCookie(cookie()->forever('key', $password))
+            ->withRecoveryString($recoveryString);
+    }
+
     public function update(Request $request)
     {
         try {
             $user = auth()->user();
-            $password = $request->input('password');
-            $data = $request->only(['password', 'name', 'email']);
+            $data = $request->only(['name', 'email']);
 
             $data['profile'] = $this->profileSettings($request, $user->profile);
 
             $user->update($data);
 
-            if (!$password) {
-                return redirect()
-                    ->back()
-                    ->withSuccess('Your profile has been updated');
+            if ($request->filled('password')) {
+                return $this->changePassword($request);
             }
-
-            // update password below
-            if ($password !== $request->input('password_confirmed')) {
-                throw new ValidationException('Passwords do not match');
-            }
-
-            DB::beginTransaction();
-
-            $user->public_key = app('encrypt')->changePassword($data['password']);
-
-            auth()->logoutOtherDevices($data['password']);
-
-            DB::commit();
 
             return redirect()
-                ->back()
-                ->withSuccess('Your profile has been updated')
-                ->withCookie(cookie()->forever('key', $data['password']));
+                ->route('profile')
+                ->withSuccess('Your profile has been updated');
         } catch (QueryException $e) {
             $error = $e->getMessage();
 
@@ -63,7 +80,7 @@ class ProfileController extends Controller
             }
 
             return redirect()
-                ->back()
+                ->route('profile')
                 ->withInput()
                 ->withError($error);
         } catch (ValidationException $e) {

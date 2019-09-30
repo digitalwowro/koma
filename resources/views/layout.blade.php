@@ -244,15 +244,9 @@
 
     <script src="{{ elixir('js/all.js') }}"></script>
 
-    <script>
-        @foreach (['success', 'notice', 'warning', 'error'] as $type)
-            @if (Session::has($type) && is_string(Session::get($type)))
-            $.growl.{{ $type === 'success' ? 'notice' : $type }}({
-                message: '{{ addslashes(Session::get($type)) }}'
-            });
-            @endif
-        @endforeach
+    @include('partials._growl-notifications')
 
+    <script>
         @if (count($errors))
             $.growl.error({!! json_encode(['message' => $errors->first()]) !!});
         @endif
