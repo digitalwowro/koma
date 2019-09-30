@@ -18,7 +18,10 @@
     <div class="login-box-body">
         <h1 class="text-center">Your account has been created</h1>
 
-        @include('partials._recovery-string-alert', compact('recoveryString'))
+        @include('partials._recovery-string-alert', [
+            'recoveryString' => $recoveryString,
+            'center' => true,
+        ])
 
         <div class="row">
             <div class="col-xs-12">
