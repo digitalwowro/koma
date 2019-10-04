@@ -125,3 +125,15 @@ function getResourceType($resource, $withCategories = false)
         throw new InvalidResourceException;
     }
 }
+
+function xss_safe_newline_to_br($string) : string
+{
+    $string = str_replace("\r\n", "\n", $string);
+    $parts = explode("\n", $string);
+
+    foreach ($parts as &$part) {
+        $part = htmlspecialchars($part);
+    }
+
+    return implode('<br>', $parts);
+}

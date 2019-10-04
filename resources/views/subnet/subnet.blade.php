@@ -85,6 +85,18 @@
             </div>
         </div>
 
+        @if (!empty($subnet->data['notes']))
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Notes</h3>
+            </div>
+
+            <div class="box-body">
+                {!! xss_safe_newline_to_br($subnet->data['notes']) !!}
+            </div>
+        </div>
+        @endif
+
         @can('owner', $subnet)
             <div class="box box-danger">
                 <div class="box-header with-border">

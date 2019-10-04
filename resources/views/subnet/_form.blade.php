@@ -41,6 +41,19 @@
 </div>
 
 <div class="form-group">
+    <label for="notes" class="col-lg-2 control-label">Notes</label>
+
+    <div class="col-lg-10">
+        {!! Form::textarea('notes', $subnet->data['notes'] ?? null, [
+            'class' => 'form-control',
+            'id' => 'notes',
+            'placeholder' => 'Any extra information',
+            'rows' => 4,
+        ]) !!}
+    </div>
+</div>
+
+<div class="form-group">
     <div class="col-lg-10 col-lg-offset-2">
         <button type="submit" class="btn btn-primary">{{ isset($subnet) ? 'Save' : 'Add' }}</button>
         <a href="{{ route('subnet.index',  $category) }}" class="btn btn-default">Cancel</a>

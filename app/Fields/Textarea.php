@@ -30,9 +30,8 @@ class Textarea extends AbstractField
     {
         if (isset($model->data[$this->getInputName()])) {
             $content = $model->data[$this->getInputName()];
-            $content = str_replace(["\r\n", "\n"], '<br>', $content);
 
-            return $content;
+            return xss_safe_newline_to_br($content);
         }
 
         return '';

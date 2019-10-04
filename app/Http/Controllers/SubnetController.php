@@ -112,6 +112,7 @@ class SubnetController extends Controller
             $subnet = IpSubnet::findOrFail($id);
             $data = (array) ($subnet->data ?? []);
             $data['name'] = $request->input('name') ?: null;
+            $data['notes'] = $request->input('notes') ?: null;
 
             $reserved = (array) $request->input('reserved');
 
