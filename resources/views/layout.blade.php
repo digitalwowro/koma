@@ -129,23 +129,7 @@
                                     </a>
 
                                     @if (count($deviceSection->categories))
-                                        <ul class="treeview-menu">
-                                            @foreach ($deviceSection->categories as $categoryId => $categoryName)
-                                            <li class="{{ $isActive && request()->route()->parameter('category') === $categoryId ? 'active' : '' }}">
-                                                <a href="{{ route('device.index', [$deviceSection->id, $categoryId]) }}">
-                                                    <i class="fa fa-circle-o"></i>
-                                                    {{ $categoryName }}
-                                                </a>
-                                            </li>
-                                            @endforeach
-
-                                            <li class="{{ $isActive && !request()->route()->parameter('category') ? 'active' : '' }}">
-                                                <a href="{{ route('device.index', $deviceSection->id) }}">
-                                                    <i class="fa fa-circle"></i>
-                                                    show all
-                                                </a>
-                                            </li>
-                                        </ul>
+                                        {!! $deviceSection->present()->treeviewMenu($isActive) !!}
                                     @endif
                                 </li>
                             @endif

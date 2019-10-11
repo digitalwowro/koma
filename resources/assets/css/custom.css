@@ -50,8 +50,18 @@
 
 table.table-field-options .fa-reorder { cursor: move; }
 table.table-field-options .fa-trash-o { color: red; }
-table.table-categories .fa-reorder { cursor: move; }
-table.table-categories .fa-trash-o { color: red; }
+
+#jstree-wrap {
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #e4e4e4;
+}
+    #jstree-wrap #jstree {
+        min-height: 200px;
+        background-color: whitesmoke;
+        margin-top: 10px;
+        padding: 10px 0;
+    }
 
 /**
  * Multi-select dropdowns

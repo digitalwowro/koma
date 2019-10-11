@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Device;
 use App\EncryptedStore;
 use App\Exceptions\InvalidSubnetException;
 use App\IpCategory;
 use App\IpSubnet;
 use App\IpField;
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\Request;

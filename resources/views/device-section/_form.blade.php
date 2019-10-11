@@ -3,10 +3,10 @@
 
     <div class="col-lg-10">
         {!! Form::text('title', null, [
-            'class'       => 'form-control',
-            'id'          => 'title',
+            'class' => 'form-control',
+            'id' => 'title',
             'placeholder' => 'Title',
-            'required'    => true,
+            'required' => true,
         ]) !!}
     </div>
 </div>
@@ -20,8 +20,8 @@
 
     <div class="col-lg-10">
         {!! Form::text('icon', null, [
-            'class'       => 'form-control',
-            'id'          => 'icon',
+            'class' => 'form-control',
+            'id' => 'icon',
             'placeholder' => 'Enter icon name',
         ]) !!}
     </div>
@@ -31,56 +31,15 @@
     <label for="title" class="col-lg-2 control-label">Categories</label>
 
     <div class="col-lg-10">
-        <table class="table table-striped table-hover table-bordered table-categories">
-            <thead>
-            <tr>
-                <th style="text-align: center;">#</th>
-                <th>Name</th>
-                <th>Del</th>
-            </tr>
-            </thead>
-            <tbody>
-                @if (isset($deviceSection) && !empty($deviceSection->categories))
-                    @foreach ($deviceSection->categories as $key => $label)
-                        <tr>
-                            <td style="width:1px; white-space:nowrap; text-align: center;">
-                                <i class="fa fa-reorder"></i>
-                            </td>
+        <div id="jstree-wrap">
+            <button type="button" class="btn btn-success btn-sm" data-action="create"><i class="glyphicon glyphicon-asterisk"></i> Create</button>
+            <button type="button" class="btn btn-warning btn-sm" data-action="rename"><i class="glyphicon glyphicon-pencil"></i> Rename</button>
+            <button type="button" class="btn btn-danger btn-sm" data-action="delete"><i class="glyphicon glyphicon-remove"></i> Delete</button>
 
-                            <td>
-                                {{ $label }}
+            <div id="jstree" style="min-height: 200px;"></div>
+        </div>
 
-                                <input type="hidden" name="categories[]" value="{{ $label }}">
-                                <input type="hidden" name="categoryid[]" value="{{ $key }}">
-                            </td>
-
-                            <td style="width:1px; white-space:nowrap; text-align: center;">
-                                <a href="#" title="Delete this category" class="delete-category">
-                                    <i class="fa fa-trash-o"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="3" style="text-align: center; padding: 20px 0;">
-                            No categories have been defined
-                        </td>
-                    </tr>
-                @endif
-            </tbody>
-
-            <tfoot>
-                <tr>
-                    <td colspan="5" style="text-align: center;">
-                        <a href="#" id="add-new-category">
-                            <i class="fa fa-plus"></i>
-                            Add a new category
-                        </a>
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
+        <input type="hidden" id="categories" name="categories">
     </div>
 </div>
 
@@ -156,78 +115,54 @@
             {{------------------
             --   CATEGORIES   --
             ------------------}}
-            $('table.table-categories tbody').sortable({
-                handle: '.fa-reorder',
-                distance: 15,
-                items: 'tr',
-                forcePlaceholderSize: true,
-                placeholder: 'ui-state-highlight',
-                start: function(event, ui) {
-                    ui.placeholder.html('<td style="height:30px; background-color:#d1eeff;" colspan="5">&nbsp;</td>');
-                }
-            });
+            $('#jstree-wrap > button').click(function() {
+                var ref = $('#jstree').jstree(true),
+                    sel = ref.get_selected(),
+                    action = $(this).data('action');
 
-            $('#add-new-category').click(function(e) {
-                e.preventDefault();
+                if (action === 'create') {
+                    var chars = '0123456789abcdefghijklmnopqrstuvwxyz',
+                        key = '',
+                        root = sel.length ? sel[0] : '#';
 
-                var $this = $(this),
-                    $tbody = $this.closest('table').find('tbody'),
-                    name = prompt('Enter category name'),
-                    chars = '0123456789abcdefghijklmnopqrstuvwxyz',
-                    key = '';
+                    for (var i = 0; i < 8; i++) {
+                        key += chars[Math.floor(Math.random() * chars.length)];
+                    }
 
-                for (var i = 0; i < 8; i++) {
-                    key += chars[Math.floor(Math.random() * chars.length)];
-                }
+                    sel = ref.create_node(root, {id: key, text: 'New category'});
 
-                if (name) {
-                    name = name.replace('"', '&quot;');
-
-                    var $tr = $tbody.find('tr'),
-                        html = '<tr>' +
-                        '<td style="width:1px; white-space:nowrap; text-align: center;">' +
-                            '<i class="fa fa-reorder"></i>' +
-                        '</td>' +
-
-                        '<td>' +
-                            name +
-
-                            '<input type="hidden" name="categories[]" value="' + name + '">' +
-                            '<input type="hidden" name="categoryid[]" value="' + key + '">' +
-                        '</td>' +
-
-                        '<td style="width:1px; white-space:nowrap; text-align: center;">' +
-                            '<a href="#" title="Delete this category" class="delete-category">' +
-                            '<i class="fa fa-trash-o"></i>' +
-                            '</a>' +
-                        '</td>' +
-                    '</tr>';
-
-                    if ($tr.length === 1 && $tr.find('td').length === 1) {
-                        $tbody.html(html);
-                    } else {
-                        $tbody.append(html);
+                    if (sel) {
+                        ref.edit(sel);
+                    }
+                } else if (action === 'rename') {
+                    if (sel.length) {
+                        ref.edit(sel[0]);
+                    }
+                } else if (action === 'delete') {
+                    if (sel.length) {
+                        ref.delete_node(sel);
                     }
                 }
             });
 
-            $('table.table-categories').on('click', '.delete-category', function(e) {
-                var $this = $(this),
-                    $tbody = $this.closest('tbody');
+            $('#jstree').jstree({
+                core: {
+                    data: {!! json_encode($deviceSection->categories ?? []) !!},
+                    force_text : true,
+                    check_callback: true,
+                    animation: 0,
+                },
+                plugins: [
+                    'contextmenu', 'dnd', 'unique', 'wholerow'
+                ],
+            });
 
-                $this.closest('tr').remove();
+            $('form').submit(function() {
+                var data = $('#jstree')
+                    .jstree(true)
+                    .get_json('#', {no_state: true, no_li_attr: true, no_a_attr: true, no_data: true, flat: true});
 
-                if (!$tbody.find('tr').length) {
-                    $tbody.html('' +
-                        '<tr>' +
-                            '<td colspan="3" style="text-align: center; padding: 20px 0;">' +
-                                'No categories have been defined' +
-                            '</td>' +
-                        '</tr>'
-                    );
-                }
-
-                e.preventDefault();
+                $('#categories').val(JSON.stringify(data));
             });
 
             {{--------------
@@ -319,6 +254,6 @@
 
                 e.preventDefault();
             });
-    });
+        });
     </script>
 @append

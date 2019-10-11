@@ -5,35 +5,38 @@ namespace App\Http\Controllers;
 use App\Device;
 use App\DeviceSection;
 use App\EncryptedStore;
+use App\Http\Controllers\Controller;
 use App\IpSubnet;
 use App\Permission;
-use App\User;
 use Exception;
 use Illuminate\Http\Request;
 
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
-
 class DeviceController extends Controller
 {
-    public function index($type, $category = null)
+    public function index($type, $categoryId = null)
     {
         try {
             app('encrypt')->disableExceptions();
 
             $deviceSection = DeviceSection::findOrFail($type);
-            $devices = $deviceSection->devices;
 
-            if ($category) {
-                if (!isset($deviceSection->categories[$category])) {
+            if ($categoryId) {
+                $category = collect($deviceSection->categories)
+                    ->first(function ($item) use ($categoryId) {
+                        return $item['id'] === $categoryId;
+                    });
+
+                if (!$category) {
                     return redirect()->route('device.index', $type);
                 }
 
-                $devices = $devices->filter(function ($device) use ($category) {
-                    return $device->category_id === $category;
-                });
+                $devices = $deviceSection->devices()
+                    ->where('category_id', $categoryId)
+                    ->get();
 
-                $categoryLabel = $deviceSection->categories[$category];
+                $categoryLabel = $category['text'] ?? '';
+            } else {
+                $devices = $deviceSection->devices;
             }
 
             $colspan = 1;
@@ -58,7 +61,7 @@ class DeviceController extends Controller
                 }
             }
 
-            return view('device.index', compact('deviceSection', 'devices', 'colspan', 'filters', 'category', 'categoryLabel', 'type'));
+            return view('device.index', compact('deviceSection', 'devices', 'colspan', 'filters', 'categoryId', 'categoryLabel', 'type'));
         } catch (Exception $e) {
             return redirect()
                 ->back()
@@ -85,7 +88,6 @@ class DeviceController extends Controller
 
     private function setCategory(Device $device, Request $request, $save = true)
     {
-        $categories = $device->section->categories;
         $category = $request->input('category_id');
 
         if (empty($category)) {
@@ -98,7 +100,9 @@ class DeviceController extends Controller
             return;
         }
 
-        if (!isset($categories[$category])) {
+        $validIds = collect($device->section->categories)->pluck('id');
+
+        if (!$validIds->contains($category)) {
             throw new Exception('Invalid device category');
         }
 
@@ -148,8 +152,12 @@ class DeviceController extends Controller
                 ]);
             }
 
+            $params = $device->category_id
+                ? ['type' => $type, 'category' => $device->category_id]
+                : $type;
+
             return redirect()
-                ->route('device.index', $type)
+                ->route('device.index', $params)
                 ->withSuccess('Device has been added');
         } catch (Exception $e) {
             return redirect()
@@ -200,8 +208,12 @@ class DeviceController extends Controller
             $ips = (array) $request->input('ips');
             IpSubnet::assignIps($device->id, $ips, $request->user());
 
+            $params = $device->category_id
+                ? ['type' => $device->section_id, 'category' => $device->category_id]
+                : $device->section_id;
+
             return redirect()
-                ->route('device.index', $device->section_id)
+                ->route('device.index', $params)
                 ->withSuccess('Device has been updated');
         } catch (Exception $e) {
             return redirect()

@@ -5,7 +5,7 @@
         </div>
 
         <div class="box-body">
-            {!! Form::select('category_id', ['' => '- uncategorized -'] + $deviceSection->categories, request()->input('category'), [
+            {!! Form::select('category_id', $deviceSection->present()->categorySelector, request()->input('category'), [
                 'class' => 'form-control',
             ]) !!}
         </div>

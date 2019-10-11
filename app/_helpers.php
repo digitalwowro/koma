@@ -137,3 +137,8 @@ function xss_safe_newline_to_br($string) : string
 
     return implode('<br>', $parts);
 }
+
+function join_class_names(array $classNames) : string
+{
+    return implode(' ', array_keys(array_filter($classNames)));
+}

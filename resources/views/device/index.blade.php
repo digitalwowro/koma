@@ -53,7 +53,7 @@
                         @if (empty($categoryLabel))
                             <a href="{{ route('device.create', $deviceSection->id) }}" class="btn btn-primary btn-sm pull-left">
                         @else
-                            <a href="{{ route('device.create', ['type' => $deviceSection->id, 'category' => $category]) }}" class="btn btn-primary pull-left">
+                            <a href="{{ route('device.create', ['type' => $deviceSection->id, 'category' => $categoryId]) }}" class="btn btn-primary pull-left">
                                 @endif
                                 <i class="fa fa-plus-circle fa-lg"></i> Add device
                             </a>
@@ -141,7 +141,7 @@
                                 @if (empty($categoryLabel))
                                     <a href="{{ route('device.create', $deviceSection->id) }}">creating one</a>
                                 @else
-                                    <a href="{{ route('device.create', ['type' => $deviceSection->id, 'category' => $category]) }}">creating one</a>
+                                    <a href="{{ route('device.create', ['type' => $deviceSection->id, 'category' => $categoryId]) }}">creating one</a>
                                 @endif
 
                                 now?

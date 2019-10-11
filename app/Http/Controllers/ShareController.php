@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Device;
 use App\DeviceSection;
 use App\Group;
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\IpSubnet;
 use App\IpCategory;

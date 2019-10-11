@@ -2,40 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use App\Device;
 use App\DeviceSection;
 use App\Fields\Factory;
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\Request;
 
 class DeviceSectionController extends Controller
 {
-    protected function getCategories(Request $request)
+    protected function sanitizeCategories(string $json) : string
     {
-        $categories = $request->input('categories');
-        $ids = $request->input('categoryid');
-        $result = [];
+        try {
+            $categories = json_decode($json, true);
 
-        if (!is_array($categories) || !is_array($ids)) {
-            return $result;
-        }
-
-        foreach ($categories as $id => $category) {
-            if (isset($ids[$id])) {
-                $result[$ids[$id]] = $category;
+            if (!is_array($categories)) {
+                throw new Exception('Invalid input');
             }
-        }
 
-        return $result;
+            return collect($categories)
+                ->filter(function ($item) {
+                    if (empty($item['id']) || empty($item['text']) || empty($item['parent'])) {
+                        return false;
+                    }
+
+                    if (preg_match('/^[A-Za-z0-9]{8}$/', $item['id']) === false) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                ->map(function ($item) {
+                    return [
+                        'id' => $item['id'],
+                        'text' => $item['text'],
+                        'parent' => $item['parent'],
+                    ];
+                })
+                ->toJson();
+        } catch (Exception $e) {
+            return '[]';
+        }
     }
 
     protected function getFields(Request $request)
     {
-        $data = $request->only('title', 'icon', 'fields');
+        $data = $request->only('title', 'icon', 'fields', 'categories');
 
-        $data['categories'] = $this->getCategories($request);
+        $data['categories'] = $this->sanitizeCategories($data['categories']);
         $data['owner_id'] = $request->user()->id;
 
         return $data;
@@ -109,22 +122,6 @@ class DeviceSectionController extends Controller
             $this->authorize('manage', $deviceSection);
 
             $deviceSection->update($this->getFields($request));
-
-            $categoryIds = array_keys($deviceSection->categories);
-
-            $invalid = [];
-
-            $deviceSection->devices()
-                ->pluck('category_id', 'id')
-                ->each(function ($categoryId, $id) use ($categoryIds, &$invalid) {
-                    if ($categoryId && !in_array($categoryId, $categoryIds)) {
-                        $invalid[] = $id;
-                    }
-                });
-
-            if (count($invalid)) {
-                Device::whereIn('id', $invalid)->update(['category_id' => null]);
-            }
 
             return redirect()
                 ->route('device-section.index')

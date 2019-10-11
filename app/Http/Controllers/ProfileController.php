@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Exceptions\ValidationException;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\ManagesUserProfiles;
-use App\Http\Requests;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;

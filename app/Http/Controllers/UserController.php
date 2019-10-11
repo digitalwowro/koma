@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\ManagesUserProfiles;
-use Validator;
 use App\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
+use Validator;
 
 class UserController extends Controller
 {

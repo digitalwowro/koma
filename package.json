@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "admin-lte": "^2.4.12",
+    "jstree": "^3.3.8",
     "laravel-elixir": "^6.0.0-18"
   }
 }

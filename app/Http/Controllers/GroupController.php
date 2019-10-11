@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\ManagesUserProfiles;
 use App\Group;
 use Exception;
 use Illuminate\Http\Request;
-
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
 
 class GroupController extends Controller
 {

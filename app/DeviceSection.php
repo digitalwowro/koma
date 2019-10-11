@@ -37,16 +37,6 @@ class DeviceSection extends Model
     }
 
     /**
-     * Auto encode the data field
-     *
-     * @param string $value
-     */
-    public function setCategoriesAttribute($value)
-    {
-        $this->attributes['categories'] = json_encode($value);
-    }
-
-    /**
      * Decode the data field
      *
      * @param string $value
