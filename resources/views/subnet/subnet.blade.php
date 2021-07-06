@@ -42,7 +42,7 @@
                                 @if (isset($ipData['reserved']) && $ipData['reserved'] === true)
                                     <span class="label label-danger">Reserved</span>
                                 @elseif (!empty($ipData['device_id']) && !empty($ipData['device']))
-                                    <span class="label label-warning">assigned</span> to <a href="{{ route('device.edit', $ipData['device']->id) }}">{{ $ipData['device']->present()->humanIdField }}</a>
+                                    <span class="label label-warning">assigned</span> to <a href="{{ route('item.edit', $ipData['device']->id) }}">{{ $ipData['device']->present()->humanIdField }}</a>
                                 @elseif (!empty($ipData['device_id']))
                                     <span class="label label-warning">assigned</span> to <i class="fa fa-question-circle"></i>
                                 @else
@@ -60,7 +60,7 @@
                             @endforeach
                             <td>
                                 @if (!empty($ipData['device_id']))
-                                @can('edit', $subnet)
+                                @can('update', $subnet)
                                     {!! Form::open(['route' => ['subnet.unassign', $subnet->id], 'method' => 'POST', 'style' => 'display: inline;']) !!}
                                         {!! Form::hidden('ip', $ipData['ip']) !!}
 
@@ -85,14 +85,14 @@
             </div>
         </div>
 
-        @if (!empty($subnet->data['notes']))
+        @if ($notes = $subnet->notes)
         <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">Notes</h3>
             </div>
 
             <div class="box-body">
-                {!! xss_safe_newline_to_br($subnet->data['notes']) !!}
+                {!! xss_safe_newline_to_br($notes) !!}
             </div>
         </div>
         @endif

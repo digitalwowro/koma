@@ -2,7 +2,15 @@
 
 namespace App\Providers;
 
+use App\Category;
+use App\IpCategory;
+use App\IpSubnet;
+use App\Item;
 use App\Permission;
+use App\Policies\CategoryPolicy;
+use App\Policies\IpCategoryPolicy;
+use App\Policies\IpSubnetPolicy;
+use App\Policies\ItemPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Gate;
 
@@ -14,7 +22,10 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        'App\Model' => 'App\Policies\ModelPolicy',
+        Category::class => CategoryPolicy::class,
+        Item::class => ItemPolicy::class,
+        IpCategory::class => IpCategoryPolicy::class,
+        IpSubnet::class => IpSubnetPolicy::class,
     ];
 
     /**
@@ -30,32 +41,32 @@ class AuthServiceProvider extends ServiceProvider
             return $user->isAdmin();
         });
 
-        Gate::define('view', function($user, $resource) {
-            return Permission::can('view', $resource, $user);
-        });
-
-        Gate::define('edit', function($user, $resource) {
-            return Permission::can('edit', $resource, $user);
-        });
-
-        Gate::define('delete', function($user, $resource) {
-            return Permission::can('delete', $resource, $user);
-        });
-
-        Gate::define('create', function($user, $resource) {
-            return Permission::can('create', $resource, $user);
-        });
-
-        Gate::define('share', function($user, $resource) {
-            return $resource->isOwner($user); // @todo separate permission?
-        });
-
-        Gate::define('owner', function($user, $resource) {
-            return $resource->isOwner($user);
-        });
-
-        Gate::define('manage', function($user, $resource) {
-            return $resource->isOwner($user); // @todo separate permission?
-        });
+        //Gate::define('view', function($user, $resource) {
+        //    return Permission::can('view', $resource, $user);
+        //});
+        //
+        //Gate::define('edit', function($user, $resource) {
+        //    return Permission::can('edit', $resource, $user);
+        //});
+        //
+        //Gate::define('delete', function($user, $resource) {
+        //    return Permission::can('delete', $resource, $user);
+        //});
+        //
+        //Gate::define('create', function($user, $resource) {
+        //    return Permission::can('create', $resource, $user);
+        //});
+        //
+        //Gate::define('share', function($user, $resource) {
+        //    return $resource->isOwner($user); // @todo separate permission?
+        //});
+        //
+        //Gate::define('owner', function($user, $resource) {
+        //    return $resource->isOwner($user);
+        //});
+        //
+        //Gate::define('manage', function($user, $resource) {
+        //    return $resource->isOwner($user); // @todo separate permission?
+        //});
     }
 }

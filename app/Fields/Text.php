@@ -2,7 +2,7 @@
 
 namespace App\Fields;
 
-use App\Device;
+use App\Item;
 use Form;
 
 class Text extends AbstractField
@@ -23,10 +23,10 @@ class Text extends AbstractField
     /**
      * Custom device list content
      *
-     * @param Device $model
+     * @param Item $model
      * @return string
      */
-    public function customDeviceListContent(Device $model)
+    public function customDeviceListContent(Item $model)
     {
         $return = '-';
 

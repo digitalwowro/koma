@@ -7,7 +7,7 @@
         <ol class="breadcrumb">
             <li><a href="{{ route('home') }}">Home</a></li>
             <li><span>Devices</span></li>
-            <li><a href="{{ route('device.index', $category->id) }}"><span>{{ $category->title }}</span></a></li>
+            <li><a href="{{ route('item.index', $category->id) }}"><span>{{ $category->title }}</span></a></li>
             <li class="active"><span>View {{ Str::singular($category->title) }}</span></li>
         </ol>
     </section>

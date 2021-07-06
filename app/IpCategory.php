@@ -50,7 +50,7 @@ class IpCategory extends Model
     }
 
     /**
-     * Get all device sections paged for admin
+     * Get all IP categories paged for admin
      *
      * @return mixed
      */
@@ -60,7 +60,7 @@ class IpCategory extends Model
     }
 
     /**
-     * Get all device sections ordered
+     * Get all IP categories ordered
      *
      * @return mixed
      */

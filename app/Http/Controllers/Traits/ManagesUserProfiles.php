@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Traits;
 
-use App\DeviceSection;
+use App\Category;
 use App\IpCategory;
 use Illuminate\Http\Request;
 
@@ -14,7 +14,7 @@ trait ManagesUserProfiles
         unset($current['ip_categories']);
 
         if (filter_var($request->input('device_sections_customize'), FILTER_VALIDATE_BOOLEAN)) {
-            $validSections = DeviceSection::pluck('id')->toArray();
+            $validSections = Category::pluck('id')->toArray();
             $sanitized = [];
             $inputSections = $request->input('device_sections');
 

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Device;
-use App\DeviceSection;
+use App\Exceptions\InvalidResourceException;
+use App\Item;
+use App\Category;
 use App\Group;
 use App\Http\Controllers\Controller;
 use App\IpSubnet;
@@ -21,17 +22,17 @@ class ShareController extends Controller
         $id = $request->input('id');
 
         switch ($type) {
-            case 'device':
-                return Device::findOrFail($id);
+            case 'item':
+                return Item::findOrFail($id);
             case 'section':
-                return DeviceSection::findOrFail($id);
+                return Category::findOrFail($id);
             case 'subnet':
                 return IpSubnet::findOrFail($id);
             case 'category':
                 return IpCategory::findOrFail($id);
         }
 
-        throw new Exception('Invalid resource type');
+        throw new InvalidResourceException;
     }
 
     public function with(Request $request)

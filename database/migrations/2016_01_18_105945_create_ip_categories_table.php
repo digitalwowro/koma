@@ -16,6 +16,8 @@ class CreateIpCategoriesTable extends Migration
             $table->increments('id');
             $table->string('title');
             $table->smallInteger('sort')->unsigned()->index();
+            $table->integer('parent_id')->unsigned()->nullable()->index();
+            $table->foreign('parent_id')->references('id')->on('ip_categories')->onDelete('cascade');
             $table->integer('owner_id')->unsigned()->index();
             $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();

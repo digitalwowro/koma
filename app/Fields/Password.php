@@ -3,7 +3,7 @@
 namespace App\Fields;
 
 use Form;
-use App\Device;
+use App\Item;
 
 class Password extends Text
 {
@@ -65,10 +65,10 @@ class Password extends Text
     /**
      * Custom device list content
      *
-     * @param Device $model
+     * @param Item $model
      * @return string
      */
-    public function customDeviceListContent(Device $model)
+    public function customDeviceListContent(Item $model)
     {
         $return = '-';
 

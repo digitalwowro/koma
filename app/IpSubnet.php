@@ -55,7 +55,7 @@ class IpSubnet extends Model
      */
     public function device()
     {
-        return $this->belongsTo('App\Device');
+        return $this->belongsTo('App\Item');
     }
 
     /**
@@ -182,7 +182,7 @@ class IpSubnet extends Model
         $results = [];
         $deviceIds = [];
         $subnet = $this->subnet;
-        $assignData = $this->data['assigned'] ?? [];
+        $assignData = (array) $this->assigned;
 
         if (!$subnet) {
             return new LengthAwarePaginator([], 0, $perPage, 1);
@@ -226,7 +226,7 @@ class IpSubnet extends Model
         }
 
         if (count($deviceIds)) {
-            Device::whereIn('id', $deviceIds)->each(function($device) use (&$results) {
+            Item::whereIn('id', $deviceIds)->each(function($device) use (&$results) {
                 foreach ($results as $key => $result) {
                     if (!empty($result['device_id']) && $result['device_id'] === $device->id) {
                         $results[$key]['device'] = $device;
@@ -244,7 +244,7 @@ class IpSubnet extends Model
     {
         $results = [];
         $subnet = $this->subnet;
-        $assignData = $this->data['assigned'] ?? [];
+        $assignData = (array) $this->assigned;
 
         if (!$subnet) {
             return [];
@@ -296,12 +296,8 @@ class IpSubnet extends Model
      */
     public static function assignIps(int $deviceId, array $inputIps, User $user)
     {
-        $encrypt = app('encrypt');
-        $exceptions = $encrypt->getExceptions();
-        $encrypt->disableExceptions();
-
         static::each(function ($subnet) use (&$inputIps, $deviceId, $user) {
-            if ($user->cannot('edit', $subnet)) {
+            if ($user->cannot('update', $subnet)) {
                 return;
             }
 
@@ -348,10 +344,6 @@ class IpSubnet extends Model
                 EncryptedStore::upsert($subnet, $data);
             }
         });
-
-        if ($exceptions) {
-            $encrypt->enableExceptions();
-        }
     }
 
     public function getReserved() : array
@@ -359,7 +351,7 @@ class IpSubnet extends Model
         $allIps = [];
         $allReserved = [];
         $subnet = $this->subnet;
-        $assignData = $this->data['assigned'] ?? [];
+        $assignData = (array) $this->assigned;
 
         if (!$subnet) {
             return [[], []];

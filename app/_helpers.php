@@ -1,7 +1,8 @@
 <?php
 
-use App\Device;
-use App\DeviceSection;
+use App\EncryptableModel;
+use App\Item;
+use App\Category;
 use App\Exceptions\InvalidResourceException;
 use App\IpSubnet;
 use App\IpCategory;
@@ -107,19 +108,18 @@ function urlify($s) {
 }
 
 /**
- * @param mixed $resource
- * @param bool $withCategories
+ * @param EncryptableModel $resource
  * @return int
  */
-function getResourceType($resource, $withCategories = false)
+function getResourceType(EncryptableModel $resource)
 {
-    if ($resource instanceof Device) {
-        return Permission::RESOURCE_TYPE_DEVICE;
+    if ($resource instanceof Item) {
+        return Permission::RESOURCE_TYPE_ITEM;
     } elseif ($resource instanceof IpSubnet) {
         return Permission::RESOURCE_TYPE_IP_SUBNET;
-    } elseif ($withCategories && $resource instanceof DeviceSection) {
-        return Permission::RESOURCE_TYPE_DEVICE_SECTION;
-    } elseif ($withCategories && $resource instanceof IpCategory) {
+    } elseif ($resource instanceof Category) {
+        return Permission::RESOURCE_TYPE_CATEGORY;
+    } elseif ($resource instanceof IpCategory) {
         return Permission::RESOURCE_TYPE_IP_CATEGORY;
     } else {
         throw new InvalidResourceException;

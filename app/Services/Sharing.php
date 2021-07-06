@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\Device;
-use App\DeviceSection;
+use App\EncryptableModel;
+use App\Item;
+use App\Category;
 use App\EncryptedStore;
 use App\Group;
 use App\IpSubnet;
@@ -16,17 +17,17 @@ class Sharing
 {
     /**
      * @param User $user
-     * @param mixed $resource
+     * @param EncryptableModel $resource
      * @return int
      */
-    protected function ensureEncryptedShares(User $user, $resource)
+    protected function ensureEncryptedShares(User $user, EncryptableModel $resource)
     {
-        if ($resource instanceof Device) {
+        if ($resource instanceof Item) {
             $data = json_encode($resource->data);
 
             EncryptedStore::updateOrCreate([
                 'user_id' => $user->id,
-                'resource_type' => Permission::RESOURCE_TYPE_DEVICE,
+                'resource_type' => Permission::RESOURCE_TYPE_ITEM,
                 'resource_id' => $resource->id,
             ], [
                 'data' => app('encrypt')->encryptForUser($data, $user),
@@ -45,9 +46,9 @@ class Sharing
     }
 
     /**
-     * @param User|Group                               $grantee
-     * @param Device|DeviceSection|IpSubnet|IpCategory $resource
-     * @param array                                    $grantType
+     * @param User|Group                        $grantee
+     * @param Item|Category|IpSubnet|IpCategory $resource
+     * @param array                             $grantType
      * @throws Exception
      */
     public function share($grantee, $resource, array $grantType = []) {
@@ -55,10 +56,10 @@ class Sharing
             throw new Exception('Invalid grantee');
         }
 
-        if ($resource instanceof Device) {
-            $resourceType = Permission::RESOURCE_TYPE_DEVICE;
-        } elseif ($resource instanceof DeviceSection) {
-            $resourceType = Permission::RESOURCE_TYPE_DEVICE_SECTION;
+        if ($resource instanceof Item) {
+            $resourceType = Permission::RESOURCE_TYPE_ITEM;
+        } elseif ($resource instanceof Category) {
+            $resourceType = Permission::RESOURCE_TYPE_CATEGORY;
         } elseif ($resource instanceof IpSubnet) {
             $resourceType = Permission::RESOURCE_TYPE_IP_SUBNET;
         } elseif ($resource instanceof IpCategory) {
@@ -108,11 +109,11 @@ class Sharing
             $resource = null;
 
             switch ($permission['resource_type']) {
-                case Permission::RESOURCE_TYPE_DEVICE_SECTION:
-                    $resource = DeviceSection::find($permission['resource_id']);
+                case Permission::RESOURCE_TYPE_CATEGORY:
+                    $resource = Category::find($permission['resource_id']);
                     break;
-                case Permission::RESOURCE_TYPE_DEVICE:
-                    $resource = Device::find($permission['resource_id']);
+                case Permission::RESOURCE_TYPE_ITEM:
+                    $resource = Item::find($permission['resource_id']);
                     break;
                 case Permission::RESOURCE_TYPE_IP_CATEGORY:
                     $resource = IpCategory::find($permission['resource_id']);

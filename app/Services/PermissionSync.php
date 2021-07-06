@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Device;
+use App\Item;
 use App\EncryptedStore;
 use App\IpSubnet;
 use App\Permission;
@@ -22,11 +22,11 @@ class PermissionSync
 
             $allowed = [
                 Permission::GRANT_TYPE_READ,
-                Permission::GRANT_TYPE_EDIT,
+                Permission::GRANT_TYPE_UPDATE,
                 Permission::GRANT_TYPE_DELETE,
             ];
 
-            if (in_array($permission['type'], [Permission::RESOURCE_TYPE_DEVICE_SECTION, Permission::RESOURCE_TYPE_IP_CATEGORY])) {
+            if (in_array($permission['type'], [Permission::RESOURCE_TYPE_CATEGORY, Permission::RESOURCE_TYPE_IP_CATEGORY])) {
                 $allowed[] = Permission::GRANT_TYPE_CREATE;
             }
 
@@ -52,10 +52,10 @@ class PermissionSync
             $resourceType = intval($permission['resource_type']);
             $resourceId = intval($permission['resource_id']);
 
-            if ($resourceType === Permission::RESOURCE_TYPE_DEVICE_SECTION) {
-                $queries[] = Device::where('section_id', $resourceId);
-            } elseif ($resourceType === Permission::RESOURCE_TYPE_DEVICE) {
-                $queries[] = Device::where('id', $resourceId);
+            if ($resourceType === Permission::RESOURCE_TYPE_CATEGORY) {
+                $queries[] = Item::where('category_id', $resourceId);
+            } elseif ($resourceType === Permission::RESOURCE_TYPE_ITEM) {
+                $queries[] = Item::where('id', $resourceId);
             } elseif ($resourceType === Permission::RESOURCE_TYPE_IP_CATEGORY) {
                 $queries[] = IpSubnet::where('category_id', $resourceId);
             } elseif ($resourceType === Permission::RESOURCE_TYPE_IP_SUBNET) {

@@ -2,7 +2,7 @@
 
 namespace App\Fields;
 
-use App\Device;
+use App\Item;
 use App\IpSubnet;
 use Form;
 
@@ -19,10 +19,10 @@ class IP extends AbstractField
     /**
      * Custom device list content
      *
-     * @param Device $model
+     * @param Item $model
      * @return string
      */
-    public function customDeviceListContent(Device $model)
+    public function customDeviceListContent(Item $model)
     {
         $filterEnabled = filter_var($this->getOption('subnetsenable', ''), FILTER_VALIDATE_BOOLEAN);
         $subnets = $this->getOption('subnets', []);

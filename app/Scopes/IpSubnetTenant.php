@@ -2,7 +2,7 @@
 
 namespace App\Scopes;
 
-use App\Device;
+use App\Item;
 use App\IpSubnet;
 use App\IpCategory;
 use App\Permission;

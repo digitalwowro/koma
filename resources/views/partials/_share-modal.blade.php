@@ -48,7 +48,7 @@
                                         </label>
                                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         <label>
-                                            {!! Form::checkbox('permission', App\Permission::GRANT_TYPE_EDIT, null, [
+                                            {!! Form::checkbox('permission', App\Permission::GRANT_TYPE_UPDATE, null, [
                                                 'class' => 'form-control icheck',
                                             ]) !!}
                                             Edit{{ $create_permissions ? ' all' : '' }}

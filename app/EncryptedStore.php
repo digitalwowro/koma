@@ -32,7 +32,13 @@ class EncryptedStore extends Model
         return $this->belongsTo('App\User');
     }
 
-    public static function upsertSingle($resource, array $data, User $user)
+    /**
+     * @param EncryptableModel $resource
+     * @param array $data
+     * @param User  $user
+     * @throws InvalidResourceException
+     */
+    public static function upsertSingle(EncryptableModel $resource, array $data, User $user)
     {
         EncryptedStore::updateOrInsert([
             'user_id' => $user->id,
@@ -44,12 +50,12 @@ class EncryptedStore extends Model
     }
 
     /**
-     * @param Device|IpSubnet $resource
-     * @param array           $data
+     * @param EncryptableModel $resource
+     * @param array         $data
      * @return void
      * @throws InvalidResourceException
      */
-    public static function upsert($resource, array $data)
+    public static function upsert(EncryptableModel $resource, array $data)
     {
         $userIds = Permission::userIdsHavingPermission($resource);
 
@@ -65,32 +71,33 @@ class EncryptedStore extends Model
     }
 
     /**
-     * @param Device|IpSubnet $resource
+     * @param EncryptableModel $resource
+     * @param bool $throwException
      * @return array
      * @throws InvalidResourceException
      * @throws ModelNotFoundException
      */
-    public static function pull($resource) : array
+    public static function pull(EncryptableModel $resource, $throwException = false) : array
     {
-        $encryption = app('encrypt');
+        try {
+            $encrypted = EncryptedStore::where([
+                'user_id' => auth()->id(),
+                'resource_type' => getResourceType($resource),
+                'resource_id' => $resource->id,
+            ])->firstOrFail();
 
-        $encrypted = EncryptedStore::where([
-            'user_id' => auth()->id(),
-            'resource_type' => getResourceType($resource),
-            'resource_id' => $resource->id,
-        ])->first();
+            $encryption = app('encrypt');
 
-        if ($encrypted) {
             $return = @json_decode($encryption->decrypt($encrypted->data), true);
 
             return is_array($return) ? $return : [];
-        }
+        } catch (ModelNotFoundException $e) {
+            if ($throwException) {
+                throw $e;
+            }
 
-        if ($encryption->getExceptions()) {
-            throw (new ModelNotFoundException)->setModel(EncryptedStore::class);
+            return [];
         }
-
-        return [];
     }
 
     /**
@@ -111,14 +118,14 @@ class EncryptedStore extends Model
 
         Permission::where($filters)->delete();
 
-        if ($resource instanceof DeviceSection) {
+        if ($resource instanceof Category) {
             $deviceIds = $resource->devices()->pluck('id');
 
-            EncryptedStore::where('resource_type', Permission::RESOURCE_TYPE_DEVICE)
+            EncryptedStore::where('resource_type', Permission::RESOURCE_TYPE_ITEM)
                 ->whereIn('resource_id', $deviceIds)
                 ->delete();
 
-            Permission::where('resource_type', Permission::RESOURCE_TYPE_DEVICE)
+            Permission::where('resource_type', Permission::RESOURCE_TYPE_ITEM)
                 ->whereIn('resource_id', $deviceIds)
                 ->delete();
         }
@@ -136,6 +143,10 @@ class EncryptedStore extends Model
         }
     }
 
+    /**
+     * @param User  $user
+     * @param array $queries
+     */
     public static function ensurePermissions(User $user, array $queries)
     {
         $existing = EncryptedStore::select('id', 'resource_type', 'resource_id')

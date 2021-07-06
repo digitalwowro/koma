@@ -57,28 +57,6 @@ class User extends Model implements AuthenticatableContract,
         $this->attributes['profile'] = json_encode($value);
     }
 
-    public function deviceSectionVisible($sectionId)
-    {
-        return true; // @todo still needed?
-
-        /*if (!isset($this->profile['device_sections']) || !is_array($this->profile['device_sections'])) {
-            return true;
-        }
-
-        return in_array($sectionId, $this->profile['device_sections']);*/
-    }
-
-    public function ipCategoryVisible($categoryId)
-    {
-        return true; // @todo still needed?
-
-        /*if (!isset($this->profile['ip_categories']) || !is_array($this->profile['ip_categories'])) {
-            return true;
-        }
-
-        return in_array($categoryId, $this->profile['ip_categories']);*/
-    }
-
     /**
      * Decode the data field
      *

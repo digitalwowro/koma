@@ -2,7 +2,7 @@
 
 namespace App\Fields;
 
-use App\Device;
+use App\Item;
 use Form;
 
 class Status extends AbstractField
@@ -35,10 +35,10 @@ class Status extends AbstractField
     /**
      * Custom device list content
      *
-     * @param Device $model
+     * @param Item $model
      * @return string
      */
-    public function customDeviceListContent(Device $model)
+    public function customDeviceListContent(Item $model)
     {
         if (isset($model->data[$this->getInputName()])) {
             $content = $model->data[$this->getInputName()];

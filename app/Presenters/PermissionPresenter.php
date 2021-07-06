@@ -2,7 +2,7 @@
 
 namespace App\Presenters;
 
-use App\DeviceSection;
+use App\Category;
 use App\IpCategory;
 use App\Permission;
 use Laracasts\Presenter\Presenter;
@@ -21,8 +21,8 @@ class PermissionPresenter extends Presenter
                 case $this->entity::GRANT_TYPE_READ:
                     $results[] = 'view';
                     break;
-                case $this->entity::GRANT_TYPE_EDIT:
-                    $results[] = 'edit';
+                case $this->entity::GRANT_TYPE_UPDATE:
+                    $results[] = 'update';
                     break;
                 case $this->entity::GRANT_TYPE_CREATE:
                     $results[] = 'create';
@@ -38,13 +38,13 @@ class PermissionPresenter extends Presenter
 
     public function sectionUrl()
     {
-        $section = DeviceSection::find($this->entity->resource_id);
+        $section = Category::find($this->entity->resource_id);
 
         if (!$section) {
             return '';
         }
 
-        $url = route('device-section.edit', $section->id);
+        $url = route('category.edit', $section->id);
 
         return '<a href="' . $url . '">' . htmlentities($section->title) . '</a>';
     }
@@ -65,12 +65,12 @@ class PermissionPresenter extends Presenter
     public function grantThrough($full = false)
     {
         switch ($this->entity->resource_type) {
-            case $this->entity::RESOURCE_TYPE_DEVICE:
+            case $this->entity::RESOURCE_TYPE_ITEM:
                 $identifier = 'this device';
 
                 if ($full) {
                     $resource = $this->entity->getResource();
-                    $url = route('device.show', $this->entity->resource_id);
+                    $url = route('item.show', $this->entity->resource_id);
 
                     if ($resource) {
                         $identifier = htmlentities($resource->present()->humanIdField);
@@ -80,7 +80,7 @@ class PermissionPresenter extends Presenter
                 }
 
                 return '<u>' . $this->grantType() . '</u> access to ' . $identifier;
-            case $this->entity::RESOURCE_TYPE_DEVICE_SECTION:
+            case $this->entity::RESOURCE_TYPE_CATEGORY:
                 return '<u>' .
                     $this->grantType() .
                     '</u> access to section ' .

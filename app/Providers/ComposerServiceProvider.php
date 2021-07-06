@@ -14,19 +14,18 @@ class ComposerServiceProvider extends ServiceProvider
     public function boot()
     {
         /**
-         * Device Sections
+         * Categories
          */
         view()->composer(
             [
                 'layout',
                 'ip-fields._form',
-                //'users._personalization',
             ],
-            'App\Composers\DeviceSectionComposer@all'
+            'App\Composers\CategoryComposer@all'
         );
 
         view()->composer(
-            'device-section.index', 'App\Composers\DeviceSectionComposer@admin'
+            'category.index', 'App\Composers\CategoryComposer@admin'
         );
 
         /**

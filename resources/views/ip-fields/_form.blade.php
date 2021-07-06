@@ -23,13 +23,13 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($deviceSections as $deviceSection)
+                @foreach ($categories as $category)
                 <tr>
                     <td>
-                        {{ $deviceSection->title }}
+                        {{ $category->title }}
                     </td>
                     <td>
-                        {!! Form::select('bindings[' . $deviceSection->id . ']', $deviceSection->getFieldsForSelect(), null, [
+                        {!! Form::select('bindings[' . $category->id . ']', $category->getFieldsForSelect(), null, [
                             'class' => 'form-control',
                         ]) !!}
                     </td>

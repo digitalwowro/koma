@@ -3,7 +3,7 @@
 namespace App\Fields;
 
 use Form;
-use App\Device;
+use App\Item;
 
 class Textarea extends AbstractField
 {
@@ -23,10 +23,10 @@ class Textarea extends AbstractField
     /**
      * Custom device list content
      *
-     * @param Device $model
+     * @param Item $model
      * @return string
      */
-    public function customDeviceListContent(Device $model)
+    public function customDeviceListContent(Item $model)
     {
         if (isset($model->data[$this->getInputName()])) {
             $content = $model->data[$this->getInputName()];

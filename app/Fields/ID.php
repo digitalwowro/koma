@@ -2,7 +2,7 @@
 
 namespace App\Fields;
 
-use App\Device;
+use App\Item;
 use Form;
 
 class ID extends AbstractField
@@ -18,10 +18,10 @@ class ID extends AbstractField
     /**
      * Custom device list content
      *
-     * @param Device $model
+     * @param Item $model
      * @return string
      */
-    public function customDeviceListContent(Device $model)
+    public function customDeviceListContent(Item $model)
     {
         $prefix = $this->getOption('prefix', '');
         return $prefix . $model->id;

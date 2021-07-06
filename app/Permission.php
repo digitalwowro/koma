@@ -13,12 +13,12 @@ class Permission extends Model
     use PresentableTrait;
 
     const GRANT_TYPE_READ = 1;
-    const GRANT_TYPE_EDIT = 2;
+    const GRANT_TYPE_UPDATE = 2;
     const GRANT_TYPE_DELETE = 4;
     const GRANT_TYPE_CREATE = 8;
 
-    const RESOURCE_TYPE_DEVICE_SECTION = 1;
-    const RESOURCE_TYPE_DEVICE = 2;
+    const RESOURCE_TYPE_CATEGORY = 1;
+    const RESOURCE_TYPE_ITEM = 2;
     const RESOURCE_TYPE_IP_CATEGORY = 3;
     const RESOURCE_TYPE_IP_SUBNET = 4;
 
@@ -41,7 +41,7 @@ class Permission extends Model
 
     private static $acl = [
         'view' => self::GRANT_TYPE_READ,
-        'edit' => self::GRANT_TYPE_EDIT,
+        'update' => self::GRANT_TYPE_UPDATE,
         'delete' => self::GRANT_TYPE_DELETE,
         'create' => self::GRANT_TYPE_CREATE,
     ];
@@ -120,7 +120,7 @@ class Permission extends Model
         $permissions = [
             $this::GRANT_TYPE_CREATE,
             $this::GRANT_TYPE_DELETE,
-            $this::GRANT_TYPE_EDIT,
+            $this::GRANT_TYPE_UPDATE,
             $this::GRANT_TYPE_READ,
         ];
 
@@ -167,15 +167,15 @@ class Permission extends Model
     }
 
     /**
-     * @param mixed $resource
+     * @param EncryptableModel $resource
      * @return array
      */
-    public static function userIdsHavingPermission($resource)
+    public static function userIdsHavingPermission(EncryptableModel $resource)
     {
         $userIds = [];
 
-        if ($resource instanceof Device || $resource instanceof DeviceSection) {
-            $section = $resource instanceof Device
+        if ($resource instanceof Item || $resource instanceof Category) {
+            $section = $resource instanceof Item
                 ? $resource->section
                 : $resource;
 
@@ -186,17 +186,17 @@ class Permission extends Model
             $list = self::select('user_id', 'group_id')
                 ->where(function($query) use ($section) {
                     $query
-                        ->where('resource_type', self::RESOURCE_TYPE_DEVICE)
+                        ->where('resource_type', self::RESOURCE_TYPE_ITEM)
                         ->whereIn('resource_id', function($query) use ($section) {
                             $query
                                 ->select('id')
-                                ->where('section_id', $section->id)
-                                ->from('devices');
+                                ->where('category_id', $section->id)
+                                ->from('items');
                         });
                 })
                 ->orWhere(function($query) use ($section) {
                     $query->where([
-                        'resource_type' => self::RESOURCE_TYPE_DEVICE_SECTION,
+                        'resource_type' => self::RESOURCE_TYPE_CATEGORY,
                         'resource_id' => $section->id,
                     ]);
                 })
@@ -245,10 +245,10 @@ class Permission extends Model
     public function getResource()
     {
         switch ($this->resource_type) {
-            case self::RESOURCE_TYPE_DEVICE_SECTION:
-                return DeviceSection::find($this->resource_id);
-            case self::RESOURCE_TYPE_DEVICE:
-                return Device::find($this->resource_id);
+            case self::RESOURCE_TYPE_CATEGORY:
+                return Category::find($this->resource_id);
+            case self::RESOURCE_TYPE_ITEM:
+                return Item::find($this->resource_id);
             case self::RESOURCE_TYPE_IP_CATEGORY:
                 return IpCategory::find($this->resource_id);
             case self::RESOURCE_TYPE_IP_SUBNET:
@@ -306,20 +306,15 @@ class Permission extends Model
      * Check given permission for given user
      *
      * @param string $action: view, edit, delete, create
-     * @param mixed $resource
+     * @param EncryptableModel $resource
      * @param User $user
      * @return bool
      */
-    public static function can($action, $resource, User $user)
+    public static function can($action, EncryptableModel $resource, User $user)
     {
         if (!isset(self::$acl[$action])) {
             return false;
         }
-
-        // @todo allow custom IPs
-        //if ($resource instanceof IpSubnet && !$resource->subnet) {
-        //    $resource = $resource->device;
-        //}
 
         if ($resource->isOwner($user)) {
             return true;
@@ -330,16 +325,16 @@ class Permission extends Model
                 continue;
             }
 
-            if ($resource instanceof DeviceSection) {
-                if ($permission['resource_type'] === self::RESOURCE_TYPE_DEVICE_SECTION && $permission['resource_id'] == $resource->id) {
+            if ($resource instanceof Category) {
+                if ($permission['resource_type'] === self::RESOURCE_TYPE_CATEGORY && $permission['resource_id'] == $resource->id) {
                     return true;
                 }
-            } elseif ($resource instanceof Device) {
-                if ($permission['resource_type'] === self::RESOURCE_TYPE_DEVICE && $permission['resource_id'] == $resource->id) {
+            } elseif ($resource instanceof Item) {
+                if ($permission['resource_type'] === self::RESOURCE_TYPE_ITEM && $permission['resource_id'] == $resource->id) {
                     return true;
                 }
 
-                if ($permission['resource_type'] === self::RESOURCE_TYPE_DEVICE_SECTION && $permission['resource_id'] == $resource->section_id) {
+                if ($permission['resource_type'] === self::RESOURCE_TYPE_CATEGORY && $permission['resource_id'] == $resource->section_id) {
                     return true;
                 }
             } elseif ($resource instanceof IpCategory) {

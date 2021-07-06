@@ -39,7 +39,7 @@
                     @forelse ($subnets as $subnet)
                         <tr>
                             <td>
-                                {{ $subnet->data['name'] ?? '' }}
+                                {{ $subnet->name ?? '' }}
                             </td>
                             <td>
                                 <a href="{{ route('subnet.subnet', $subnet->id) }}">
@@ -66,7 +66,7 @@
                                     </a>
                                 @endcan
 
-                                @can('edit', $subnet)
+                                @can('update', $subnet)
                                     <a href="{{ route('subnet.edit', ['category' => $ipCategory->id, 'id' => $subnet->id]) }}" class="table-link" title="Edit">
                                         <span class="fa-stack">
                                             <i class="fa fa-square fa-stack-2x"></i>

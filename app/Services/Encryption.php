@@ -16,33 +16,6 @@ use ParagonIE\Halite\Symmetric\Crypto as Symmetric;
 class Encryption
 {
     private $keyPair;
-    private $throwException = true;
-
-    /**
-     * Disable throwing exception on decryption failure
-     */
-    public function disableExceptions()
-    {
-        $this->throwException = false;
-    }
-
-    /**
-     * Enable throwing exception on decryption failure
-     */
-    public function enableExceptions()
-    {
-        $this->throwException = true;
-    }
-
-    /**
-     * Returns whether exception throwing is enabled
-     *
-     * @return bool
-     */
-    public function getExceptions()
-    {
-        return $this->throwException;
-    }
 
     /**
      * @return string

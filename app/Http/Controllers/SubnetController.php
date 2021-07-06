@@ -18,8 +18,6 @@ class SubnetController extends Controller
     public function index($category, Request $request)
     {
         try {
-            app('encrypt')->disableExceptions();
-
             $ipCategory = IpCategory::findOrFail($category);
 
             $subnets = IpSubnet::where('category_id', $category)->get();
@@ -183,7 +181,7 @@ class SubnetController extends Controller
         try {
             $subnet = IpSubnet::findOrFail($id);
 
-            $this->authorize('edit', $subnet);
+            $this->authorize('update', $subnet);
 
             $ip = $request->input('ip');
             $data = $subnet->data;

@@ -2,6 +2,9 @@
 
 Route::pattern('type', '[0-9]+');
 
+//Route::get('/test', function () {
+//    dd(App\Category::all()->each(function ($i) { $i->data = $i->data; })->toArray());
+//});
 
 Route::get ('/auth/login',           ['as' => 'login',           'uses' => 'Auth\LoginController@showLoginForm']);
 Route::post('/auth/login',           ['as' => 'login.post',      'uses' => 'Auth\LoginController@login']);
@@ -18,21 +21,21 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get ('/profile', ['as' => 'profile',        'uses' => 'ProfileController@index']);
     Route::post('/profile', ['as' => 'profile.update', 'uses' => 'ProfileController@update']);
 
-    Route::resource('users',          'UserController');
-    Route::resource('groups',         'GroupController');
-    Route::resource('device-section', 'DeviceSectionController');
-    Route::resource('ip-category',    'IpCategoryController');
-    Route::resource('ip-fields',      'IpFieldController');
+    Route::resource('users',       'UserController');
+    Route::resource('groups',      'GroupController');
+    Route::resource('category',    'CategoryController');
+    Route::resource('ip-category', 'IpCategoryController');
+    Route::resource('ip-fields',   'IpFieldController');
 
-    Route::post('/device-section/get-options', ['as' => 'device-section.get-options', 'uses' => 'DeviceSectionController@getOptions']);
+    Route::post('/category/get-options', ['as' => 'category.get-options', 'uses' => 'CategoryController@getOptions']);
 
-    Route::get   ('/device/{type}/create',      ['as' => 'device.create',  'uses' => 'DeviceController@create']);
-    Route::get   ('/device/{type}/{category?}', ['as' => 'device.index',   'uses' => 'DeviceController@index'])->where('category', '\w{8}');
-    Route::get   ('/device/{id}/show',          ['as' => 'device.show',    'uses' => 'DeviceController@show']);
-    Route::post  ('/device/{type}',             ['as' => 'device.store',   'uses' => 'DeviceController@store']);
-    Route::get   ('/device/{id}/edit',          ['as' => 'device.edit',    'uses' => 'DeviceController@edit']);
-    Route::put   ('/device/{id}',               ['as' => 'device.update',  'uses' => 'DeviceController@update']);
-    Route::delete('/device/{id}',               ['as' => 'device.destroy', 'uses' => 'DeviceController@destroy']);
+    Route::get   ('/item/{category}/create', ['as' => 'item.create',  'uses' => 'ItemController@create']);
+    Route::get   ('/item/{category}',        ['as' => 'item.index',   'uses' => 'ItemController@index']);
+    Route::get   ('/item/{id}/show',         ['as' => 'item.show',    'uses' => 'ItemController@show']);
+    Route::post  ('/item/{category}',        ['as' => 'item.store',   'uses' => 'ItemController@store']);
+    Route::get   ('/item/{id}/edit',         ['as' => 'item.edit',    'uses' => 'ItemController@edit']);
+    Route::put   ('/item/{id}',              ['as' => 'item.update',  'uses' => 'ItemController@update']);
+    Route::delete('/item/{id}',              ['as' => 'item.destroy', 'uses' => 'ItemController@destroy']);
 
     Route::get   ('/subnet/subnet/{subnet}/list', ['as' => 'subnet.subnet-list', 'uses' => 'SubnetController@subnetList']);
     Route::get   ('/subnet/subnet/{subnet}',      ['as' => 'subnet.subnet',      'uses' => 'SubnetController@subnet']);
